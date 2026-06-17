@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Local Memory Hub 图谱首页 Spike</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="brand">Local Memory Hub</div>
+        <nav>
+          <a class="active">图谱首页</a>
+          <a>工作台</a>
+          <a>Inbox</a>
+          <a>源资料</a>
+          <a>记忆库</a>
+          <a>搜索/问答</a>
+          <a>治理</a>
+          <a>外部接入</a>
+          <a>设置</a>
+        </nav>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <input id="search" placeholder="搜索图谱节点、源资料、主题..." />
+          <button id="importText">导入一段文本</button>
+          <span id="status" class="status">连接中</span>
+        </header>
+
+        <section class="graph-shell">
+          <div class="graph-toolbar">
+            <span>图谱首页</span>
+            <button id="fit">重新布局</button>
+            <label><input id="showPolluted" type="checkbox" /> 显示污染节点</label>
+          </div>
+          <svg id="graph" viewBox="0 0 1000 700" aria-label="记忆图谱"></svg>
+          <div id="empty" class="empty hidden">
+            <h1>你的记忆图谱还没有开始生长。</h1>
+            <p>导入一段文本后，这里会出现第一个源资料节点和主题节点。</p>
+            <button id="emptyImport">导入示例文本</button>
+          </div>
+        </section>
+      </main>
+
+      <aside class="detail">
+        <div class="detail-title">节点详情</div>
+        <div id="detailBody" class="detail-body">
+          <p>点击图谱节点查看来源、类型和状态。</p>
+        </div>
+      </aside>
+    </div>
+
+    <script src="/main.js"></script>
+  </body>
+</html>

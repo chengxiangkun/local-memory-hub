@@ -1,0 +1,231 @@
+:root {
+  color-scheme: dark;
+  --bg: #0f1115;
+  --panel: #151922;
+  --panel-2: #10141b;
+  --line: #2a3140;
+  --text: #edf2ff;
+  --muted: #8e99ad;
+  --accent: #68d8b2;
+  --warn: #f0b86e;
+  --bad: #ee6f7a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.app {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr) 320px;
+  height: 100dvh;
+}
+
+.sidebar,
+.detail {
+  background: var(--panel);
+  border-color: var(--line);
+}
+
+.sidebar {
+  border-right: 1px solid var(--line);
+  padding: 18px 12px;
+}
+
+.brand {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin: 6px 8px 22px;
+}
+
+nav {
+  display: grid;
+  gap: 4px;
+}
+
+nav a {
+  color: var(--muted);
+  border-radius: 8px;
+  padding: 9px 10px;
+  font-size: 14px;
+}
+
+nav a.active {
+  background: #202838;
+  color: var(--text);
+}
+
+.main {
+  min-width: 0;
+  display: grid;
+  grid-template-rows: 64px minmax(0, 1fr);
+}
+
+.topbar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(15, 17, 21, 0.86);
+}
+
+input {
+  width: min(680px, 100%);
+  border: 1px solid var(--line);
+  background: #0b0e13;
+  color: var(--text);
+  border-radius: 9px;
+  padding: 10px 12px;
+  outline: none;
+}
+
+button {
+  border: 1px solid #2f3a4d;
+  background: #1a2230;
+  color: var(--text);
+  border-radius: 9px;
+  padding: 9px 12px;
+  cursor: pointer;
+}
+
+button:hover {
+  border-color: var(--accent);
+}
+
+.status {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.graph-shell {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(104, 216, 178, 0.12), transparent 28%),
+    radial-gradient(circle at 70% 20%, rgba(115, 148, 255, 0.12), transparent 24%),
+    #0b0e13;
+}
+
+.graph-toolbar {
+  position: absolute;
+  z-index: 2;
+  left: 16px;
+  top: 16px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: rgba(16, 20, 27, 0.78);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 9px 11px;
+  backdrop-filter: blur(10px);
+}
+
+.graph-toolbar span {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+svg {
+  width: 100%;
+  height: 100%;
+}
+
+.edge {
+  stroke: rgba(142, 153, 173, 0.42);
+  stroke-width: 1.4;
+}
+
+.node circle {
+  stroke: rgba(255, 255, 255, 0.72);
+  stroke-width: 1.2;
+  filter: drop-shadow(0 0 12px rgba(104, 216, 178, 0.28));
+}
+
+.node.source circle {
+  fill: #68d8b2;
+}
+
+.node.topic circle {
+  fill: #83a2ff;
+}
+
+.node text {
+  fill: var(--text);
+  font-size: 13px;
+  paint-order: stroke;
+  stroke: #0b0e13;
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+
+.node.dim {
+  opacity: 0.16;
+}
+
+.node.selected circle {
+  stroke: #ffffff;
+  stroke-width: 2.4;
+}
+
+.detail {
+  border-left: 1px solid var(--line);
+  padding: 18px;
+}
+
+.detail-title {
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.detail-body {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.detail-body strong {
+  color: var(--text);
+}
+
+.pill {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 3px 8px;
+  margin: 4px 4px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  padding: 24px;
+}
+
+.empty h1 {
+  margin: 0 0 10px;
+  font-size: 28px;
+}
+
+.empty p {
+  margin: 0 0 20px;
+  color: var(--muted);
+}
+
+.hidden {
+  display: none;
+}

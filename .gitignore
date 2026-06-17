@@ -1,0 +1,36 @@
+.DS_Store
+
+# Dependencies
+node_modules/
+
+# Local runtime data
+.local-memory-data/
+data/
+database/
+raw/
+processed/
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build outputs
+dist/
+build/
+.turbo/
+.vite/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# OS/editor files
+.idea/
+.vscode/
+*.swp
+*.swo

@@ -1,0 +1,21 @@
+{
+  "name": "local-memory-hub",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev:api": "node apps/api/src/server.js",
+    "dev:mcp": "node apps/mcp/src/server.js",
+    "dev:web": "node apps/web/src/server.js",
+    "test:api": "node apps/api/src/smoke-test.js",
+    "test:model": "node apps/api/src/model-smoke-test.js",
+    "test:fallback": "node apps/api/src/fallback-smoke-test.js",
+    "test:mcp": "node apps/mcp/src/mcp-smoke-test.js",
+    "test:migration": "node apps/api/src/migration-smoke-test.js",
+    "test:vector": "node apps/api/src/vector-smoke-test.js"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
+}
