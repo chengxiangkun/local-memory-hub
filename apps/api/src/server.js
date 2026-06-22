@@ -38,6 +38,11 @@ import {
   listQaMessages,
   listRecentQaMessages,
   listMemorySegments,
+  listAllMemorySegments,
+  getMemorySegmentById,
+  setSegmentPollutionStatus,
+  appendGovernanceEvents,
+  listGovernanceEvents,
   listSourcesSqlite,
   quarantineSourceCascade,
   markSourceDeleted,
@@ -295,9 +300,52 @@ const server = http.createServer(async (req, res) => {
     if (req.method === "GET" && req.url?.startsWith("/api/segments")) {
       const url = new URL(req.url, "http://127.0.0.1");
       const sourceId = url.searchParams.get("source_id");
+      const includeAll = url.searchParams.get("all") === "1";
       return json(res, 200, {
         source_id: sourceId,
-        segments: await listMemorySegments(sourceId)
+        segments: includeAll
+          ? await listAllMemorySegments(sourceId, dataInfo.data_dir)
+          : await listMemorySegments(sourceId, dataInfo.data_dir)
+      });
+    }
+
+    if (req.method === "POST" && req.url === "/api/memory/segments/quarantine") {
+      const body = await readJson(req);
+      if (!body.segment_id) return json(res, 400, { error: "bad_request", message: "缺少 segment_id" });
+      const segment = await setSegmentPollutionStatus(body.segment_id, "quarantined", dataInfo.data_dir);
+      if (!segment) return json(res, 404, { error: "not_found", message: "片段不存在" });
+      await appendGovernanceEvents({
+        scope: "segment",
+        source_id: segment.source_id,
+        segment_id: segment.segment_id,
+        title: segment.title_path || `片段 #${segment.segment_index}`,
+        action: "quarantined",
+        reason: body.reason || "manual_segment_quarantine"
+      }, dataInfo.data_dir);
+      return json(res, 200, { status: "quarantined", segment });
+    }
+
+    if (req.method === "POST" && req.url === "/api/memory/segments/restore") {
+      const body = await readJson(req);
+      if (!body.segment_id) return json(res, 400, { error: "bad_request", message: "缺少 segment_id" });
+      const segment = await setSegmentPollutionStatus(body.segment_id, "clean", dataInfo.data_dir);
+      if (!segment) return json(res, 404, { error: "not_found", message: "片段不存在" });
+      await appendGovernanceEvents({
+        scope: "segment",
+        source_id: segment.source_id,
+        segment_id: segment.segment_id,
+        title: segment.title_path || `片段 #${segment.segment_index}`,
+        action: "restored",
+        reason: "manual_segment_restore"
+      }, dataInfo.data_dir);
+      return json(res, 200, { status: "restored", segment });
+    }
+
+    if (req.method === "GET" && req.url?.startsWith("/api/memory/govern/events")) {
+      const url = new URL(req.url, "http://127.0.0.1");
+      const limit = Number(url.searchParams.get("limit") || 50);
+      return json(res, 200, {
+        events: await listGovernanceEvents(dataInfo.data_dir, { limit })
       });
     }
 
@@ -407,7 +455,15 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method === "POST" && req.url === "/api/sources/quarantine") {
       const body = await readJson(req);
+      const source = await getSourceById(body.source_id, dataInfo.data_dir);
       await quarantineSourceCascade(body.source_id, dataInfo.data_dir);
+      await appendGovernanceEvents({
+        scope: "source",
+        source_id: body.source_id,
+        title: source?.title || "",
+        action: "quarantined",
+        reason: body.reason || "manual_source_quarantine"
+      }, dataInfo.data_dir);
       return json(res, 200, {
         status: "quarantined",
         source_id: body.source_id
@@ -416,7 +472,15 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method === "POST" && req.url === "/api/sources/restore") {
       const body = await readJson(req);
+      const source = await getSourceById(body.source_id, dataInfo.data_dir);
       await restoreSourceCascade(body.source_id, dataInfo.data_dir);
+      await appendGovernanceEvents({
+        scope: "source",
+        source_id: body.source_id,
+        title: source?.title || "",
+        action: "restored",
+        reason: "manual_source_restore"
+      }, dataInfo.data_dir);
       return json(res, 200, {
         status: "restored",
         source_id: body.source_id
@@ -443,6 +507,18 @@ const server = http.createServer(async (req, res) => {
         await quarantineSourceCascade(body.source_id, dataInfo.data_dir);
       }
       await markSourceDeleted(body.source_id, dataInfo.data_dir);
+      await appendGovernanceEvents({
+        scope: "source",
+        source_id: body.source_id,
+        title: source.title || "",
+        action: "deleted",
+        reason: "manual_source_delete",
+        detail: {
+          delete_derived: body.delete_derived !== false,
+          delete_source_file: body.delete_source_file !== false,
+          trash_path: typeof trash_path === "string" ? trash_path : ""
+        }
+      }, dataInfo.data_dir);
       return json(res, 200, {
         status: "deleted",
         source_id: body.source_id,

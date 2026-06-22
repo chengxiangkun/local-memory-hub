@@ -1,6 +1,10 @@
 import { get, post } from "./js/api.js";
 import { renderConnectorCards, renderConnectorTimeline } from "./js/connectors-view.js";
-import { renderGovernance as renderGovernanceViewModule } from "./js/governance-view.js";
+import {
+  renderGovernance as renderGovernanceViewModule,
+  renderGovernanceEvents,
+  renderQaGovernanceResult
+} from "./js/governance-view.js";
 import { renderEmptyNodeDetail, renderSelectedNode } from "./js/graph-detail-view.js";
 import { renderGraph as renderGraphSvg, updateGraphSelection } from "./js/graph-renderer.js";
 import { importExampleText as runExampleImport, importFile as runFileImport, importText as runTextImport, importUrl as runUrlImport } from "./js/import-flow.js";
@@ -102,6 +106,7 @@ function bindEvents() {
   document.querySelector("#askButton")?.addEventListener("click", askQuestion);
   document.querySelector("#clearQaButton")?.addEventListener("click", clearQaConversation);
   document.querySelector("#newQaSessionButton")?.addEventListener("click", startNewQaSession);
+  document.querySelector("#scanQaDuplicatesButton")?.addEventListener("click", scanQaDuplicates);
   document.querySelector("#questionInput")?.addEventListener("keydown", (event) => {
     if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
       event.preventDefault();
@@ -148,7 +153,7 @@ async function boot() {
 }
 
 async function refreshAll() {
-  await Promise.allSettled([loadHealth(), loadVersion(), loadProviders(), loadModelPolicies(), loadSources(), loadSourceFolders(), loadGraph(), loadHabits(), loadMcpStatus(), loadSystemDoctor(), loadConnectors()]);
+  await Promise.allSettled([loadHealth(), loadVersion(), loadProviders(), loadModelPolicies(), loadSources(), loadSourceFolders(), loadGraph(), loadHabits(), loadMcpStatus(), loadSystemDoctor(), loadConnectors(), loadGovernanceEvents()]);
   renderMetrics();
   renderSources();
   renderFolderTree();
@@ -657,8 +662,46 @@ function sourceFilterMatch(source) {
 function renderGovernance() {
   renderGovernanceViewModule(els.governList, state.sources, {
     onRestore: (sourceId) => mutateSource("/api/sources/restore", sourceId),
-    onDelete: deleteSource
+    onDelete: deleteSource,
+    events: state.governanceEvents
   });
+  renderGovernanceEvents(document.querySelector("#auditLog"), state.governanceEvents);
+}
+
+async function loadGovernanceEvents() {
+  try {
+    const data = await get("/api/memory/govern/events?limit=50");
+    state.governanceEvents = data.events || [];
+  } catch {
+    state.governanceEvents = [];
+  }
+}
+
+async function scanQaDuplicates() {
+  const button = document.querySelector("#scanQaDuplicatesButton");
+  if (button) button.disabled = true;
+  setStatus("正在扫描 QA 记忆重复…");
+  try {
+    const result = await post("/api/memory/govern/qa", {});
+    renderQaGovernanceResult(document.querySelector("#qaGovernResult"), result, {
+      onRestore: async (sourceId) => {
+        await post("/api/sources/restore", { source_id: sourceId });
+        await refreshAll();
+        setStatus("已恢复该 QA 记忆");
+      },
+      onDelete: async (sourceId) => {
+        if (!window.confirm("确认删除该 QA 记忆？")) return;
+        await deleteSource(sourceId);
+      }
+    });
+    await loadGovernanceEvents();
+    renderGovernance();
+    setStatus(`QA 去重完成：隔离 ${result.quarantined_count ?? 0} 条`);
+  } catch (error) {
+    setStatus(`QA 去重失败：${error.message}`);
+  } finally {
+    if (button) button.disabled = false;
+  }
 }
 
 async function deleteSource(sourceId) {

@@ -349,6 +349,17 @@
                 </div>
               </div>
               <div class="govern-list" id="governList"></div>
+
+              <div class="qa-govern-card">
+                <div class="qa-govern-head">
+                  <div>
+                    <strong>QA 记忆去重</strong>
+                    <p>扫描问答记忆中的完全重复、重复问题和语义重复，并可恢复或删除。</p>
+                  </div>
+                  <button class="secondary-button" id="scanQaDuplicatesButton" type="button">扫描重复</button>
+                </div>
+                <div class="govern-list" id="qaGovernResult"></div>
+              </div>
             </section>
             <section class="panel">
               <h2>影响范围预览</h2>
@@ -358,8 +369,8 @@
                 <div><strong id="impactGraph">0</strong><span>图谱节点</span></div>
               </div>
               <div class="audit-log">
-                <p>最近操作</p>
-                <span>暂无破坏性操作。</span>
+                <p>治理审计日志</p>
+                <div id="auditLog" class="audit-log-list"><span>暂无治理操作记录。</span></div>
               </div>
             </section>
           </div>

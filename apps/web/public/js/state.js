@@ -18,6 +18,7 @@ export const state = {
   version: null,
   habits: null,
   mcpStatus: null,
+  governanceEvents: [],
   selectedNodeId: null,
   matchedNodeIds: null,
   selectedFolderId: null,

@@ -1,6 +1,6 @@
 import { embedTexts } from "./embedding-service.js";
 import { extractMultilingualTokens } from "./text-tokenizer.js";
-import { listMemorySegments, listSourcesSqlite, quarantineSourceCascade } from "./sqlite-store.js";
+import { appendGovernanceEvents, listMemorySegments, listSourcesSqlite, quarantineSourceCascade } from "./sqlite-store.js";
 
 const LOW_SIGNAL_ANSWER_PATTERNS = [
   /^根据本地记忆，找到\s*\d+\s*条相关资料/,
@@ -87,6 +87,25 @@ export async function runQaMemoryAutoGovernance(dataDir, options = {}) {
     seenContentHashes.add(record.content_hash);
     seenQuestions.add(record.normalized_question);
     kept.push(record);
+  }
+
+  if (!options.dryRun && quarantined.length > 0) {
+    await appendGovernanceEvents(
+      quarantined.map((item) => ({
+        scope: "qa_memory",
+        source_id: item.source_id,
+        title: item.title,
+        action: "quarantined",
+        reason: item.reason,
+        detail: {
+          duplicate_of: item.duplicate_of || "",
+          semantic_score: item.semantic_score,
+          vector_score: item.vector_score,
+          lexical_score: item.lexical_score
+        }
+      })),
+      dataDir
+    );
   }
 
   return {

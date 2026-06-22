@@ -1523,6 +1523,87 @@ svg.is-dragging {
   padding-top: 14px;
 }
 
+.audit-log-list {
+  display: grid;
+  gap: 6px;
+  max-height: 320px;
+  overflow: auto;
+  margin-top: 8px;
+}
+
+.audit-row {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.audit-action {
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: rgba(138, 155, 178, 0.16);
+}
+
+.audit-action.audit-quarantined { color: var(--warn); }
+.audit-action.audit-deleted { color: #f87171; }
+.audit-action.audit-restored { color: var(--accent); }
+
+.audit-scope {
+  color: var(--muted);
+}
+
+.audit-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.audit-reason {
+  color: var(--muted);
+}
+
+.audit-time {
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.qa-govern-card {
+  margin-top: 16px;
+  border-top: 1px solid var(--line-soft);
+  padding-top: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.qa-govern-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.qa-govern-head strong {
+  display: block;
+}
+
+.qa-govern-head p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.qa-govern-summary {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .qa-layout {
   display: grid;
   grid-template-columns: minmax(220px, 260px) minmax(0, 1fr) minmax(300px, 360px);

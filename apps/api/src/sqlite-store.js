@@ -156,6 +156,20 @@ async function initSqliteOnce(dataDir) {
     );
 
     CREATE INDEX IF NOT EXISTS idx_qa_messages_session ON qa_messages(session_id, created_at);
+
+    CREATE TABLE IF NOT EXISTS governance_events (
+      event_id TEXT PRIMARY KEY,
+      scope TEXT NOT NULL,
+      source_id TEXT NOT NULL DEFAULT '',
+      segment_id TEXT NOT NULL DEFAULT '',
+      title TEXT NOT NULL DEFAULT '',
+      action TEXT NOT NULL,
+      reason TEXT NOT NULL DEFAULT '',
+      detail_json TEXT NOT NULL DEFAULT '{}',
+      created_at TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_governance_events_created ON governance_events(created_at);
     `,
     dataDir
   );
@@ -545,6 +559,93 @@ export async function listMemorySegments(sourceId, dataDir = getDataDir()) {
     dataDir,
     { source_id: sourceId }
   );
+}
+
+// 列出源资料的全部片段，包含已隔离的，供详情页/治理页展示和恢复使用。
+export async function listAllMemorySegments(sourceId, dataDir = getDataDir()) {
+  await initSqlite(dataDir);
+  return queryJson(
+    `
+    SELECT * FROM memory_segments
+    WHERE source_id = $source_id
+    ORDER BY segment_index ASC;
+    `,
+    dataDir,
+    { source_id: sourceId }
+  );
+}
+
+export async function getMemorySegmentById(segmentId, dataDir = getDataDir()) {
+  await initSqlite(dataDir);
+  const rows = await queryJson(
+    "SELECT * FROM memory_segments WHERE segment_id = $segment_id LIMIT 1;",
+    dataDir,
+    { segment_id: segmentId }
+  );
+  return rows[0] || null;
+}
+
+// 片段级隔离：只翻转单个片段(及其向量)的污染状态，不连累整篇源资料。
+// status 取 'quarantined' 隔离或 'clean' 恢复。检索层(listMemorySegments、
+// searchAllSqlite、listVectors)已按 pollution_status 过滤，因此隔离后立即生效。
+export async function setSegmentPollutionStatus(segmentId, status, dataDir = getDataDir()) {
+  await initSqlite(dataDir);
+  const now = new Date().toISOString();
+  await runSql(
+    `
+    UPDATE memory_segments SET pollution_status = $status, updated_at = $updated_at WHERE segment_id = $segment_id;
+    UPDATE vector_index SET pollution_status = $status WHERE segment_id = $segment_id;
+    `,
+    dataDir,
+    { segment_id: segmentId, status, updated_at: now }
+  );
+  return getMemorySegmentById(segmentId, dataDir);
+}
+
+export async function appendGovernanceEvents(events, dataDir = getDataDir()) {
+  await initSqlite(dataDir);
+  const list = Array.isArray(events) ? events : [events];
+  if (list.length === 0) return 0;
+  const now = new Date().toISOString();
+  for (const event of list) {
+    await runSql(
+      `
+      INSERT INTO governance_events (
+        event_id, scope, source_id, segment_id, title, action, reason, detail_json, created_at
+      ) VALUES (
+        $event_id, $scope, $source_id, $segment_id, $title, $action, $reason, $detail_json, $created_at
+      );
+      `,
+      dataDir,
+      {
+        event_id: randomUUID(),
+        scope: event.scope || "qa_memory",
+        source_id: event.source_id || "",
+        segment_id: event.segment_id || "",
+        title: event.title || "",
+        action: event.action || "",
+        reason: event.reason || "",
+        detail_json: JSON.stringify(event.detail || {}),
+        created_at: event.created_at || now
+      }
+    );
+  }
+  return list.length;
+}
+
+export async function listGovernanceEvents(dataDir = getDataDir(), options = {}) {
+  await initSqlite(dataDir);
+  const limit = Math.max(1, Math.min(Number(options.limit || 50), 500));
+  const rows = await queryJson(
+    `
+    SELECT * FROM governance_events
+    ORDER BY created_at DESC
+    LIMIT $limit;
+    `,
+    dataDir,
+    { limit }
+  );
+  return rows.map((row) => ({ ...row, detail: parseJsonObject(row.detail_json) }));
 }
 
 export async function insertGraphNodes(records, dataDir = getDataDir()) {
@@ -1157,5 +1258,14 @@ function parseJsonArray(value) {
     return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
+  }
+}
+
+function parseJsonObject(value) {
+  try {
+    const parsed = JSON.parse(value || "{}");
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+  } catch {
+    return {};
   }
 }
