@@ -34,3 +34,7 @@ build/
 .vscode/
 *.swp
 *.swo
+
+# Tauri 桌面构建产物
+apps/desktop/src-tauri/target/
+apps/desktop/src-tauri/gen/

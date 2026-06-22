@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "默认能力:主窗口加载本地 Web 服务,无需额外原生权限。",
+  "windows": ["main"],
+  "permissions": ["core:default"]
+}

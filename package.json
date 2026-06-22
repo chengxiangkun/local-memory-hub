@@ -43,7 +43,9 @@
     "test:feishu-real": "node apps/api/src/feishu-real-smoke-test.js",
     "test:feishu-folder-real": "node apps/api/src/feishu-folder-real-smoke-test.js",
     "test:feishu-wiki-probe": "node apps/api/src/feishu-wiki-probe.js",
-    "import:feishu-real": "node apps/api/src/feishu-import-real.js"
+    "import:feishu-real": "node apps/api/src/feishu-import-real.js",
+    "desktop": "tauri dev --config apps/desktop/src-tauri/tauri.conf.json",
+    "desktop:build": "tauri build --config apps/desktop/src-tauri/tauri.conf.json"
   },
   "workspaces": [
     "apps/*",
@@ -54,5 +56,8 @@
     "@modelcontextprotocol/sdk": "^1.29.0",
     "better-sqlite3": "^12.11.1",
     "force-graph": "^1.51.4"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.11.3"
   }
 }

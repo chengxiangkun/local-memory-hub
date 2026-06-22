@@ -1,0 +1,16 @@
+[package]
+name = "local-memory-hub-desktop"
+version = "0.0.1"
+description = "Local Memory Hub 桌面运行时(sidecar 启动本地服务,webview 加载本地 Web)"
+edition = "2021"
+rust-version = "1.77"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+
+[profile.release]
+opt-level = "s"
+lto = true
