@@ -2451,6 +2451,168 @@ svg.is-dragging {
   display: none !important;
 }
 
+/* 源资料详情抽屉(右侧全高)。 */
+.detail-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 25;
+  display: flex;
+  justify-content: flex-end;
+  background: rgba(0, 0, 0, 0.52);
+  backdrop-filter: blur(8px);
+}
+
+.detail-drawer-panel {
+  width: min(720px, 100%);
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  background: var(--surface);
+  border-left: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
+
+.detail-drawer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line-soft);
+  font-weight: 600;
+}
+
+.detail-drawer-body {
+  overflow: auto;
+  padding: 18px;
+  display: grid;
+  gap: 18px;
+  align-content: start;
+}
+
+.detail-section {
+  display: grid;
+  gap: 10px;
+}
+
+.detail-section h3 {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.detail-section h4 {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.detail-status-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.detail-meta {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.detail-meta > div {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.detail-meta dt {
+  color: var(--muted);
+}
+
+.detail-meta dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+.detail-meta a {
+  color: var(--accent-2);
+  overflow-wrap: anywhere;
+}
+
+.detail-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.detail-counts > div {
+  display: grid;
+  gap: 2px;
+  min-width: 80px;
+}
+
+.detail-counts strong {
+  font-size: 18px;
+}
+
+.detail-counts span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.detail-segments {
+  display: grid;
+  gap: 10px;
+}
+
+.detail-segment {
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: grid;
+  gap: 6px;
+}
+
+.detail-segment.quarantined {
+  border-color: var(--warn);
+  opacity: 0.82;
+}
+
+.detail-segment-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.detail-segment-head > span:first-child {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detail-segment p {
+  margin: 0;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.detail-empty {
+  color: var(--muted);
+  font-size: 13px;
+  padding: 12px;
+}
+
 @media (max-width: 1100px) {
   .app-shell {
     grid-template-columns: 84px minmax(0, 1fr);

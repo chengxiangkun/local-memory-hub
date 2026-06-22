@@ -602,6 +602,41 @@ export async function setSegmentPollutionStatus(segmentId, status, dataDir = get
   return getMemorySegmentById(segmentId, dataDir);
 }
 
+// 统计某源资料的向量数量(总数与未隔离的有效数)。
+export async function countSourceVectors(sourceId, dataDir = getDataDir()) {
+  await initSqlite(dataDir);
+  const rows = await queryJson(
+    `
+    SELECT
+      COUNT(*) AS total,
+      SUM(CASE WHEN pollution_status != 'quarantined' THEN 1 ELSE 0 END) AS active
+    FROM vector_index
+    WHERE source_id = $source_id;
+    `,
+    dataDir,
+    { source_id: sourceId }
+  );
+  return { total: Number(rows[0]?.total || 0), active: Number(rows[0]?.active || 0) };
+}
+
+// 硬删除某源资料的全部派生数据(片段、向量、图谱节点与相关边),供"重新解析"前清场。
+// 注意:不动 sources 行本身,调用方负责重置状态并重新解析。
+export async function purgeSourceDerivedData(sourceId, dataDir = getDataDir()) {
+  await initSqlite(dataDir);
+  await runSql(
+    `
+    DELETE FROM graph_edges
+    WHERE from_node_id IN (SELECT node_id FROM graph_nodes WHERE source_id = $source_id)
+       OR to_node_id IN (SELECT node_id FROM graph_nodes WHERE source_id = $source_id);
+    DELETE FROM graph_nodes WHERE source_id = $source_id;
+    DELETE FROM vector_index WHERE source_id = $source_id;
+    DELETE FROM memory_segments WHERE source_id = $source_id;
+    `,
+    dataDir,
+    { source_id: sourceId }
+  );
+}
+
 export async function appendGovernanceEvents(events, dataDir = getDataDir()) {
   await initSqlite(dataDir);
   const list = Array.isArray(events) ? events : [events];

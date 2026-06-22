@@ -41,6 +41,9 @@ import {
   listAllMemorySegments,
   getMemorySegmentById,
   setSegmentPollutionStatus,
+  countSourceVectors,
+  purgeSourceDerivedData,
+  updateSourceStatuses,
   appendGovernanceEvents,
   listGovernanceEvents,
   listSourcesSqlite,
@@ -353,6 +356,54 @@ const server = http.createServer(async (req, res) => {
       const url = new URL(req.url, "http://127.0.0.1");
       const sourceId = url.searchParams.get("source_id");
       return json(res, 200, await getImpactScope(sourceId));
+    }
+
+    if (req.method === "GET" && req.url?.startsWith("/api/sources/detail")) {
+      const url = new URL(req.url, "http://127.0.0.1");
+      const sourceId = url.searchParams.get("source_id");
+      const source = await getSourceById(sourceId, dataInfo.data_dir);
+      if (!source) return json(res, 404, { error: "source_not_found", message: "源资料不存在" });
+      const [segments, impact, vectors] = await Promise.all([
+        listAllMemorySegments(sourceId, dataInfo.data_dir),
+        getImpactScope(sourceId, dataInfo.data_dir),
+        countSourceVectors(sourceId, dataInfo.data_dir)
+      ]);
+      return json(res, 200, {
+        source,
+        segments,
+        graph_nodes: impact.graph_nodes,
+        counts: {
+          segments: segments.length,
+          segments_quarantined: segments.filter((item) => item.pollution_status === "quarantined").length,
+          graph_nodes: impact.counts.graph_nodes,
+          graph_edges: impact.counts.graph_edges,
+          vectors_total: vectors.total,
+          vectors_active: vectors.active
+        }
+      });
+    }
+
+    if (req.method === "POST" && req.url === "/api/sources/reparse") {
+      const body = await readJson(req);
+      const source = await getSourceById(body.source_id, dataInfo.data_dir);
+      if (!source) return json(res, 404, { error: "source_not_found", message: "源资料不存在" });
+      // 清场后重置状态,再重新解析,等价于"重建该资料的片段、向量和图谱"。
+      await purgeSourceDerivedData(body.source_id, dataInfo.data_dir);
+      await updateSourceStatuses(
+        body.source_id,
+        { parse_status: "parse_pending", memory_status: "memory_pending", pollution_status: "clean" },
+        dataInfo.data_dir
+      );
+      const result = await parseSource(body.source_id, { llm_fallback: true }, dataInfo.data_dir);
+      await appendGovernanceEvents({
+        scope: "source",
+        source_id: body.source_id,
+        title: source.title || "",
+        action: "reparsed",
+        reason: "manual_source_reparse",
+        detail: { segment_count: result.segment_count ?? 0 }
+      }, dataInfo.data_dir);
+      return json(res, 200, result);
     }
 
     if (req.method === "GET" && req.url?.startsWith("/api/graph/neighbors")) {

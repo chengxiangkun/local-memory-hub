@@ -7,7 +7,7 @@
 
 import { badge, escapeHtml, formatDate, statusText } from "./utils.js";
 
-export function renderSources(sourceTable, sources, { folders = [], assignments = {}, parsingSourceIds = new Set(), pagination = {}, onImpactScope, onMoveSource, onParseSource, onOpenSource, onOpenFile, onPreviewSource, onOpenGovernance, onPageChange, onPageSizeChange } = {}) {
+export function renderSources(sourceTable, sources, { folders = [], assignments = {}, parsingSourceIds = new Set(), pagination = {}, onImpactScope, onMoveSource, onParseSource, onOpenSource, onOpenFile, onPreviewSource, onOpenGovernance, onOpenDetail, onPageChange, onPageSizeChange } = {}) {
   const pageSize = Number(pagination.pageSize || 10);
   const pageCount = Math.max(1, Math.ceil(sources.length / pageSize));
   const page = clamp(Number(pagination.page || 1), 1, pageCount);
@@ -28,7 +28,7 @@ export function renderSources(sourceTable, sources, { folders = [], assignments 
           ${badge(displayParseStatus(source, parsingSourceIds.has(source.source_id)))}
           ${badge(displayMemoryStatus(source))}
           ${renderTraceability(source)}
-          <span class="source-actions-cell">${renderPreviewAction(source)}${renderParseAction(source, parsingSourceIds.has(source.source_id))}</span>
+          <span class="source-actions-cell">${renderDetailAction(source)}${renderPreviewAction(source)}${renderParseAction(source, parsingSourceIds.has(source.source_id))}</span>
         </div>
       `).join("") || `<div class="source-row"><strong>暂无源资料<small>导入文本后会出现在这里</small></strong><span>-</span><span>-</span><span>-</span><span>-</span><span>-</span><span>-</span><span>-</span></div>`
     }
@@ -72,6 +72,12 @@ export function renderSources(sourceTable, sources, { folders = [], assignments 
       onOpenGovernance?.(button.dataset.openGovernance);
     });
   });
+  sourceTable.querySelectorAll("[data-open-detail]").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.stopPropagation();
+      onOpenDetail?.(button.dataset.openDetail);
+    });
+  });
   sourceTable.querySelectorAll("[data-source-page]").forEach((button) => {
     button.addEventListener("click", () => onPageChange?.(Number(button.dataset.sourcePage)));
   });
@@ -103,6 +109,10 @@ function renderPagination({ total, page, pageSize, pageCount, startIndex }) {
       </div>
     </div>
   `;
+}
+
+function renderDetailAction(source) {
+  return `<button class="row-action-button" type="button" data-open-detail="${escapeHtml(source.source_id)}">详情</button>`;
 }
 
 function renderPreviewAction(source) {

@@ -111,7 +111,8 @@ const REASON_LABELS = {
   manual_source_restore: "手动恢复源资料",
   manual_source_delete: "手动删除源资料",
   manual_segment_quarantine: "手动隔离片段",
-  manual_segment_restore: "手动恢复片段"
+  manual_segment_restore: "手动恢复片段",
+  manual_source_reparse: "重新解析源资料"
 };
 
 function formatGovernanceReason(reason) {
@@ -120,7 +121,7 @@ function formatGovernanceReason(reason) {
 }
 
 function formatAction(action) {
-  const labels = { quarantined: "隔离", restored: "恢复", deleted: "删除", kept: "保留", skipped: "跳过" };
+  const labels = { quarantined: "隔离", restored: "恢复", deleted: "删除", kept: "保留", skipped: "跳过", reparsed: "重新解析" };
   return labels[action] || action || "";
 }
 

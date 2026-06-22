@@ -23,6 +23,7 @@ import {
 } from "./js/qa-view.js";
 import { renderSettings } from "./js/settings-view.js";
 import { renderSources as renderSourcesViewModule } from "./js/sources-view.js";
+import { renderSourceDetail } from "./js/source-detail-view.js";
 import { state } from "./js/state.js";
 import { debounce } from "./js/utils.js";
 
@@ -42,6 +43,8 @@ const els = {
   contextList: document.querySelector("#contextList"),
   answerBox: document.querySelector("#answerBox"),
   floatingImport: document.querySelector("#floatingImport"),
+  sourceDetailDrawer: document.querySelector("#sourceDetailDrawer"),
+  sourceDetailBody: document.querySelector("#sourceDetailBody"),
   graphZoomSlider: document.querySelector("#graphZoomSlider"),
   graphZoomValue: document.querySelector("#graphZoomValue")
 };
@@ -107,6 +110,10 @@ function bindEvents() {
   document.querySelector("#clearQaButton")?.addEventListener("click", clearQaConversation);
   document.querySelector("#newQaSessionButton")?.addEventListener("click", startNewQaSession);
   document.querySelector("#scanQaDuplicatesButton")?.addEventListener("click", scanQaDuplicates);
+  document.querySelector("#closeSourceDetail")?.addEventListener("click", closeSourceDetail);
+  els.sourceDetailDrawer?.addEventListener("click", (event) => {
+    if (event.target === els.sourceDetailDrawer) closeSourceDetail();
+  });
   document.querySelector("#questionInput")?.addEventListener("keydown", (event) => {
     if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
       event.preventDefault();
@@ -492,6 +499,7 @@ function renderSources() {
     onOpenFile: openSourceFile,
     onPreviewSource: previewSourceContent,
     onOpenGovernance: openGovernanceView,
+    onOpenDetail: openSourceDetail,
     onPageChange: setSourcePage,
     onPageSizeChange: setSourcePageSize
   });
@@ -521,6 +529,59 @@ function openSourceUrl(url) {
 async function openSourceFile(sourceId) {
   await post("/api/sources/open", { source_id: sourceId });
   setStatus("已打开本地源文件");
+}
+
+let currentDetailSourceId = "";
+
+async function openSourceDetail(sourceId) {
+  currentDetailSourceId = sourceId;
+  if (els.sourceDetailDrawer) els.sourceDetailDrawer.classList.remove("hidden");
+  els.sourceDetailBody.innerHTML = `<div class="detail-empty">加载中…</div>`;
+  await refreshSourceDetail();
+}
+
+async function refreshSourceDetail() {
+  if (!currentDetailSourceId) return;
+  try {
+    const detail = await get(`/api/sources/detail?source_id=${encodeURIComponent(currentDetailSourceId)}`);
+    renderSourceDetail(els.sourceDetailBody, detail, {
+      onReparse: reparseSourceFromDetail,
+      onOpenFile: openSourceFile,
+      onQuarantine: async (id) => { await post("/api/sources/quarantine", { source_id: id }); await afterDetailMutation("已隔离该资料"); },
+      onRestore: async (id) => { await post("/api/sources/restore", { source_id: id }); await afterDetailMutation("已恢复该资料"); },
+      onDelete: async (id) => {
+        if (!window.confirm("确认删除该源资料？")) return;
+        await deleteSource(id);
+        closeSourceDetail();
+      },
+      onSegmentQuarantine: async (segmentId) => { await post("/api/memory/segments/quarantine", { segment_id: segmentId }); await afterDetailMutation("已隔离该片段"); },
+      onSegmentRestore: async (segmentId) => { await post("/api/memory/segments/restore", { segment_id: segmentId }); await afterDetailMutation("已恢复该片段"); }
+    });
+  } catch (error) {
+    els.sourceDetailBody.innerHTML = `<div class="detail-empty">加载失败：${escapeHtmlLocal(error.message)}</div>`;
+  }
+}
+
+async function reparseSourceFromDetail(sourceId) {
+  setStatus("正在重新解析：清场 -> 解析 -> 重建片段/向量/图谱");
+  try {
+    await post("/api/sources/reparse", { source_id: sourceId });
+    await afterDetailMutation("重新解析完成");
+  } catch (error) {
+    setStatus(`重新解析失败：${error.message}`);
+  }
+}
+
+// 详情页内的变更后:刷新全局数据与详情面板，保持两者一致。
+async function afterDetailMutation(message) {
+  await refreshAll();
+  await refreshSourceDetail();
+  setStatus(message);
+}
+
+function closeSourceDetail() {
+  currentDetailSourceId = "";
+  els.sourceDetailDrawer?.classList.add("hidden");
 }
 
 // 供问答引用追溯使用:按 source_id 返回该资料的实时状态。
