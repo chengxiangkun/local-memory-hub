@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>S8 Force Graph Spike</title>
+    <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="22" fill="%2334d399"/><circle cx="32" cy="32" r="9" fill="%2305080d"/></svg>' />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="graph-panel">
+        <header class="toolbar">
+          <div>
+            <p>Spike S8</p>
+            <h1>Force Graph 图谱验证</h1>
+          </div>
+          <label class="search-box">
+            <span>搜索</span>
+            <input id="searchInput" type="search" placeholder="主题、文件、人物、想法..." />
+          </label>
+          <label class="switch">
+            <input id="showQuarantined" type="checkbox" />
+            <span>显示隔离节点</span>
+          </label>
+        </header>
+        <div id="graph" class="graph-canvas" aria-label="Force Graph 图谱验证画布"></div>
+        <footer class="status-bar">
+          <span id="graphStats">加载中</span>
+          <span>验证：缩放、平移、拖拽、hover、点击、搜索定位</span>
+        </footer>
+      </section>
+      <aside class="detail-panel">
+        <h2>节点详情</h2>
+        <div id="detailBody" class="detail-empty">点击一个节点查看详情。</div>
+      </aside>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

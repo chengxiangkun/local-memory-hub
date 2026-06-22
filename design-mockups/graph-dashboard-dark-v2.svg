@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1440" height="900" viewBox="0 0 1440 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <linearGradient id="appGlow" x1="0" y1="0" x2="1440" y2="900">
+    <stop offset="0" stop-color="#17262F"/>
+    <stop offset="0.38" stop-color="#0A1015"/>
+    <stop offset="1" stop-color="#0B1116"/>
+  </linearGradient>
+  <linearGradient id="activeNav" x1="0" y1="0" x2="230" y2="0">
+    <stop offset="0" stop-color="#164B41"/>
+    <stop offset="1" stop-color="#17232A"/>
+  </linearGradient>
+  <linearGradient id="cardGlow" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#18252E"/>
+    <stop offset="1" stop-color="#0F171D"/>
+  </linearGradient>
+  <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+    <feDropShadow dx="0" dy="20" stdDeviation="24" flood-color="#000000" flood-opacity="0.28"/>
+  </filter>
+  <style>
+    .cn { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'PingFang SC', 'Noto Sans SC', sans-serif; }
+    .mono { font-family: 'SF Mono', ui-monospace, Menlo, monospace; }
+  </style>
+</defs>
+
+    <rect x="0" y="0" width="1440" height="900" rx="10" fill="#070B0F" />
+    <rect x="2" y="2" width="1436" height="896" rx="10" fill="url(#appGlow)" stroke="#33444E" />
+    <rect x="2" y="2" width="1436" height="42" rx="10" fill="#0B1116" />
+    <circle cx="20" cy="24" r="6" fill="#FF5F57" opacity="1"/><circle cx="40" cy="24" r="6" fill="#FFBD2E" opacity="1"/><circle cx="60" cy="24" r="6" fill="#28C840" opacity="1"/>
+    <g transform="translate(82,11)">
+    <path d="M14 2 L26 8.5 V21.5 L14 28 L2 21.5 V8.5 L14 2Z" fill="#23D391"/>
+    <path d="M14 2 L26 8.5 L14 15 L2 8.5 L14 2Z" fill="#70F0B7"/>
+    <path d="M2 8.5 L14 15 V28 L2 21.5 V8.5Z" fill="#1AA779"/>
+    <path d="M26 8.5 L14 15 V28 L26 21.5 V8.5Z" fill="#22C98E"/>
+    <path d="M14 15 L14 28" stroke="#0B6A53" stroke-width="1.4"/>
+  </g><text x="122" y="30" class="cn" font-size="14" font-weight="800" fill="#E7EEF3" >Local Memory Hub</text>
+    <rect x="580" y="10" width="300" height="34" rx="16" fill="#0B1116" stroke="#33444E" />
+    <circle cx="600" cy="27" r="6" fill="none" opacity="1" stroke="#91A0AA"/><line x1="604" y1="31" x2="610" y2="37" stroke="#91A0AA" stroke-opacity="1" stroke-width="1.5"/>
+    <text x="626" y="31" class="cn" font-size="13" font-weight="500" fill="#91A0AA" >搜索记忆、节点、标签…</text><text x="836" y="31" class="mono" font-size="11" font-weight="700" fill="#91A0AA" >⌘K</text>
+    <text x="1328" y="29" class="cn" font-size="18" font-weight="500" fill="#91A0AA" >—</text><rect x="1364" y="18" width="10" height="10" rx="1" fill="none" stroke="#91A0AA" /><line x1="1407" y1="18" x2="1398" y2="28" stroke="#91A0AA" stroke-opacity="1" stroke-width="1.3"/><line x1="1398" y1="18" x2="1407" y2="28" stroke="#91A0AA" stroke-opacity="1" stroke-width="1.3"/>
+    <rect x="2" y="44" width="226" height="854" rx="0" fill="#0B1218" /><line x1="228" y1="44" x2="228" y2="898" stroke="#33444E" stroke-opacity="1" stroke-width="1"/>
+    <text x="28" y="92" class="cn" font-size="12" font-weight="500" fill="#65737D" >工作区</text>
+    
+    
+    <g><path d="M29 122 L40 113 L51 122" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M33 121 V133 H47 V121" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="66" y="129" class="cn" font-size="14" font-weight="600" fill="#BCC7CF" >概览</text><rect x="12" y="148" width="206" height="44" rx="8" fill="url(#activeNav)" />
+    <rect x="12" y="148" width="3" height="44" rx="2" fill="#31D49B" />
+    <g><circle cx="33" cy="164" r="2.6" fill="#31D49B" opacity="1"/><circle cx="48" cy="163" r="2.6" fill="#31D49B" opacity="1"/><circle cx="44" cy="178" r="2.6" fill="#31D49B" opacity="1"/><path d="M35 165 L46 163 M34 166 L42 176 M47 166 L45 176" stroke="#31D49B" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="66" y="177" class="cn" font-size="14" font-weight="800" fill="#BFFFE7" >图谱</text>
+    
+    <g><path d="M33 210 H43 L49 216 V229 H33 Z" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M43 210 V216 H49" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="66" y="225" class="cn" font-size="14" font-weight="600" fill="#BCC7CF" >源资料库</text>
+    
+    <g><path d="M32 260 H50 V272 H40 L35 277 V272 H32 Z" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M37 265 H46 M37 269 H43" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="66" y="273" class="cn" font-size="14" font-weight="600" fill="#BCC7CF" >搜索与问答</text>
+    
+    <g><path d="M41 305 V320" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M35 314 L41 320 L47 314" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M32 325 H50" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="66" y="321" class="cn" font-size="14" font-weight="600" fill="#BCC7CF" >导入中心</text>
+    <line x1="28" y1="366" x2="208" y2="366" stroke="#26343D" stroke-opacity="1" stroke-width="1"/>
+    <text x="28" y="406" class="cn" font-size="12" font-weight="500" fill="#65737D" >数据管理</text>
+    
+    
+    <g><path d="M41 427 L50 431 V438 C50 444 46 447 41 449 C36 447 32 444 32 438 V431 Z" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M37 438 L40 441 L46 434" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="66" y="443" class="cn" font-size="14" font-weight="600" fill="#BCC7CF" >污染治理</text>
+    
+    <g><ellipse cx="41" cy="478" rx="9" ry="4" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M32 478 V492 C32 497 50 497 50 492 V478 M32 485 C32 490 50 490 50 485" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="66" y="491" class="cn" font-size="14" font-weight="600" fill="#BCC7CF" >向量索引</text>
+    
+    <g><path d="M33 525 H44 L50 531 L40 542 L30 532 Z" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="41" cy="529" r="1.8" fill="#B5C0C8" opacity="1"/></g>
+    <text x="66" y="539" class="cn" font-size="14" font-weight="600" fill="#BCC7CF" >标签管理</text>
+    <line x1="28" y1="704" x2="208" y2="704" stroke="#26343D" stroke-opacity="1" stroke-width="1"/>
+    <text x="28" y="740" class="cn" font-size="12" font-weight="600" fill="#91A0AA" >本地存储</text>
+    <rect x="28" y="758" width="180" height="7" rx="4" fill="#1D2B33" /><rect x="28" y="758" width="64" height="7" rx="4" fill="#31D49B" />
+    <text x="28" y="786" class="cn" font-size="12" font-weight="500" fill="#91A0AA" >482.6 GB / 1.0 TB</text>
+    <circle cx="36" cy="842" r="16" fill="#375B4E" opacity="1"/><text x="31" y="847" class="cn" font-size="13" font-weight="800" fill="#E8FFF4" >L</text><text x="66" y="840" class="cn" font-size="13" font-weight="700" fill="#E7EEF3" >Local User</text><text x="66" y="860" class="cn" font-size="11" font-weight="700" fill="#31D49B" >本地模式</text>
+    <rect x="228" y="44" width="1210" height="854" rx="0" fill="#0D151B" />
+    <text x="254" y="92" class="cn" font-size="24" font-weight="900" fill="#E7EEF3" >知识图谱</text>
+    <text x="254" y="118" class="cn" font-size="13" font-weight="500" fill="#91A0AA" >图谱是首页：用于探索记忆关系，同时可追溯源文件、向量和文本片段。</text>
+    
+    <rect x="254" y="144" width="804" height="44" rx="8" fill="#0E171D" stroke="#33444E" />
+    <rect x="270" y="154" width="34" height="26" rx="6" fill="#103D35" stroke="#33444E" /><g><circle cx="280" cy="160" r="2.6" fill="#31D49B" opacity="1"/><circle cx="295" cy="159" r="2.6" fill="#31D49B" opacity="1"/><circle cx="291" cy="174" r="2.6" fill="#31D49B" opacity="1"/><path d="M282 161 L293 159 M281 162 L289 172 M294 162 L292 172" stroke="#31D49B" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <rect x="312" y="154" width="34" height="26" rx="6" fill="#0F171D" stroke="#33444E" /><g><path d="M318 166 L329 157 L340 166" stroke="#91A0AA" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M322 165 V177 H336 V165" stroke="#91A0AA" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <rect x="354" y="154" width="34" height="26" rx="6" fill="#0F171D" stroke="#33444E" /><g><path d="M364 159 H375 L381 165 L371 176 L361 166 Z" stroke="#91A0AA" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="372" cy="163" r="1.8" fill="#91A0AA" opacity="1"/></g>
+    <rect x="742" y="154" width="150" height="28" rx="6" fill="#0F171D" stroke="#33444E" /><text x="766" y="173" class="cn" font-size="12" font-weight="700" fill="#91A0AA" >布局：力导向</text>
+    <rect x="904" y="154" width="130" height="28" rx="6" fill="#0F171D" stroke="#33444E" /><text x="928" y="173" class="cn" font-size="12" font-weight="700" fill="#91A0AA" >关系筛选</text>
+    <rect x="254" y="200" width="804" height="646" rx="12" fill="#0A1116" stroke="#33444E" />
+    <line x1="616" y1="430" x2="500" y2="350" stroke="#71808A" stroke-opacity="0.46" stroke-width="1.2"/><line x1="616" y1="430" x2="740" y2="334" stroke="#71808A" stroke-opacity="0.46" stroke-width="1.2"/><line x1="616" y1="430" x2="850" y2="454" stroke="#71808A" stroke-opacity="0.46" stroke-width="1.2"/><line x1="616" y1="430" x2="632" y2="575" stroke="#71808A" stroke-opacity="0.46" stroke-width="1.2"/><line x1="616" y1="430" x2="470" y2="530" stroke="#71808A" stroke-opacity="0.46" stroke-width="1.2"/><line x1="500" y1="350" x2="395" y2="305" stroke="#71808A" stroke-opacity="0.46" stroke-width="1.2"/><line x1="500" y1="350" x2="450" y2="430" stroke="#71808A" stroke-opacity="0.46" stroke-width="1.2"/><line x1="740" y1="334" x2="870" y2="272" stroke="#71808A" stroke-opacity="0.46" stroke-width="1.2"/><line x1="850" y1="454" x2="1020" y2="530" stroke="#71808A" stroke-opacity="0.46" stroke-width="1.2"/><line x1="632" y1="575" x2="540" y2="686" stroke="#71808A" stroke-opacity="0.46" stroke-width="1.2"/><line x1="632" y1="575" x2="770" y2="716" stroke="#71808A" stroke-opacity="0.46" stroke-width="1.2"/><line x1="470" y1="530" x2="350" y2="610" stroke="#71808A" stroke-opacity="0.46" stroke-width="1.2"/><line x1="740" y1="334" x2="706" y2="210" stroke="#71808A" stroke-opacity="0.46" stroke-width="1.2"/><line x1="616" y1="430" x2="1012" y2="380" stroke="#71808A" stroke-opacity="0.46" stroke-width="1.2"/>
+    <circle cx="616" cy="430" r="35" fill="#5FA8FF" opacity="0.18" stroke="#5FA8FF"/><circle cx="616" cy="430" r="11.666666666666666" fill="#5FA8FF" opacity="0.95"/><text x="616" y="485" class="cn" font-size="12" font-weight="700" fill="#55D6FF" text-anchor="middle">《人工智能：一种现代的方法》.pdf</text><circle cx="500" cy="350" r="18" fill="#5FA8FF" opacity="0.18" stroke="#5FA8FF"/><circle cx="500" cy="350" r="6" fill="#5FA8FF" opacity="0.95"/><text x="500" y="388" class="cn" font-size="12" font-weight="700" fill="#C8D2D8" text-anchor="middle">机器学习基础</text><circle cx="740" cy="334" r="18" fill="#5FA8FF" opacity="0.18" stroke="#5FA8FF"/><circle cx="740" cy="334" r="6" fill="#5FA8FF" opacity="0.95"/><text x="740" y="372" class="cn" font-size="12" font-weight="700" fill="#C8D2D8" text-anchor="middle">搜索算法</text><circle cx="850" cy="454" r="16" fill="#5FA8FF" opacity="0.18" stroke="#5FA8FF"/><circle cx="850" cy="454" r="5.333333333333333" fill="#5FA8FF" opacity="0.95"/><text x="850" y="490" class="cn" font-size="12" font-weight="700" fill="#C8D2D8" text-anchor="middle">SVM</text><circle cx="632" cy="575" r="17" fill="#5FA8FF" opacity="0.18" stroke="#5FA8FF"/><circle cx="632" cy="575" r="5.666666666666667" fill="#5FA8FF" opacity="0.95"/><text x="632" y="612" class="cn" font-size="12" font-weight="700" fill="#C8D2D8" text-anchor="middle">自然语言处理</text><circle cx="470" cy="530" r="16" fill="#31D49B" opacity="0.18" stroke="#31D49B"/><circle cx="470" cy="530" r="5.333333333333333" fill="#31D49B" opacity="0.95"/><text x="470" y="566" class="cn" font-size="12" font-weight="700" fill="#C8D2D8" text-anchor="middle">反向传播算法</text><circle cx="395" cy="305" r="17" fill="#31D49B" opacity="0.18" stroke="#31D49B"/><circle cx="395" cy="305" r="5.666666666666667" fill="#31D49B" opacity="0.95"/><text x="395" y="342" class="cn" font-size="12" font-weight="700" fill="#C8D2D8" text-anchor="middle">深度学习 第6章</text><circle cx="350" cy="610" r="15" fill="#31D49B" opacity="0.18" stroke="#31D49B"/><circle cx="350" cy="610" r="5" fill="#31D49B" opacity="0.95"/><text x="350" y="645" class="cn" font-size="12" font-weight="700" fill="#C8D2D8" text-anchor="middle">AlphaGo论文</text><circle cx="540" cy="686" r="16" fill="#31D49B" opacity="0.18" stroke="#31D49B"/><circle cx="540" cy="686" r="5.333333333333333" fill="#31D49B" opacity="0.95"/><text x="540" y="722" class="cn" font-size="12" font-weight="700" fill="#C8D2D8" text-anchor="middle">Attention机制</text><circle cx="770" cy="716" r="18" fill="#5FA8FF" opacity="0.18" stroke="#5FA8FF"/><circle cx="770" cy="716" r="6" fill="#5FA8FF" opacity="0.95"/><text x="770" y="754" class="cn" font-size="12" font-weight="700" fill="#C8D2D8" text-anchor="middle">Transformer结构原理</text><circle cx="1020" cy="530" r="18" fill="#5FA8FF" opacity="0.18" stroke="#5FA8FF"/><circle cx="1020" cy="530" r="6" fill="#5FA8FF" opacity="0.95"/><text x="1020" y="568" class="cn" font-size="12" font-weight="700" fill="#C8D2D8" text-anchor="middle">聚类算法 K-Means</text><circle cx="1012" cy="380" r="15" fill="#31D49B" opacity="0.18" stroke="#31D49B"/><circle cx="1012" cy="380" r="5" fill="#31D49B" opacity="0.95"/><text x="1012" y="415" class="cn" font-size="12" font-weight="700" fill="#C8D2D8" text-anchor="middle">统计学习方法</text><circle cx="706" cy="210" r="16" fill="#5FA8FF" opacity="0.18" stroke="#5FA8FF"/><circle cx="706" cy="210" r="5.333333333333333" fill="#5FA8FF" opacity="0.95"/><text x="706" y="246" class="cn" font-size="12" font-weight="700" fill="#C8D2D8" text-anchor="middle">神经网络基础</text>
+    <rect x="274" y="732" width="132" height="128" rx="8" fill="#0C151B" stroke="#33444E" />
+    <line x1="340" y1="795" x2="326.08" y2="785.4" stroke="#65757F" stroke-opacity="0.35" stroke-width="1"/><line x1="340" y1="795" x2="354.88" y2="783.48" stroke="#65757F" stroke-opacity="0.35" stroke-width="1"/><line x1="340" y1="795" x2="368.08" y2="797.88" stroke="#65757F" stroke-opacity="0.35" stroke-width="1"/><line x1="340" y1="795" x2="341.92" y2="812.4" stroke="#65757F" stroke-opacity="0.35" stroke-width="1"/><line x1="340" y1="795" x2="322.48" y2="807" stroke="#65757F" stroke-opacity="0.35" stroke-width="1"/><line x1="326.08" y1="785.4" x2="313.48" y2="780" stroke="#65757F" stroke-opacity="0.35" stroke-width="1"/><line x1="326.08" y1="785.4" x2="320.08" y2="795" stroke="#65757F" stroke-opacity="0.35" stroke-width="1"/><line x1="354.88" y1="783.48" x2="370.48" y2="776.04" stroke="#65757F" stroke-opacity="0.35" stroke-width="1"/><line x1="368.08" y1="797.88" x2="388.48" y2="807" stroke="#65757F" stroke-opacity="0.35" stroke-width="1"/>
+    <circle cx="340" cy="795" r="3" fill="#5FA8FF" opacity="0.8"/><circle cx="326.08" cy="785.4" r="3" fill="#5FA8FF" opacity="0.8"/><circle cx="354.88" cy="783.48" r="3" fill="#5FA8FF" opacity="0.8"/><circle cx="368.08" cy="797.88" r="3" fill="#5FA8FF" opacity="0.8"/><circle cx="341.92" cy="812.4" r="3" fill="#5FA8FF" opacity="0.8"/><circle cx="322.48" cy="807" r="3" fill="#31D49B" opacity="0.8"/><circle cx="313.48" cy="780" r="3" fill="#31D49B" opacity="0.8"/><circle cx="308.08" cy="816.6" r="3" fill="#31D49B" opacity="0.8"/><circle cx="330.88" cy="825.72" r="3" fill="#31D49B" opacity="0.8"/>
+    <rect x="292" y="782" width="62" height="34" rx="3" fill="none" stroke="#19BFE0" />
+  
+    
+    <line x1="1078" y1="44" x2="1078" y2="898" stroke="#33444E" stroke-opacity="1" stroke-width="1"/>
+    <text x="1100" y="92" class="cn" font-size="18" font-weight="900" fill="#E7EEF3" >节点详情</text><text x="1354" y="92" class="cn" font-size="28" font-weight="300" fill="#91A0AA" >×</text>
+    <circle cx="1138" cy="190" r="38" fill="#172638" opacity="1" stroke="#557899"/><g><path d="M1131 182 H1141 L1147 188 V201 H1131 Z" stroke="#8DC2FF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M1141 182 V188 H1147" stroke="#8DC2FF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="1192" y="166" class="cn" font-size="18" font-weight="900" fill="#E7EEF3" >《人工智能：一种现代的方法》.pdf</text>
+    <rect x="1192" y="182" width="64" height="22" rx="5" fill="#12372D" /><text x="1224" y="197" class="cn" font-size="11" font-weight="800" fill="#6AF2B7" text-anchor="middle">源资料</text><text x="1192" y="224" class="cn" font-size="13" font-weight="500" fill="#91A0AA" >本地文件 · PDF · 87.4 MB</text>
+    <text x="1192" y="250" class="cn" font-size="12" font-weight="500" fill="#91A0AA" >添加时间：2024-05-12 14:32</text>
+    <line x1="1100" y1="304" x2="1408" y2="304" stroke="#33444E" stroke-opacity="1" stroke-width="1"/>
+    <text x="1100" y="342" class="cn" font-size="14" font-weight="800" fill="#31D49B" >源资料</text><text x="1222" y="342" class="cn" font-size="14" font-weight="600" fill="#91A0AA" >文本片段</text><text x="1340" y="342" class="cn" font-size="14" font-weight="600" fill="#91A0AA" >向量索引</text>
+    <rect x="1100" y="356" width="74" height="2" rx="1" fill="#31D49B" />
+    <text x="1100" y="400" class="cn" font-size="13" font-weight="800" fill="#E7EEF3" >文件路径</text><text x="1100" y="428" class="cn" font-size="12" font-weight="500" fill="#91A0AA" >D:\Memory\Books\人工智能方法.pdf</text>
+    <text x="1100" y="468" class="cn" font-size="13" font-weight="800" fill="#E7EEF3" >处理状态</text>
+    <circle cx="1112" cy="506" r="10" fill="none" opacity="1" stroke="#31D49B"/><text x="1134" y="512" class="cn" font-size="14" font-weight="700" fill="#E7EEF3" >解析成功</text><text x="1342" y="512" class="cn" font-size="12" font-weight="500" fill="#91A0AA" >14:33</text>
+    <circle cx="1112" cy="548" r="10" fill="none" opacity="1" stroke="#31D49B"/><text x="1134" y="554" class="cn" font-size="14" font-weight="700" fill="#E7EEF3" >已入记忆</text><text x="1342" y="554" class="cn" font-size="12" font-weight="500" fill="#91A0AA" >14:34</text>
+    <circle cx="1112" cy="590" r="10" fill="none" opacity="1" stroke="#D9A52C"/><text x="1134" y="596" class="cn" font-size="14" font-weight="800" fill="#D9A52C" >可隔离源资料</text><rect x="1330" y="574" width="58" height="30" rx="6" fill="none" stroke="#D9A52C" /><text x="1359" y="594" class="cn" font-size="12" font-weight="800" fill="#D9A52C" text-anchor="middle">隔离</text>
+    <line x1="1100" y1="638" x2="1408" y2="638" stroke="#33444E" stroke-opacity="1" stroke-width="1"/>
+    <text x="1100" y="678" class="cn" font-size="14" font-weight="800" fill="#E7EEF3" >相关统计</text>
+    <text x="1158" y="720" class="cn" font-size="12" font-weight="500" fill="#91A0AA" text-anchor="middle">文本片段</text><text x="1158" y="750" class="cn" font-size="16" font-weight="800" fill="#E7EEF3" text-anchor="middle">1,842</text><line x1="1210" y1="698" x2="1210" y2="760" stroke="#33444E" stroke-opacity="1" stroke-width="1"/><text x="1262" y="720" class="cn" font-size="12" font-weight="500" fill="#91A0AA" text-anchor="middle">向量数量</text><text x="1262" y="750" class="cn" font-size="16" font-weight="800" fill="#E7EEF3" text-anchor="middle">1,842</text><line x1="1314" y1="698" x2="1314" y2="760" stroke="#33444E" stroke-opacity="1" stroke-width="1"/><text x="1366" y="720" class="cn" font-size="12" font-weight="500" fill="#91A0AA" text-anchor="middle">关联节点</text><text x="1366" y="750" class="cn" font-size="16" font-weight="800" fill="#E7EEF3" text-anchor="middle">23</text>
+  
+  
+</svg>

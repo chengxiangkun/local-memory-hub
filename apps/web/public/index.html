@@ -3,56 +3,546 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Local Memory Hub 图谱首页 Spike</title>
+    <title>Local Memory Hub</title>
+    <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path fill="%2370f0b7" d="M8 18 32 8v38L8 56z"/><path fill="%2322c98e" d="m32 8 24 10v38L32 46z"/></svg>' />
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
-    <div class="app">
-      <aside class="sidebar">
-        <div class="brand">Local Memory Hub</div>
-        <nav>
-          <a class="active">图谱首页</a>
-          <a>工作台</a>
-          <a>Inbox</a>
-          <a>源资料</a>
-          <a>记忆库</a>
-          <a>搜索/问答</a>
-          <a>治理</a>
-          <a>外部接入</a>
-          <a>设置</a>
+    <div class="app-shell">
+      <aside class="rail" aria-label="主导航">
+        <div class="brand-block">
+          <div class="brand-mark" aria-hidden="true"></div>
+          <div>
+            <div class="brand-name">Local Memory Hub</div>
+            <div class="brand-path" id="dataPath">读取数据目录中</div>
+          </div>
+        </div>
+
+        <nav class="nav-list">
+          <button class="nav-item" data-view="home">
+            <span class="nav-glyph">⌂</span>
+            <span>概览</span>
+          </button>
+          <button class="nav-item active" data-view="graph">
+            <span class="nav-glyph">G</span>
+            <span>图谱</span>
+          </button>
+          <button class="nav-item" data-view="sources">
+            <span class="nav-glyph">S</span>
+            <span>源资料库</span>
+          </button>
+          <button class="nav-item" data-view="qa">
+            <span class="nav-glyph">Q</span>
+            <span>搜索与问答</span>
+          </button>
+          <button class="nav-item" data-view="inbox">
+            <span class="nav-glyph">I</span>
+            <span>导入中心</span>
+          </button>
+          <button class="nav-item" data-view="governance">
+            <span class="nav-glyph">R</span>
+            <span>污染治理</span>
+          </button>
+          <button class="nav-item" data-view="settings">
+            <span class="nav-glyph">P</span>
+            <span>设置中心</span>
+          </button>
         </nav>
+
+        <div class="rail-footer">
+          <div class="mini-metric">
+            <span>今日新增</span>
+            <strong id="todayCount">0</strong>
+          </div>
+          <button class="mini-metric metric-link" type="button" data-governance-entry aria-label="查看待治理资料">
+            <span>待治理</span>
+            <strong id="riskCount">0</strong>
+          </button>
+        </div>
       </aside>
 
-      <main class="main">
-        <header class="topbar">
-          <input id="search" placeholder="搜索图谱节点、源资料、主题..." />
-          <button id="importText">导入一段文本</button>
-          <span id="status" class="status">连接中</span>
+      <main class="workspace">
+        <header class="command-bar">
+          <div class="search-box">
+            <span class="search-prefix">搜索</span>
+            <input id="globalSearch" type="search" placeholder="源资料、文本片段、图谱节点、问题..." autocomplete="off" />
+          </div>
+          <div class="command-actions">
+            <button class="ghost-button" id="refreshButton">刷新</button>
+            <button class="primary-button" id="openImportPanel">快速导入</button>
+          </div>
         </header>
 
-        <section class="graph-shell">
-          <div class="graph-toolbar">
-            <span>图谱首页</span>
-            <button id="fit">重新布局</button>
-            <label><input id="showPolluted" type="checkbox" /> 显示污染节点</label>
+        <section class="view active" id="view-graph">
+          <div class="graph-layout">
+            <section class="graph-stage">
+              <div class="stage-head">
+                <div>
+                  <p class="section-kicker">记忆图谱</p>
+                  <h1>资料、主题和想法在这里连起来</h1>
+                </div>
+                <div class="segmented-control" role="tablist" aria-label="图谱模式">
+                  <button class="active" type="button" data-graph-mode="relation">关系</button>
+                  <button type="button" data-graph-mode="community">社区</button>
+                  <button type="button" data-graph-mode="vector">向量</button>
+                  <button type="button" data-graph-mode="time">时间</button>
+                  <button id="resetGraphView" type="button">重置</button>
+                </div>
+              </div>
+
+              <div class="graph-canvas">
+                <svg id="graph" viewBox="0 0 1120 720" aria-label="记忆图谱"></svg>
+                <div class="graph-zoom-control" aria-label="图谱缩放">
+                  <span>缩放</span>
+                  <input id="graphZoomSlider" type="range" min="55" max="240" value="100" aria-label="图谱缩放比例" />
+                  <strong id="graphZoomValue">100%</strong>
+                </div>
+                <div class="graph-grid" aria-hidden="true"></div>
+                <div id="graphEmpty" class="empty-state hidden">
+                  <h2>还没有记忆节点</h2>
+                  <p>导入一段文本后，会生成源资料节点、主题节点和文本片段。</p>
+                  <button class="primary-button" id="emptyImport">导入示例文本</button>
+                </div>
+              </div>
+
+              <div class="stage-foot">
+                <div class="legend">
+                  <span><i class="dot dot-source"></i>源资料</span>
+                  <span><i class="dot dot-topic"></i>主题</span>
+                  <span><i class="dot dot-risk"></i>已隔离</span>
+                </div>
+                <div class="status-line" id="status">连接中</div>
+              </div>
+            </section>
+
+            <aside class="inspector">
+              <div class="inspector-head">
+                <span>节点详情</span>
+                <button class="icon-button" id="clearSelection" title="清除选择">×</button>
+              </div>
+              <div id="detailBody" class="detail-body">
+                <div class="detail-empty">
+                  <strong>选择一个节点</strong>
+                  <span>查看来源、处理状态、影响范围和污染治理操作。</span>
+                </div>
+              </div>
+            </aside>
           </div>
-          <svg id="graph" viewBox="0 0 1000 700" aria-label="记忆图谱"></svg>
-          <div id="empty" class="empty hidden">
-            <h1>你的记忆图谱还没有开始生长。</h1>
-            <p>导入一段文本后，这里会出现第一个源资料节点和主题节点。</p>
-            <button id="emptyImport">导入示例文本</button>
+        </section>
+
+        <section class="view" id="view-home">
+          <div class="page-grid two-col">
+            <section class="panel">
+              <h2>本地记忆概览</h2>
+              <p>第一版核心闭环：源资料可信进入系统，生成可追溯记忆，再通过图谱、搜索和问答使用。</p>
+              <div class="impact-preview">
+                <div><strong id="homeSourceCount">0</strong><span>源资料</span></div>
+                <div><strong id="homeGraphCount">0</strong><span>图谱节点</span></div>
+                <button type="button" class="impact-card metric-link" data-governance-entry aria-label="查看待治理资料">
+                  <strong id="homeRiskCount">0</strong><span>待治理</span>
+                </button>
+              </div>
+            </section>
+            <section class="panel">
+              <h2>下一步动作</h2>
+              <div class="timeline">
+                <div class="timeline-item done">
+                  <span></span>
+                  <div>
+                    <div class="inline-help-row">
+                      <strong>保存源文件</strong>
+                      <button class="info-dot" type="button" aria-label="说明：源数据保存在本地数据目录，升级不丢失。">i<span role="tooltip">源数据保存在本地数据目录，升级不丢失。</span></button>
+                    </div>
+                  </div>
+                </div>
+                <div class="timeline-item done">
+                  <span></span>
+                  <div>
+                    <div class="inline-help-row">
+                      <strong>进入记忆</strong>
+                      <button class="info-dot" type="button" aria-label="说明：文本片段、向量索引和图谱节点同步生成。">i<span role="tooltip">文本片段、向量索引和图谱节点同步生成。</span></button>
+                    </div>
+                  </div>
+                </div>
+                <div class="timeline-item">
+                  <span></span>
+                  <div>
+                    <div class="inline-help-row">
+                      <strong>外部 AI 调用</strong>
+                      <button class="info-dot" type="button" aria-label="说明：后续通过 MCP-like 服务暴露本地记忆能力。">i<span role="tooltip">后续通过 MCP-like 服务暴露本地记忆能力。</span></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="view-inbox">
+          <div class="page-grid two-col">
+            <section class="panel import-panel">
+              <div class="panel-title-row">
+                <div>
+                  <h2>快速导入</h2>
+                  <p>文本、文件、链接和外部文档统一进入同一条处理流水线。</p>
+                </div>
+              </div>
+              <div class="import-tabs">
+                <button class="active" data-import-tab="text">文本</button>
+                <button data-import-tab="file">文件</button>
+                <button data-import-tab="link">链接</button>
+                <button data-import-tab="connector">外部文档</button>
+              </div>
+              <div class="import-box active" data-import-box="text">
+                <label for="textTitle">标题</label>
+                <input id="textTitle" value="新的灵感片段" />
+                <label for="textPayload">内容</label>
+                <textarea id="textPayload">把今天看到的资料、截图文字、会议记录或突然冒出来的想法粘到这里。</textarea>
+                <button class="primary-button" id="submitTextImport">导入并解析</button>
+              </div>
+              <div class="import-box" data-import-box="file">
+                <div class="drop-zone">
+                  <strong>拖入文件</strong>
+                  <span>PDF、Markdown、TXT、图片、视频会进入本地解析队列。</span>
+                  <input id="filePayload" type="file" />
+                  <button class="primary-button" id="submitFileImport">导入并解析文件</button>
+                </div>
+              </div>
+              <div class="import-box" data-import-box="link">
+                <label>分享链接</label>
+                <input id="linkPayload" value="https://example.com/share/..." />
+                <button class="primary-button" id="submitLinkImport">保存并解析链接</button>
+              </div>
+              <div class="import-box" data-import-box="connector">
+                <div class="connector-hero">
+                  <div>
+                    <strong>连接外部文档后自动同步新增和修改</strong>
+                    <span>删除外部文档时只标记风险，本地源资料、向量和图谱是否删除由用户手动确认。</span>
+                  </div>
+                </div>
+                <div class="connector-list" id="connectorCards">
+                  <div class="connector-card primary-connector">
+                    <strong>飞书文档</strong>
+                    <span>读取连接器状态中</span>
+                    <small>必做 · 新增/修改同步</small>
+                  </div>
+                  <div class="connector-card primary-connector">
+                    <strong>腾讯文档</strong>
+                    <span>读取连接器状态中</span>
+                    <small>必做 · 手动/定时同步</small>
+                  </div>
+                  <button class="connector-card">
+                    <strong>有道云笔记</strong>
+                    <span>导出、复制和链接保存兜底</span>
+                    <small>后置 · 不承诺自动同步</small>
+                  </button>
+                  <button class="connector-card">
+                    <strong>通用网页文档</strong>
+                    <span>保存网页链接并抽取正文</span>
+                    <small>通用 URL</small>
+                  </button>
+                </div>
+                <div class="sync-policy">
+                  <label><input type="checkbox" checked /> 保留外部文件夹结构</label>
+                  <label><input type="checkbox" checked /> 同步修改后生成新版本</label>
+                  <label><input type="checkbox" /> 外部删除时自动隔离本地资料</label>
+                </div>
+              </div>
+            </section>
+
+            <section class="panel">
+              <h2>连接器同步队列</h2>
+              <div class="timeline" id="connectorTimeline">
+                <div class="timeline-item done">
+                  <span></span>
+                  <div>
+                    <strong>连接账号</strong>
+                    <p>飞书和腾讯文档通过授权连接，凭证只保存在本地。</p>
+                  </div>
+                </div>
+                <div class="timeline-item done">
+                  <span></span>
+                  <div>
+                    <strong>保存结构</strong>
+                    <p>外部文件夹、文档 ID 和标题会映射成本地目录结构。</p>
+                  </div>
+                </div>
+                <div class="timeline-item">
+                  <span></span>
+                  <div>
+                    <strong>同步新增和修改</strong>
+                    <p>飞书优先事件触发，腾讯文档优先轮询检查。</p>
+                  </div>
+                </div>
+                <div class="timeline-item">
+                  <span></span>
+                  <div>
+                    <strong>删除需确认</strong>
+                    <p>外部删除不会自动清掉本地向量和图谱，用户手动选择范围。</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="view-sources">
+          <div class="source-library-layout">
+            <aside class="panel source-folder-panel">
+              <div class="panel-title-row compact-row">
+                <div>
+                  <h2>资料结构</h2>
+                  <p>保留外部结构，也可手动归类。</p>
+                </div>
+                <button class="icon-button" id="createFolderButton" title="新建文件夹">+</button>
+              </div>
+              <div class="folder-tree" id="folderTree"></div>
+            </aside>
+            <section class="panel full-height source-content-panel">
+              <div class="panel-title-row">
+                <div>
+                  <h2>源资料库</h2>
+                  <p>按文件夹、日期、类型、来源、同步状态和处理状态检索原始资料。</p>
+                </div>
+                <div class="source-actions">
+                  <button class="ghost-button">立即同步</button>
+                  <button class="ghost-button">移动到文件夹</button>
+                  <button class="ghost-button" id="createFolderAction">新建文件夹</button>
+                </div>
+              </div>
+              <div class="table-toolbar">
+                <input id="sourceSearch" type="search" placeholder="检索文件名、来源、类型、路径" autocomplete="off" />
+                <button class="chip active" data-source-filter="">全部</button>
+                <button class="chip" data-source-filter="memory_indexed">已入记忆</button>
+                <button class="chip" data-source-filter="export_required">需要导出</button>
+                <button class="chip" data-source-filter="sync_pending">等待同步</button>
+                <button class="chip" data-source-filter="auth_expired">授权失效</button>
+                <button class="chip" data-source-filter="parse_failed">解析失败</button>
+                <button class="chip" data-source-filter="quarantined">已隔离</button>
+              </div>
+              <div class="source-sync-banner">
+                <strong>外部删除保护</strong>
+                <span>飞书或腾讯文档删除后，本地只标记为“外部已删除”。是否删除源文件、向量和图谱由用户手动选择。</span>
+              </div>
+              <div class="source-table" id="sourceTable"></div>
+              <div class="source-preview" id="sourcePreview">
+                <strong>内容预览</strong>
+                <p>点击已入记忆资料的“内容”，查看解析后的文本片段。</p>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="view-governance">
+          <div class="page-grid two-col">
+            <section class="panel">
+              <h2>污染治理</h2>
+              <div class="risk-card">
+                <div>
+                  <strong>删除源资料时</strong>
+                  <p>可以选择同步删除文本片段、向量索引和图谱节点。</p>
+                </div>
+                <div class="toggle-row">
+                  <label><input id="deleteDerivedData" type="checkbox" checked /> 删除向量和图谱</label>
+                  <label><input id="deleteSourceFile" type="checkbox" checked /> 源文件移入回收站</label>
+                  <label><input type="checkbox" /> 保留审计记录</label>
+                </div>
+              </div>
+              <div class="govern-list" id="governList"></div>
+            </section>
+            <section class="panel">
+              <h2>影响范围预览</h2>
+              <div class="impact-preview">
+                <div><strong id="impactSegments">0</strong><span>文本片段</span></div>
+                <div><strong id="impactVectors">0</strong><span>向量索引</span></div>
+                <div><strong id="impactGraph">0</strong><span>图谱节点</span></div>
+              </div>
+              <div class="audit-log">
+                <p>最近操作</p>
+                <span>暂无破坏性操作。</span>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="view-qa">
+          <div class="qa-layout">
+            <aside class="panel qa-sessions-panel">
+              <div class="qa-sessions-head">
+                <h2>会话</h2>
+                <button class="ghost-button" id="newQaSessionButton" type="button">新建</button>
+              </div>
+              <div id="qaSessionList" class="qa-session-list"></div>
+            </aside>
+            <section class="panel qa-panel">
+              <div class="panel-title-row">
+                <div>
+                  <h2>AI 多轮问答</h2>
+                  <p>围绕本地资料连续追问，最近一轮引用显示在右侧。</p>
+                </div>
+                <div class="qa-model-control">
+                  <label id="qaProviderLabel">问答模型</label>
+                  <div class="model-picker" id="qaProviderSelect" data-value="mock" aria-labelledby="qaProviderLabel"></div>
+                </div>
+              </div>
+              <div class="chat-thread" id="answerBox" aria-live="polite">
+                <div class="chat-empty">
+                  <strong>开始一次资料对话</strong>
+                  <p>输入问题后，系统会先检索本地资料，再生成带引用的回答。</p>
+                </div>
+              </div>
+              <div class="qa-input">
+                <textarea id="questionInput" placeholder="继续追问本地资料、上一轮回答或新的问题">这些资料里有哪些可以碰撞出产品创意？</textarea>
+                <div class="qa-actions">
+                  <label class="checkbox-line"><input id="persistQaMemory" type="checkbox" checked /> 自动沉淀高价值回答</label>
+                  <div class="qa-action-buttons">
+                    <button class="ghost-button" id="clearQaButton" type="button">清空会话</button>
+                    <button class="primary-button" id="askButton">发送</button>
+                  </div>
+                </div>
+              </div>
+            </section>
+            <aside class="panel context-panel">
+              <h2>最近引用</h2>
+              <div id="contextList" class="context-list"></div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="view-settings">
+          <div class="settings-layout">
+            <section class="panel settings-hero">
+              <div>
+                <p class="section-kicker">设置中心</p>
+                <h2>本地数据、模型、解析和外部接入</h2>
+                <p>这些配置决定资料如何进入系统、什么时候调用模型、外部 AI 能访问哪些本地记忆。</p>
+              </div>
+              <div class="settings-version">
+                <strong id="settingsAppVersion">读取中</strong>
+                <span id="settingsMigrationStatus">检查升级状态中</span>
+              </div>
+            </section>
+
+            <section class="panel settings-section">
+              <div class="panel-title-row">
+                <div>
+                  <h2>本地存储</h2>
+                  <p>数据保存在本机，升级后应保留源资料、记忆、向量和图谱。</p>
+                </div>
+              </div>
+              <label>数据保存位置</label>
+              <div class="path-field" id="settingsDataPath">读取中</div>
+              <div class="setting-action-row">
+                <button class="ghost-button" disabled>打开目录</button>
+                <button class="ghost-button" disabled>迁移数据目录</button>
+                <span>当前版本只展示路径；更换目录必须经过检查、备份、复制或切换、校验和重启。</span>
+              </div>
+              <div class="settings-list">
+                <div><span>Schema 版本</span><strong id="settingsSchemaVersion">-</strong></div>
+                <div><span>源资料数量</span><strong id="settingsSourceCount">0</strong></div>
+                <div><span>图谱节点</span><strong id="settingsGraphCount">0</strong></div>
+              </div>
+            </section>
+
+            <section class="panel settings-section">
+              <div class="panel-title-row">
+                <div>
+                  <h2>模型 Provider</h2>
+                  <p>API Key 只应保存在本地。当前先展示供应商模板，后续接入本地加密配置。</p>
+                </div>
+              </div>
+              <div class="provider-grid" id="providerGrid"></div>
+            </section>
+
+            <section class="panel settings-section">
+              <h2>解析与 Token 策略</h2>
+              <div class="settings-cards">
+                <div class="setting-card active">
+                  <strong>平衡模式</strong>
+                  <span>本地解析失败或置信度低时调用模型兜底。</span>
+                </div>
+                <div class="setting-card">
+                  <strong>省 Token</strong>
+                  <span>优先本地脚本，不主动发送内容给外部模型。</span>
+                </div>
+                <div class="setting-card">
+                  <strong>深度模式</strong>
+                  <span>更多使用模型生成摘要、结构和图谱关系。</span>
+                </div>
+              </div>
+              <div class="toggle-row">
+                <label><input type="checkbox" checked /> 本地解析优先</label>
+                <label><input type="checkbox" checked /> 失败时模型兜底</label>
+                <label><input type="checkbox" checked /> 沉淀解析规则</label>
+              </div>
+              <div class="settings-list model-policy-list">
+                <label>问答默认模型<select id="chatPolicyProvider"></select></label>
+                <label>解析兜底模型<select id="parsePolicyProvider"></select></label>
+                <label>向量模型<select id="embeddingPolicyProvider"></select></label>
+              </div>
+            </section>
+
+            <section class="panel settings-section">
+              <h2>外部接入</h2>
+              <div class="settings-list">
+                <div><span>MCP-like Server</span><strong id="settingsMcpStatus">读取中</strong></div>
+                <div><span>暴露工具</span><strong>memory.search / memory.get_context / graph.search</strong></div>
+                <div><span>源文件原文访问</span><strong>默认关闭</strong></div>
+              </div>
+            </section>
+
+            <section class="panel settings-section">
+              <h2>升级与备份</h2>
+              <div class="settings-list">
+                <div><span>迁移状态</span><strong id="settingsMigrationDetail">读取中</strong></div>
+                <div><span>备份策略</span><strong>迁移前自动备份</strong></div>
+                <div><span>恢复策略</span><strong>恢复后重建向量和图谱</strong></div>
+              </div>
+              <div class="setting-action-row">
+                <button class="ghost-button" id="rebuildGraphButton" type="button">重建图谱索引</button>
+                <button class="ghost-button" id="rebuildVectorButton" type="button">重建向量索引</button>
+                <span>根据已有文本片段重建派生索引，不改动源文件和解析文本。</span>
+              </div>
+            </section>
+
+            <section class="panel settings-section settings-wide">
+              <div class="panel-title-row">
+                <div>
+                  <h2>本机能力检查</h2>
+                  <p>用于判断一键启动后哪些解析、打包和本地存储能力已经可用。</p>
+                </div>
+              </div>
+              <div class="doctor-grid" id="systemDoctor"></div>
+            </section>
+
+            <section class="panel settings-section settings-wide">
+              <div class="panel-title-row">
+                <div>
+                  <h2>记忆整理 Agent</h2>
+                  <p>本地统计问答记忆，维护用户习惯画像；默认不调用外部模型。</p>
+                </div>
+              </div>
+              <div id="habitProfile" class="habit-profile"></div>
+            </section>
           </div>
         </section>
       </main>
-
-      <aside class="detail">
-        <div class="detail-title">节点详情</div>
-        <div id="detailBody" class="detail-body">
-          <p>点击图谱节点查看来源、类型和状态。</p>
-        </div>
-      </aside>
     </div>
 
-    <script src="/main.js"></script>
+    <div class="floating-import hidden" id="floatingImport">
+      <div class="floating-card">
+        <div class="inspector-head">
+          <span>快速导入</span>
+          <button class="icon-button" id="closeImportPanel" title="关闭">×</button>
+        </div>
+        <label>标题</label>
+        <input id="quickTitle" value="快速导入文本" />
+        <label>内容</label>
+        <textarea id="quickText">这是一条从快捷入口进入的资料，会被保存、解析并写入记忆系统。</textarea>
+        <button class="primary-button" id="quickImportSubmit">导入并生成记忆</button>
+      </div>
+    </div>
+
+    <script type="module" src="/main.js"></script>
   </body>
 </html>

@@ -238,6 +238,29 @@ V1 设置页必须提供国产主流模型的预设模板，至少包括：
 - fallback 顺序
 - 是否允许外部调用
 
+## 7. 当前 Spike 落地状态
+
+已完成：
+
+- Provider 模板包含 DeepSeek、通义千问、豆包、智谱、Kimi、MiniMax、腾讯混元等。
+- OpenAI-Compatible 模板可通过通用 Adapter 调用，不再只是 UI 展示项。
+- 模型调用日志写入本地数据目录 `logs/model-calls.log`。
+- 日志不记录 API Key。
+- 成功和失败调用都会记录。
+
+当前仍未完成：
+
+- API Key 加密持久化。
+- 任务模型策略持久化。
+- Anthropic-Compatible、Gemini、百度千帆、讯飞星火等特殊协议真实验证。
+- 精确 token 统计和成本估算。
+
+详细结论见：
+
+```text
+docs/SPIKE-RESULTS-019.md
+```
+
 示例：
 
 ```text
@@ -317,3 +340,28 @@ UI 需要支持三种模式：
 - 没有大模型时问答页面直接不可用。
 - 每个供应商各写一套业务流程。
 - 不支持自定义 Base URL。
+
+## 11. 当前 Spike 落地状态
+
+已完成：
+
+- OpenAI-Compatible 模板可通过通用 Adapter 调用。
+- 模型调用日志写入本地数据目录。
+- Provider 配置可保存到本地数据目录。
+- 设置页可展示并保存 Provider 配置。
+- 任务模型策略可保存到本地数据目录。
+- 问答和解析兜底可读取任务模型策略。
+
+当前限制：
+
+- API Key 当前仅使用本地文件和 `600` 权限隔离，正式版本仍需接入系统密钥存储或加密文件。
+- 当前任务模型策略只支持单 Provider，不支持 fallback 队列。
+- 真实外部模型连通性测试还未做。
+
+详细结论：
+
+```text
+docs/SPIKE-RESULTS-019.md
+docs/SPIKE-RESULTS-020.md
+docs/SPIKE-RESULTS-021.md
+```

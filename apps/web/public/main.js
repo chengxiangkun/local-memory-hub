@@ -1,231 +1,817 @@
-const API = "http://127.0.0.1:4317";
-const graphEl = document.querySelector("#graph");
-const detailBody = document.querySelector("#detailBody");
-const statusEl = document.querySelector("#status");
-const emptyEl = document.querySelector("#empty");
-const searchEl = document.querySelector("#search");
+import { get, post } from "./js/api.js";
+import { renderConnectorCards, renderConnectorTimeline } from "./js/connectors-view.js";
+import { renderGovernance as renderGovernanceViewModule } from "./js/governance-view.js";
+import { renderEmptyNodeDetail, renderSelectedNode } from "./js/graph-detail-view.js";
+import { renderGraph as renderGraphSvg, updateGraphSelection } from "./js/graph-renderer.js";
+import { importExampleText as runExampleImport, importFile as runFileImport, importText as runTextImport, importUrl as runUrlImport } from "./js/import-flow.js";
+import { renderMetrics as renderMetricCounters } from "./js/metrics-view.js";
+import {
+  askQuestion as runAskQuestion,
+  loadQaSession,
+  renderQaModelOptions,
+  loadQaSessions,
+  switchQaSession,
+  createQaSession,
+  renameQaSession,
+  deleteQaSession,
+  getCurrentSessionId
+} from "./js/qa-view.js";
+import { renderSettings } from "./js/settings-view.js";
+import { renderSources as renderSourcesViewModule } from "./js/sources-view.js";
+import { state } from "./js/state.js";
+import { debounce } from "./js/utils.js";
 
-let graph = { nodes: [], edges: [] };
-let selectedNodeId = null;
-let matchedNodeIds = null;
+const GRAPH_LIMIT = 120;
 
-document.querySelector("#fit").addEventListener("click", loadGraph);
-document.querySelector("#importText").addEventListener("click", importExampleText);
-document.querySelector("#emptyImport").addEventListener("click", importExampleText);
-searchEl.addEventListener("input", debounce(searchGraph, 180));
+const els = {
+  graph: document.querySelector("#graph"),
+  graphEmpty: document.querySelector("#graphEmpty"),
+  detailBody: document.querySelector("#detailBody"),
+  status: document.querySelector("#status"),
+  globalSearch: document.querySelector("#globalSearch"),
+  dataPath: document.querySelector("#dataPath"),
+  sourceTable: document.querySelector("#sourceTable"),
+  sourcePreview: document.querySelector("#sourcePreview"),
+  folderTree: document.querySelector("#folderTree"),
+  governList: document.querySelector("#governList"),
+  contextList: document.querySelector("#contextList"),
+  answerBox: document.querySelector("#answerBox"),
+  floatingImport: document.querySelector("#floatingImport"),
+  graphZoomSlider: document.querySelector("#graphZoomSlider"),
+  graphZoomValue: document.querySelector("#graphZoomValue")
+};
 
-loadGraph();
+bindEvents();
+boot();
+
+function bindEvents() {
+  document.querySelectorAll("[data-view]").forEach((button) => {
+    button.addEventListener("click", () => setView(button.dataset.view));
+  });
+  document.querySelectorAll("[data-governance-entry]").forEach((button) => {
+    button.addEventListener("click", openGovernanceView);
+  });
+
+  document.querySelectorAll("[data-import-tab]").forEach((button) => {
+    button.addEventListener("click", () => {
+      document.querySelectorAll("[data-import-tab]").forEach((item) => item.classList.remove("active"));
+      document.querySelectorAll("[data-import-box]").forEach((item) => item.classList.remove("active"));
+      button.classList.add("active");
+      document.querySelector(`[data-import-box="${button.dataset.importTab}"]`)?.classList.add("active");
+    });
+  });
+
+  document.querySelector("#refreshButton")?.addEventListener("click", refreshAll);
+  document.querySelector("#resetGraphView")?.addEventListener("click", resetGraphView);
+  document.querySelectorAll("[data-graph-mode]").forEach((button) => {
+    button.addEventListener("click", () => setGraphMode(button.dataset.graphMode));
+  });
+  els.graphZoomSlider?.addEventListener("input", (event) => {
+    setGraphZoom(Number(event.target.value) / 100);
+  });
+  document.querySelector("#openImportPanel")?.addEventListener("click", () => els.floatingImport.classList.remove("hidden"));
+  document.querySelector("#closeImportPanel")?.addEventListener("click", () => els.floatingImport.classList.add("hidden"));
+  document.querySelector("#clearSelection")?.addEventListener("click", clearSelection);
+  document.querySelector("#emptyImport")?.addEventListener("click", importExampleText);
+  document.querySelector("#submitTextImport")?.addEventListener("click", () => {
+    importText(document.querySelector("#textTitle").value, document.querySelector("#textPayload").value);
+  });
+  document.querySelector("#submitLinkImport")?.addEventListener("click", () => {
+    importUrl(document.querySelector("#linkPayload").value);
+  });
+  document.querySelector("#submitFileImport")?.addEventListener("click", () => {
+    importFile(document.querySelector("#filePayload").files?.[0]);
+  });
+  document.querySelector(".drop-zone")?.addEventListener("dragover", (event) => {
+    event.preventDefault();
+    event.currentTarget.classList.add("drag-over");
+  });
+  document.querySelector(".drop-zone")?.addEventListener("dragleave", (event) => {
+    event.currentTarget.classList.remove("drag-over");
+  });
+  document.querySelector(".drop-zone")?.addEventListener("drop", (event) => {
+    event.preventDefault();
+    event.currentTarget.classList.remove("drag-over");
+    importFile(event.dataTransfer.files?.[0]);
+  });
+  document.querySelector("#quickImportSubmit")?.addEventListener("click", async () => {
+    await importText(document.querySelector("#quickTitle").value, document.querySelector("#quickText").value);
+    els.floatingImport.classList.add("hidden");
+  });
+  document.querySelector("#askButton")?.addEventListener("click", askQuestion);
+  document.querySelector("#clearQaButton")?.addEventListener("click", clearQaConversation);
+  document.querySelector("#newQaSessionButton")?.addEventListener("click", startNewQaSession);
+  document.querySelector("#questionInput")?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+      event.preventDefault();
+      askQuestion();
+    }
+  });
+  document.querySelector("#createFolderButton")?.addEventListener("click", createFolder);
+  document.querySelector("#createFolderAction")?.addEventListener("click", createFolder);
+  document.querySelector("#rebuildGraphButton")?.addEventListener("click", rebuildGraphIndex);
+  document.querySelector("#rebuildVectorButton")?.addEventListener("click", rebuildVectorIndex);
+  els.globalSearch?.addEventListener("input", debounce(handleGlobalSearch, 180));
+  document.querySelector("#sourceSearch")?.addEventListener("input", debounce((event) => {
+    state.sourceQuery = event.target.value.trim().toLowerCase();
+    state.sourcePage = 1;
+    renderSources();
+  }, 120));
+  document.querySelectorAll("[data-source-filter]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.sourceFilter = button.dataset.sourceFilter || "";
+      state.sourcePage = 1;
+      document.querySelectorAll("[data-source-filter]").forEach((item) =>
+        item.classList.toggle("active", item === button)
+      );
+      renderSources();
+    });
+  });
+}
+
+async function boot() {
+  await refreshAll();
+  await loadQaSession({
+    answerBox: els.answerBox,
+    contextList: els.contextList
+  }).catch(() => null);
+  await renderQaSessions().catch(() => null);
+  if (state.graph.nodes.length === 0 && state.sources.length === 0) {
+    els.status.textContent = "等待首次导入";
+  }
+}
+
+async function refreshAll() {
+  await Promise.allSettled([loadHealth(), loadVersion(), loadProviders(), loadModelPolicies(), loadSources(), loadSourceFolders(), loadGraph(), loadHabits(), loadMcpStatus(), loadSystemDoctor(), loadConnectors()]);
+  renderMetrics();
+  renderSources();
+  renderFolderTree();
+  renderGovernance();
+  renderConnectors();
+  renderQaControls();
+  renderSettingsView();
+}
+
+async function loadHealth() {
+  try {
+    const data = await get("/health");
+    state.apiOnline = true;
+    state.health = data;
+    els.dataPath.textContent = data.data_dir || "本地数据目录未返回";
+  } catch {
+    state.apiOnline = false;
+    state.health = null;
+    els.dataPath.textContent = "后端 API 未连接";
+    showApiOffline();
+  }
+}
+
+async function loadVersion() {
+  state.version = await get("/api/system/version");
+}
+
+async function loadSources() {
+  const data = await get("/api/sources");
+  state.sources = data.sources || [];
+}
+
+async function loadSourceFolders() {
+  const data = await get("/api/source-folders");
+  state.sourceFolders = data.folders || [];
+  state.sourceFolderAssignments = data.assignments || {};
+}
+
+async function loadProviders() {
+  const data = await get("/api/models/providers");
+  state.providers = data.providers || [];
+}
+
+async function loadModelPolicies() {
+  const data = await get("/api/models/policies");
+  state.modelPolicies = data.policies || [];
+}
+
+async function loadConnectors() {
+  const data = await get("/api/connectors");
+  state.externalConnectors = data.connectors || [];
+}
+
+async function loadHabits() {
+  state.habits = await get("/api/memory/habits");
+}
+
+async function loadMcpStatus() {
+  state.mcpStatus = await get("/api/external/mcp/status");
+}
+
+async function loadSystemDoctor() {
+  state.systemDoctor = await get("/api/system/doctor");
+}
 
 async function loadGraph() {
   try {
-    statusEl.textContent = "读取图谱中";
-    const res = await fetch(`${API}/api/graph`);
-    graph = await res.json();
-    matchedNodeIds = null;
-    statusEl.textContent = `${graph.nodes.length} 个节点`;
+    if (!state.apiOnline) {
+      showApiOffline();
+      return;
+    }
+    els.status.textContent = "读取图谱中";
+    state.graphMode = "relation";
+    updateGraphModeButtons();
+    state.graph = await get(`/api/graph?limit=${GRAPH_LIMIT}`);
+    state.matchedNodeIds = null;
+    setGraphStatus("关系图");
+    resetGraphEmpty();
     renderGraph();
   } catch (error) {
-    statusEl.textContent = "API 未连接";
-    emptyEl.classList.remove("hidden");
+    showApiOffline();
   }
+}
+
+function showApiOffline() {
+  state.graph = { nodes: [], edges: [] };
+  els.status.textContent = "后端 API 未连接，请重启本地服务";
+  els.graphEmpty.classList.remove("hidden");
+  els.graphEmpty.innerHTML = `
+    <h2>后端服务未启动</h2>
+    <p>前端页面还在，但 API 没有连接。请在项目目录执行 npm run restart。</p>
+    <code>cd /Users/xiaocheng/build/codex/codex-projects/local-memory-hub && npm run restart</code>
+  `;
+}
+
+function resetGraphEmpty() {
+  els.graphEmpty.innerHTML = `
+    <h2>还没有记忆节点</h2>
+    <p>导入一段文本后，会生成源资料节点、主题节点和文本片段。</p>
+    <button class="primary-button" id="emptyImport">导入示例文本</button>
+  `;
+  document.querySelector("#emptyImport")?.addEventListener("click", importExampleText);
+}
+
+async function resetGraphView() {
+  if (els.globalSearch) els.globalSearch.value = "";
+  state.selectedNodeId = null;
+  state.matchedNodeIds = null;
+  setGraphZoom(1);
+  await loadGraph();
+}
+
+async function loadGraphCommunities() {
+  if (els.globalSearch) els.globalSearch.value = "";
+  state.selectedNodeId = null;
+  state.matchedNodeIds = null;
+  state.graphMode = "community";
+  updateGraphModeButtons();
+  state.graph = await get("/api/graph/communities");
+  setGraphStatus("社区概览");
+  renderGraph();
+  renderEmptyNodeDetail(els.detailBody);
+}
+
+async function setGraphMode(mode) {
+  if (mode === "relation") return loadGraph();
+  if (mode === "community") return loadGraphCommunities();
+  if (mode === "vector") return loadGraphType("keyword", "向量关键词", "vector");
+  if (mode === "time") return loadGraphTimeline();
+}
+
+async function loadGraphTimeline() {
+  if (els.globalSearch) els.globalSearch.value = "";
+  state.selectedNodeId = null;
+  state.matchedNodeIds = null;
+  state.graphMode = "time";
+  updateGraphModeButtons();
+  state.graph = await get(`/api/graph?limit=${GRAPH_LIMIT}`);
+  setGraphStatus("时间视图");
+  renderGraph();
+  renderEmptyNodeDetail(els.detailBody);
+}
+
+function updateGraphModeButtons() {
+  document.querySelectorAll("[data-graph-mode]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.graphMode === state.graphMode);
+  });
+}
+
+function setGraphStatus(label) {
+  els.status.textContent = `${label}：${state.graph.nodes.length} 个节点 · ${state.graph.edges.length} 条关系${state.graph.limited ? " · 已折叠更多节点" : ""}`;
+}
+
+function setGraphZoom(scale) {
+  const next = Math.min(2.4, Math.max(0.55, scale || 1));
+  els.graph?.setZoom?.(next);
+  if (els.graphZoomSlider) els.graphZoomSlider.value = String(Math.round(next * 100));
+  if (els.graphZoomValue) els.graphZoomValue.textContent = `${Math.round(next * 100)}%`;
+}
+
+function setView(view) {
+  document.querySelectorAll("[data-view]").forEach((item) => item.classList.toggle("active", item.dataset.view === view));
+  document.querySelectorAll(".view").forEach((item) => item.classList.remove("active"));
+  document.querySelector(`#view-${view}`)?.classList.add("active");
+}
+
+function openGovernanceView() {
+  setView("governance");
+  renderGovernance();
+  document.querySelector("#view-governance")?.scrollIntoView({ block: "start" });
 }
 
 async function importExampleText() {
-  try {
-    statusEl.textContent = "导入示例文本";
-    const imported = await post("/api/import", {
-      entrypoint: "onboarding",
-      source_hint: "text",
-      payload: {
-        title: `示例记忆 ${new Date().toLocaleTimeString()}`,
-        text:
-          "这是 Local Memory Hub 的第一条记忆。它会进入源资料库，解析成文本片段，并在图谱首页生成源资料节点和主题节点。"
-      }
-    });
-    if (imported.error) throw new Error(imported.message || imported.error);
-    const parsed = await post("/api/parse", { source_id: imported.source.source_id });
-    if (parsed.status !== "success") throw new Error(parsed.error || "解析失败");
-    await loadGraph();
-    statusEl.textContent = "导入成功";
-  } catch (error) {
-    statusEl.textContent = `导入失败：${error.message}`;
-  }
+  await runExampleImport(importDependencies());
+}
+
+async function importText(title, text) {
+  await runTextImport({ title, text }, importDependencies());
+}
+
+async function importFile(file) {
+  await runFileImport({ file }, importDependencies());
+}
+
+async function importUrl(url) {
+  await runUrlImport({ url }, importDependencies());
+}
+
+function importDependencies() {
+  return { setStatus, refreshAll, setView };
 }
 
 function renderGraph() {
-  const query = searchEl.value.trim().toLowerCase();
-  graphEl.innerHTML = "";
-  emptyEl.classList.toggle("hidden", graph.nodes.length > 0);
-  if (graph.nodes.length === 0) return;
-
-  const layout = buildLayout(graph);
-  const visibleNodeIds = new Set(layout.nodes.map((node) => node.node_id));
-  const highlightIds =
-    matchedNodeIds ||
-    new Set(
-      layout.nodes
-        .filter((node) => !query || node.label.toLowerCase().includes(query) || node.node_type.includes(query))
-        .map((node) => node.node_id)
-    );
-
-  const edgeLayer = svg("g");
-  const nodeLayer = svg("g");
-  graphEl.append(edgeLayer, nodeLayer);
-
-  for (const edge of graph.edges) {
-    const from = layout.byId.get(edge.from_node_id);
-    const to = layout.byId.get(edge.to_node_id);
-    if (!from || !to) continue;
-    const line = svg("line", {
-      class: "edge",
-      x1: from.x,
-      y1: from.y,
-      x2: to.x,
-      y2: to.y
-    });
-    edgeLayer.append(line);
-  }
-
-  for (const node of layout.nodes) {
-    const isMatch = highlightIds.has(node.node_id);
-    const g = svg("g", {
-      class: `node ${node.node_type} ${selectedNodeId === node.node_id ? "selected" : ""} ${query && !isMatch ? "dim" : ""}`,
-      transform: `translate(${node.x} ${node.y})`
-    });
-    g.append(
-      svg("circle", { r: node.node_type === "source" ? 16 : 12 }),
-      svg("text", { x: 22, y: 5 }, node.label.slice(0, 26))
-    );
-    g.addEventListener("click", () => selectNode(node, visibleNodeIds));
-    nodeLayer.append(g);
-  }
+  renderGraphSvg({
+    graphEl: els.graph,
+    graphEmpty: els.graphEmpty,
+    zoomSlider: els.graphZoomSlider,
+    zoomValue: els.graphZoomValue
+  }, state.graph, {
+    selectedNodeId: state.selectedNodeId,
+    matchedNodeIds: state.matchedNodeIds,
+    mode: state.graphMode,
+    onSelectNode: selectNode
+  });
 }
 
-function selectNode(node) {
-  selectedNodeId = node.node_id;
-  const neighbors = graph.edges
-    .filter((edge) => edge.from_node_id === node.node_id || edge.to_node_id === node.node_id)
+async function selectNode(node) {
+  if (node.node_type === "community") {
+    await loadGraphType(node.node_id.replace("community:", ""));
+    return;
+  }
+  state.selectedNodeId = node.node_id;
+  renderNodeDetail(node);
+  updateGraphSelection(els.graph, node.node_id);
+  await expandGraphNeighbors(node.node_id);
+  renderNodeDetail(node);
+  updateGraphSelection(els.graph, node.node_id);
+}
+
+function renderNodeDetail(node) {
+  const selectedNode = state.graph.nodes.find((item) => item.node_id === node.node_id) || node;
+  const source = state.sources.find((item) => item.source_id === selectedNode.source_id);
+  const neighbors = state.graph.edges
+    .filter((edge) => edge.from_node_id === selectedNode.node_id || edge.to_node_id === selectedNode.node_id)
     .map((edge) => {
-      const otherId = edge.from_node_id === node.node_id ? edge.to_node_id : edge.from_node_id;
-      const other = graph.nodes.find((item) => item.node_id === otherId);
+      const otherId = edge.from_node_id === selectedNode.node_id ? edge.to_node_id : edge.from_node_id;
+      const other = state.graph.nodes.find((item) => item.node_id === otherId);
       return `${other?.label || otherId}：${edge.reason}`;
     });
 
-  detailBody.innerHTML = `
-    <p><strong>${escapeHtml(node.label)}</strong></p>
-    <p><span class="pill">${node.node_type === "source" ? "源资料" : "主题"}</span><span class="pill">${node.pollution_status === "clean" ? "干净" : node.pollution_status}</span></p>
-    <p>源资料 ID：${node.source_id || "无"}</p>
-    <p id="impactScope">影响范围：读取中...</p>
-    <p>相邻关系：</p>
-    <ul>${neighbors.map((item) => `<li>${escapeHtml(item)}</li>`).join("") || "<li>暂无</li>"}</ul>
-    ${
-      node.source_id
-        ? `<button id="quarantineNode">隔离该源资料</button> <button id="restoreNode">恢复该源资料</button>`
-        : ""
-    }
-  `;
-  if (node.source_id) loadImpactScope(node.source_id);
-  const quarantineButton = document.querySelector("#quarantineNode");
-  if (quarantineButton) {
-    quarantineButton.addEventListener("click", async () => {
-      await post("/api/sources/quarantine", { source_id: node.source_id });
-      selectedNodeId = null;
-      detailBody.innerHTML = "<p>已隔离。该源资料、文本片段和图谱节点将从普通视图中隐藏。</p>";
-      await loadGraph();
-    });
-  }
-  const restoreButton = document.querySelector("#restoreNode");
-  if (restoreButton) {
-    restoreButton.addEventListener("click", async () => {
-      await post("/api/sources/restore", { source_id: node.source_id });
-      selectedNodeId = null;
-      detailBody.innerHTML = "<p>已恢复。该源资料、文本片段和图谱节点会重新进入普通视图。</p>";
-      await loadGraph();
-    });
-  }
-  renderGraph();
+  renderSelectedNode(els.detailBody, {
+    node: selectedNode,
+    source,
+    neighbors,
+    onImpactScope: loadImpactScope,
+    onQuarantine: (sourceId) => mutateSource("/api/sources/quarantine", sourceId),
+    onRestore: (sourceId) => mutateSource("/api/sources/restore", sourceId)
+  });
 }
 
-async function searchGraph() {
-  const query = searchEl.value.trim();
-  if (!query) {
-    matchedNodeIds = null;
-    renderGraph();
+async function expandGraphNeighbors(nodeId) {
+  if (state.graph.nodes.length >= 600) {
+    setStatus("当前子图较大，请用搜索缩小范围后再展开");
     return;
   }
-  try {
-    const res = await fetch(`${API}/api/graph/search?q=${encodeURIComponent(query)}`);
-    const data = await res.json();
-    matchedNodeIds = new Set(data.nodes.map((node) => node.node_id));
-    statusEl.textContent = `命中 ${matchedNodeIds.size} 个节点`;
-    renderGraph();
-  } catch (error) {
-    statusEl.textContent = `搜索失败：${error.message}`;
-  }
+  const data = await get(`/api/graph/neighbors?node_id=${encodeURIComponent(nodeId)}&limit=120`).catch(() => null);
+  if (!data) return;
+  const existingNodes = new Map(state.graph.nodes.map((node) => [node.node_id, node]));
+  const existingEdges = new Map(state.graph.edges.map((edge) => [edge.edge_id, edge]));
+  for (const node of data.nodes || []) existingNodes.set(node.node_id, node);
+  for (const edge of data.edges || []) existingEdges.set(edge.edge_id, edge);
+  const nodeCountBefore = state.graph.nodes.length;
+  state.graph = {
+    ...state.graph,
+    nodes: [...existingNodes.values()],
+    edges: [...existingEdges.values()]
+  };
+  if (state.graph.nodes.length !== nodeCountBefore) renderGraph();
+}
+
+async function loadGraphType(nodeType, label = graphTypeLabel(nodeType), mode = state.graphMode) {
+  state.selectedNodeId = null;
+  state.matchedNodeIds = null;
+  state.graphMode = mode;
+  updateGraphModeButtons();
+  state.graph = await get(`/api/graph/type?node_type=${encodeURIComponent(nodeType)}&limit=60`);
+  setGraphStatus(`${label}子图`);
+  renderGraph();
+  renderEmptyNodeDetail(els.detailBody);
+}
+
+function graphTypeLabel(nodeType) {
+  return {
+    source: "源资料",
+    topic: "主题",
+    keyword: "关键词",
+    memory: "记忆"
+  }[nodeType] || nodeType || "类型";
+}
+
+function clearSelection() {
+  state.selectedNodeId = null;
+  renderEmptyNodeDetail(els.detailBody);
+  updateGraphSelection(els.graph, null);
 }
 
 async function loadImpactScope(sourceId) {
   try {
-    const res = await fetch(`${API}/api/sources/impact?source_id=${encodeURIComponent(sourceId)}`);
-    const data = await res.json();
-    const el = document.querySelector("#impactScope");
-    if (el) {
-      el.textContent = `影响范围：${data.counts.segments} 个文本片段，${data.counts.graph_nodes} 个图谱节点，${data.counts.graph_edges} 条关系`;
+    const data = await get(`/api/sources/impact?source_id=${encodeURIComponent(sourceId)}`);
+    const scope = document.querySelector("#impactScope");
+    if (scope) {
+      scope.textContent = `影响范围：${data.counts.segments} 个文本片段，${data.counts.graph_nodes} 个图谱节点，${data.counts.graph_edges} 条关系`;
     }
+    document.querySelector("#impactSegments").textContent = data.counts.segments;
+    document.querySelector("#impactVectors").textContent = data.counts.segments;
+    document.querySelector("#impactGraph").textContent = data.counts.graph_nodes;
   } catch {
-    const el = document.querySelector("#impactScope");
-    if (el) el.textContent = "影响范围：读取失败";
+    const scope = document.querySelector("#impactScope");
+    if (scope) scope.textContent = "影响范围：读取失败";
   }
 }
 
-function buildLayout(data) {
-  const cx = 500;
-  const cy = 350;
-  const radius = Math.min(280, 90 + data.nodes.length * 18);
-  const nodes = data.nodes.map((node, index) => {
-    const angle = (Math.PI * 2 * index) / Math.max(data.nodes.length, 1) - Math.PI / 2;
-    const typeOffset = node.node_type === "source" ? -30 : 30;
-    return {
-      ...node,
-      x: cx + Math.cos(angle) * (radius + typeOffset),
-      y: cy + Math.sin(angle) * (radius + typeOffset)
+async function mutateSource(path, sourceId) {
+  await post(path, { source_id: sourceId });
+  clearSelection();
+  await refreshAll();
+}
+
+async function moveSourceToFolder(sourceId, folderId) {
+  await post("/api/source-folders/move", { source_id: sourceId, folder_id: folderId });
+  await refreshAll();
+}
+
+async function createFolder() {
+  const name = window.prompt("新建文件夹名称");
+  if (!name?.trim()) return;
+  await post("/api/source-folders", { name: name.trim() });
+  await refreshAll();
+}
+
+function renderSources() {
+  const sources = filteredSourcesByFolder();
+  normalizeSourcePage(sources.length);
+  renderSourcesViewModule(els.sourceTable, sources, {
+    folders: state.sourceFolders,
+    assignments: state.sourceFolderAssignments,
+    parsingSourceIds: state.parsingSourceIds,
+    pagination: {
+      page: state.sourcePage,
+      pageSize: state.sourcePageSize
+    },
+    onImpactScope: loadImpactScope,
+    onMoveSource: moveSourceToFolder,
+    onParseSource: parseSourceFromLibrary,
+    onOpenSource: openSourceUrl,
+    onOpenFile: openSourceFile,
+    onPreviewSource: previewSourceContent,
+    onOpenGovernance: openGovernanceView,
+    onPageChange: setSourcePage,
+    onPageSizeChange: setSourcePageSize
+  });
+}
+
+function normalizeSourcePage(total) {
+  const pageCount = Math.max(1, Math.ceil(total / state.sourcePageSize));
+  state.sourcePage = Math.min(pageCount, Math.max(1, state.sourcePage));
+}
+
+function setSourcePage(page) {
+  state.sourcePage = page;
+  renderSources();
+}
+
+function setSourcePageSize(pageSize) {
+  state.sourcePageSize = pageSize;
+  state.sourcePage = 1;
+  renderSources();
+}
+
+function openSourceUrl(url) {
+  const opened = window.open(url, "_blank", "noopener,noreferrer");
+  setStatus(opened ? "已打开源链接" : "浏览器阻止了弹窗，请允许后重试");
+}
+
+async function openSourceFile(sourceId) {
+  await post("/api/sources/open", { source_id: sourceId });
+  setStatus("已打开本地源文件");
+}
+
+async function parseSourceFromLibrary(sourceId) {
+  if (state.parsingSourceIds.has(sourceId)) return;
+  state.parsingSourceIds.add(sourceId);
+  renderSources();
+  setStatus("解析已开始：保存源资料 -> 本地解析 -> 模型兜底 -> 写入记忆");
+  post("/api/parse", { source_id: sourceId, llm_fallback: true })
+    .then(async (result) => {
+      await refreshAll();
+      setStatus(["success", "llm_fallback_success", "already_parsed"].includes(result.status)
+        ? `解析完成：${result.segment_count || 0} 个文本片段`
+        : `解析失败：${result.error || result.status}`);
+    })
+    .catch((error) => {
+      setStatus(`解析失败：${error.message}`);
+    })
+    .finally(() => {
+      state.parsingSourceIds.delete(sourceId);
+      renderSources();
+    });
+}
+
+async function previewSourceContent(sourceId) {
+  if (!els.sourcePreview) return;
+  const source = state.sources.find((item) => item.source_id === sourceId);
+  els.sourcePreview.innerHTML = `<strong>内容预览</strong><p>读取中...</p>`;
+  const data = await get(`/api/segments?source_id=${encodeURIComponent(sourceId)}`);
+  const segments = data.segments || [];
+  els.sourcePreview.innerHTML = `
+    <strong>${escapeHtmlLocal(source?.title || "内容预览")}</strong>
+    ${
+      segments.length
+        ? segments.slice(0, 6).map((item) => `<p>${escapeHtmlLocal(item.text)}</p>`).join("")
+        : "<p>还没有解析出的文本片段。</p>"
+    }
+  `;
+}
+
+function renderFolderTree() {
+  if (!els.folderTree) return;
+  const countByFolder = new Map();
+  for (const source of state.sources) {
+    const folderId = state.sourceFolderAssignments[source.source_id] || defaultFolderForSource(source);
+    countByFolder.set(folderId, (countByFolder.get(folderId) || 0) + 1);
+  }
+  els.folderTree.innerHTML = `
+    <button class="folder-node ${state.selectedFolderId ? "" : "active"}" data-folder-filter=""><strong>全部资料</strong><span>${state.sources.length}</span></button>
+    ${state.sourceFolders.map((folder) => `
+      <button class="folder-node ${folder.origin !== "local" ? "external" : ""} ${state.selectedFolderId === folder.folder_id ? "active" : ""}" data-folder-filter="${escapeHtmlLocal(folder.folder_id)}">
+        <strong>${escapeHtmlLocal(folder.name)}</strong>
+        <span>${countByFolder.get(folder.folder_id) || 0}</span>
+      </button>
+    `).join("")}
+  `;
+  els.folderTree.querySelectorAll("[data-folder-filter]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.selectedFolderId = button.dataset.folderFilter || null;
+      state.sourcePage = 1;
+      renderFolderTree();
+      renderSources();
+    });
+  });
+}
+
+function filteredSourcesByFolder() {
+  return state.sources.filter((source) => {
+    const folderMatch = !state.selectedFolderId ||
+      (state.sourceFolderAssignments[source.source_id] || defaultFolderForSource(source)) === state.selectedFolderId;
+    const text = [
+      source.title,
+      source.source_platform,
+      source.source_type,
+      source.original_url,
+      source.local_file_path,
+      source.parse_status,
+      source.memory_status
+    ].join(" ").toLowerCase();
+    return folderMatch &&
+      sourceFilterMatch(source) &&
+      (!state.sourceQuery || text.includes(state.sourceQuery));
+  });
+}
+
+function sourceFilterMatch(source) {
+  if (!state.sourceFilter) return true;
+  if (source.pollution_status === "quarantined") return state.sourceFilter === "quarantined";
+  if (state.sourceFilter === "memory_indexed") return source.memory_status === "memory_indexed";
+  if (state.sourceFilter === "export_required") return source.parse_status === "export_required";
+  if (state.sourceFilter === "parse_failed") return source.parse_status === "parse_failed";
+  if (state.sourceFilter === "quarantined") return source.pollution_status === "quarantined";
+  if (state.sourceFilter === "sync_pending") return ["sync_polling", "syncing"].includes(source.trace_status);
+  if (state.sourceFilter === "auth_expired") return source.trace_status === "auth_expired";
+  return true;
+}
+
+function renderGovernance() {
+  renderGovernanceViewModule(els.governList, state.sources, {
+    onRestore: (sourceId) => mutateSource("/api/sources/restore", sourceId),
+    onDelete: deleteSource
+  });
+}
+
+async function deleteSource(sourceId) {
+  await post("/api/sources/delete", {
+    source_id: sourceId,
+    delete_source_file: document.querySelector("#deleteSourceFile")?.checked !== false,
+    delete_derived: document.querySelector("#deleteDerivedData")?.checked !== false
+  });
+  clearSelection();
+  await refreshAll();
+  setStatus("源资料已移入删除状态");
+}
+
+function renderConnectors() {
+  renderConnectorCards(document.querySelector("#connectorCards"), state.externalConnectors, {
+    onChanged: refreshAll
+  });
+  renderConnectorTimeline(document.querySelector("#connectorTimeline"), state.externalConnectors);
+}
+
+function renderSettingsView() {
+  renderSettings({
+    providers: state.providers,
+    health: state.health,
+    version: state.version,
+    sources: state.sources,
+    graph: state.graph,
+    habits: state.habits,
+    modelPolicies: state.modelPolicies,
+    mcpStatus: state.mcpStatus,
+    systemDoctor: state.systemDoctor,
+    onProviderSaved: refreshAll
+  });
+}
+
+function renderQaControls() {
+  renderQaModelOptions(document.querySelector("#qaProviderSelect"), state.providers);
+}
+
+function renderMetrics() {
+  renderMetricCounters({ sources: state.sources, graph: state.graph });
+  const folderAllCount = document.querySelector("#folderAllCount");
+  if (folderAllCount) folderAllCount.textContent = state.sources.length;
+}
+
+async function askQuestion() {
+  await runAskQuestion({
+    questionInput: document.querySelector("#questionInput"),
+    answerBox: els.answerBox,
+    contextList: els.contextList,
+    providerSelect: document.querySelector("#qaProviderSelect"),
+    persistMemoryInput: document.querySelector("#persistQaMemory"),
+    onQuarantineCitation: (sourceId) => mutateSource("/api/sources/quarantine", sourceId)
+  });
+  // 新会话首条提问后标题会从默认名变为问题摘要，刷新列表以同步标题与排序。
+  await renderQaSessions().catch(() => null);
+}
+
+async function clearQaConversation() {
+  await runAskQuestion.clear?.({
+    answerBox: els.answerBox,
+    contextList: els.contextList,
+    questionInput: document.querySelector("#questionInput")
+  });
+  await renderQaSessions().catch(() => null);
+  setStatus("问答会话已清空");
+}
+
+async function renderQaSessions() {
+  const listEl = document.querySelector("#qaSessionList");
+  if (!listEl) return;
+  const sessions = await loadQaSessions();
+  const activeId = getCurrentSessionId();
+  if (sessions.length === 0) {
+    listEl.innerHTML = `<div class="qa-session-empty">还没有会话，点“新建”开始一次资料对话。</div>`;
+    return;
+  }
+  listEl.innerHTML = sessions
+    .map((session) => `
+      <div class="qa-session-item ${session.session_id === activeId ? "active" : ""}" data-session-id="${escapeHtmlLocal(session.session_id)}">
+        <div class="qa-session-item-title">${escapeHtmlLocal(session.title || "未命名会话")}</div>
+        <div class="qa-session-item-meta">
+          <span>${session.message_count || 0} 条消息</span>
+          <span class="qa-session-item-actions">
+            <button type="button" data-rename-session="${escapeHtmlLocal(session.session_id)}">重命名</button>
+            <button type="button" data-delete-session="${escapeHtmlLocal(session.session_id)}">删除</button>
+          </span>
+        </div>
+      </div>
+    `)
+    .join("");
+
+  listEl.querySelectorAll(".qa-session-item").forEach((item) => {
+    item.addEventListener("click", (event) => {
+      if (event.target.closest("[data-rename-session]") || event.target.closest("[data-delete-session]")) return;
+      switchToQaSession(item.dataset.sessionId);
+    });
+  });
+  listEl.querySelectorAll("[data-rename-session]").forEach((button) => {
+    button.addEventListener("click", () => renameQaSessionPrompt(button.dataset.renameSession));
+  });
+  listEl.querySelectorAll("[data-delete-session]").forEach((button) => {
+    button.addEventListener("click", () => deleteQaSessionConfirm(button.dataset.deleteSession));
+  });
+}
+
+async function startNewQaSession() {
+  await createQaSession({ answerBox: els.answerBox, contextList: els.contextList });
+  await renderQaSessions().catch(() => null);
+  document.querySelector("#questionInput")?.focus();
+  setStatus("已新建会话");
+}
+
+async function switchToQaSession(sessionId) {
+  if (!sessionId || sessionId === getCurrentSessionId()) return;
+  await switchQaSession(sessionId, { answerBox: els.answerBox, contextList: els.contextList });
+  await renderQaSessions().catch(() => null);
+}
+
+async function renameQaSessionPrompt(sessionId) {
+  const nextTitle = window.prompt("重命名会话");
+  if (nextTitle === null) return;
+  const trimmed = nextTitle.trim();
+  if (!trimmed) return;
+  await renameQaSession(sessionId, trimmed);
+  await renderQaSessions().catch(() => null);
+  setStatus("会话已重命名");
+}
+
+async function deleteQaSessionConfirm(sessionId) {
+  if (!window.confirm("确认删除该会话？此操作会一并删除其问答消息。")) return;
+  const wasActive = sessionId === getCurrentSessionId();
+  await deleteQaSession(sessionId);
+  if (wasActive) {
+    // 当前会话被删后，优先切换到最近的剩余会话，没有再新建空会话。
+    const remaining = await loadQaSessions().catch(() => []);
+    if (remaining.length > 0) {
+      await switchQaSession(remaining[0].session_id, { answerBox: els.answerBox, contextList: els.contextList });
+    } else {
+      await loadQaSession({ answerBox: els.answerBox, contextList: els.contextList }).catch(() => null);
+    }
+  }
+  await renderQaSessions().catch(() => null);
+  setStatus("会话已删除");
+}
+
+async function rebuildGraphIndex() {
+  setStatus("正在重建图谱索引");
+  const result = await post("/api/graph/rebuild", {});
+  await refreshAll();
+  setView("graph");
+  setStatus(`图谱已重建：${result.source_count} 个源资料，${result.node_count} 个节点，${result.edge_count} 条关系`);
+}
+
+async function rebuildVectorIndex() {
+  setStatus("正在重建向量索引");
+  const result = await post("/api/vector/rebuild", {});
+  await refreshAll();
+  const embedding = result.embedding_model ? `，模型：${result.embedding_model} (${result.embedding_dimension} 维)` : "";
+  setStatus(`向量已重建：${result.source_count} 个源资料，${result.vector_count} 条向量${embedding}`);
+}
+
+async function handleGlobalSearch() {
+  const query = els.globalSearch.value.trim();
+  if (!query) {
+    state.matchedNodeIds = null;
+    await loadGraph();
+    return;
+  }
+  try {
+    const data = await get(`/api/graph/subgraph?q=${encodeURIComponent(query)}`);
+    state.graph = {
+      nodes: data.nodes || [],
+      edges: data.edges || [],
+      limited: data.limited
     };
-  });
-  return {
-    nodes,
-    byId: new Map(nodes.map((node) => [node.node_id, node]))
-  };
+    state.matchedNodeIds = new Set(data.matched_node_ids || []);
+    els.status.textContent = `命中 ${state.matchedNodeIds.size} 个节点${state.graph.limited ? " · 已折叠更多节点" : ""}`;
+    renderGraph();
+  } catch {
+    state.matchedNodeIds = null;
+  }
 }
 
-async function post(path, body) {
-  const res = await fetch(`${API}${path}`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify(body)
-  });
-  return res.json();
+function setStatus(message) {
+  els.status.textContent = message;
 }
 
-function svg(tag, attrs = {}, text) {
-  const el = document.createElementNS("http://www.w3.org/2000/svg", tag);
-  for (const [key, value] of Object.entries(attrs)) el.setAttribute(key, value);
-  if (text) el.textContent = text;
-  return el;
+function defaultFolderForSource(source) {
+  if (source.source_platform === "feishu") return "feishu-space";
+  if (source.source_platform === "tencent_docs") return "tencent-docs-space";
+  if (source.source_platform === "local") return "local-imports";
+  return "uncategorized";
 }
 
-function escapeHtml(input) {
-  return String(input)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-function debounce(fn, delay) {
-  let timer = null;
-  return (...args) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => fn(...args), delay);
-  };
+function escapeHtmlLocal(value) {
+  return String(value || "").replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[char]);
 }

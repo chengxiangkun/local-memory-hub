@@ -1,0 +1,15 @@
+{
+  "name": "local-memory-hub-cli-spike",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "lmh-spike": "./src/cli.js"
+  },
+  "scripts": {
+    "check": "node --check src/cli.js",
+    "stop": "node src/cli.js stop",
+    "doctor": "node src/cli.js doctor",
+    "data-dir": "node src/cli.js data-dir"
+  }
+}

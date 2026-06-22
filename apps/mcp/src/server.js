@@ -1,7 +1,10 @@
 import http from "node:http";
+import { pathToFileURL } from "node:url";
+import { appendExternalCallLog } from "./external-call-log.js";
 
 const port = Number(process.env.LMH_MCP_PORT || 4318);
 const apiBase = process.env.LMH_API_BASE || "http://127.0.0.1:4317";
+const dataDir = process.env.LMH_DATA_DIR || null;
 
 const tools = [
   {
@@ -24,6 +27,18 @@ const tools = [
         query: { type: "string" }
       },
       required: ["query"]
+    }
+  },
+  {
+    name: "memory.ask",
+    description: "基于本地记忆生成回答",
+    inputSchema: {
+      type: "object",
+      properties: {
+        question: { type: "string" },
+        provider_id: { type: "string" }
+      },
+      required: ["question"]
     }
   },
   {
@@ -68,11 +83,13 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(port, "127.0.0.1", () => {
-  console.log(`Local Memory Hub MCP-like server listening on http://127.0.0.1:${port}`);
-});
+if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
+  server.listen(port, "127.0.0.1", () => {
+    console.log(`Local Memory Hub MCP-like server listening on http://127.0.0.1:${port}`);
+  });
+}
 
-async function handleRpc(body) {
+export async function handleRpc(body) {
   if (body.method === "tools/list") {
     return { tools };
   }
@@ -83,15 +100,40 @@ async function handleRpc(body) {
 }
 
 async function callTool(name, args) {
+  const startedAt = Date.now();
+  try {
+    const result = await callToolInner(name, args);
+    await appendExternalCallLog({
+      timestamp: new Date().toISOString(),
+      tool: name,
+      status: "success",
+      duration_ms: Date.now() - startedAt,
+      query_chars: String(args.query || "").length
+    }, dataDir);
+    return result;
+  } catch (error) {
+    await appendExternalCallLog({
+      timestamp: new Date().toISOString(),
+      tool: name,
+      status: "failed",
+      duration_ms: Date.now() - startedAt,
+      query_chars: String(args.query || "").length,
+      error: error.message
+    }, dataDir);
+    throw error;
+  }
+}
+
+async function callToolInner(name, args) {
   if (name === "memory.search") {
     const data = await apiGet(`/api/search?q=${encodeURIComponent(args.query || "")}`);
     return {
-      content: [{ type: "text", text: JSON.stringify(data.results, null, 2) }]
+      content: [{ type: "text", text: JSON.stringify(filterSafeResults(data.results), null, 2) }]
     };
   }
   if (name === "memory.get_context") {
     const data = await apiGet(`/api/search?q=${encodeURIComponent(args.query || "")}`);
-    const context = data.results.slice(0, 5).map((item) => ({
+    const context = filterSafeResults(data.results).slice(0, 5).map((item) => ({
       source_id: item.source_id,
       title: item.title,
       snippet: item.segment_text || item.extracted_preview || item.title,
@@ -105,10 +147,20 @@ async function callTool(name, args) {
       content: [{ type: "text", text: JSON.stringify(context, null, 2) }]
     };
   }
+  if (name === "memory.ask") {
+    const data = await apiPost("/api/ask", {
+      question: args.question || "",
+      provider_id: args.provider_id || "mock",
+      persist_memory: false
+    });
+    return {
+      content: [{ type: "text", text: JSON.stringify(data, null, 2) }]
+    };
+  }
   if (name === "graph.search") {
     const data = await apiGet(`/api/graph/search?q=${encodeURIComponent(args.query || "")}`);
     return {
-      content: [{ type: "text", text: JSON.stringify(data.nodes, null, 2) }]
+      content: [{ type: "text", text: JSON.stringify(filterSafeResults(data.nodes), null, 2) }]
     };
   }
   throw new Error(`Unknown tool: ${name}`);
@@ -118,6 +170,24 @@ async function apiGet(path) {
   const res = await fetch(`${apiBase}${path}`);
   if (!res.ok) throw new Error(`API request failed: ${res.status}`);
   return res.json();
+}
+
+async function apiPost(path, body) {
+  const res = await fetch(`${apiBase}${path}`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) throw new Error(`API request failed: ${res.status}`);
+  return res.json();
+}
+
+function filterSafeResults(items = []) {
+  return items.filter((item) =>
+    !["quarantined", "deleted"].includes(item.pollution_status) &&
+    !["deleted", "source_deleted"].includes(item.import_status) &&
+    item.trace_status !== "source_deleted"
+  );
 }
 
 function json(res, status, body) {

@@ -1,26 +1,62 @@
 import http from "node:http";
-import { initDataDir } from "./data-store.js";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+import { loadLocalEnv } from "./local-env.js";
+import { persistConversationTurn } from "./conversation-memory-service.js";
+import { initDataDir, moveToTrash } from "./data-store.js";
+import { testEmbeddingProvider } from "./embedding-service.js";
+import { listExternalConnectors, markConnectorSync, saveExternalConnector } from "./external-connector-store.js";
 import { handleImport } from "./import-pipeline.js";
+import { syncFeishuConnector } from "./feishu-sync-service.js";
+import { getUserHabitProfile } from "./memory-organizer-agent.js";
+import { getProviderConfig, listProviderConfigs, saveProviderConfig } from "./model-config-store.js";
+import { resolveModelConfig } from "./model-config-resolver.js";
+import { getModelPolicy, listModelPolicies, saveModelPolicy } from "./model-policy-store.js";
 import { getVersionInfo, migrateIfNeeded } from "./migration-service.js";
 import { initModelProviders, listProviderTemplates, routeChat } from "./model-provider.js";
-import { parseSource } from "./parser-service.js";
-import { vectorSearch } from "./vector-service.js";
+import { parseSource, rebuildGraphIndex } from "./parser-service.js";
+import { runQaMemoryAutoGovernance } from "./qa-memory-governance-service.js";
+import { listFallbackQuestionContext, retrieveQuestionContext } from "./retrieval-service.js";
+import { createSourceFolder, listSourceFolders, moveSourceToFolder } from "./source-folder-store.js";
+import { runSystemDoctor } from "./system-doctor.js";
+import { rebuildVectorIndex, vectorSearch } from "./vector-service.js";
 import {
   getGraph,
+  getGraphByNodeType,
+  getGraphCommunities,
+  getGraphNeighbors,
   getImpactScope,
+  getSourceById,
+  getOrCreateQaSession,
+  createQaSession,
   initSqlite,
+  appendQaMessage,
+  clearQaSession,
+  listQaSessions,
+  renameQaSession,
+  deleteQaSession,
+  listQaMessages,
+  listRecentQaMessages,
   listMemorySegments,
   listSourcesSqlite,
   quarantineSourceCascade,
+  markSourceDeleted,
+  markSourceExternalDeleted,
   restoreSourceCascade,
   searchAllSqlite,
-  searchGraph
+  searchGraph,
+  searchGraphSubgraph
 } from "./sqlite-store.js";
 
 const port = Number(process.env.LMH_PORT || 4317);
+const execFileAsync = promisify(execFile);
+await loadLocalEnv();
 const dataInfo = await initDataDir();
 await initSqlite(dataInfo.data_dir);
 initModelProviders();
+runQaMemoryAutoGovernance(dataInfo.data_dir).catch((error) => {
+  console.error("QA memory auto governance failed", error);
+});
 
 const server = http.createServer(async (req, res) => {
   try {
@@ -43,6 +79,10 @@ const server = http.createServer(async (req, res) => {
       return json(res, 200, await getVersionInfo());
     }
 
+    if (req.method === "GET" && req.url === "/api/system/doctor") {
+      return json(res, 200, await runSystemDoctor({ dataDir: dataInfo.data_dir }));
+    }
+
     if (req.method === "POST" && req.url === "/api/system/migrate") {
       return json(res, 200, await migrateIfNeeded());
     }
@@ -55,8 +95,179 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method === "GET" && req.url === "/api/models/providers") {
       return json(res, 200, {
-        providers: listProviderTemplates()
+        providers: await mergeProviderTemplatesWithConfigs(dataInfo.data_dir)
       });
+    }
+
+    if (req.method === "GET" && req.url === "/api/models/configs") {
+      return json(res, 200, {
+        configs: await listProviderConfigs(dataInfo.data_dir)
+      });
+    }
+
+    if (req.method === "POST" && req.url === "/api/models/configs") {
+      const body = await readJson(req);
+      return json(res, 200, {
+        config: await saveProviderConfig(body, dataInfo.data_dir)
+      });
+    }
+
+    if (req.method === "POST" && req.url === "/api/models/test") {
+      const body = await readJson(req);
+      const saved = await getProviderConfig(body.provider_id, dataInfo.data_dir);
+      const result = await routeChat({
+        provider_id: body.provider_id,
+        task: "model_test",
+        question: "请只回复 OK",
+        context: [],
+        config: {
+          base_url: body.base_url || saved?.base_url,
+          model: body.model || saved?.model,
+          api_key: body.api_key || saved?.api_key
+        }
+      }, dataInfo.data_dir);
+      return json(res, 200, {
+        ok: true,
+        provider_id: result.provider_id,
+        model: result.model,
+        preview: String(result.answer || "").slice(0, 80)
+      });
+    }
+
+    if (req.method === "POST" && req.url === "/api/models/embedding/test") {
+      const body = await readJson(req);
+      const saved = await getProviderConfig(body.provider_id, dataInfo.data_dir);
+      return json(res, 200, await testEmbeddingProvider({
+        provider_id: body.provider_id,
+        text: body.text,
+        config: {
+          base_url: body.base_url || saved?.base_url,
+          model: body.embedding_model || body.model || saved?.embedding_model || saved?.model,
+          api_key: body.api_key || saved?.api_key
+        }
+      }, dataInfo.data_dir));
+    }
+
+    if (req.method === "GET" && req.url === "/api/models/policies") {
+      return json(res, 200, {
+        policies: await listModelPolicies(dataInfo.data_dir)
+      });
+    }
+
+    if (req.method === "POST" && req.url === "/api/models/policies") {
+      const body = await readJson(req);
+      return json(res, 200, {
+        policy: await saveModelPolicy(body, dataInfo.data_dir)
+      });
+    }
+
+    if (req.method === "GET" && req.url === "/api/memory/habits") {
+      return json(res, 200, await getUserHabitProfile());
+    }
+
+    // 注意：必须放在下面 "/api/qa/session" 的 startsWith 匹配之前，
+    // 否则复数 "/api/qa/sessions" 会被单个会话路由吞掉。
+    if (req.method === "GET" && req.url === "/api/qa/sessions") {
+      return json(res, 200, {
+        sessions: await listQaSessions(dataInfo.data_dir)
+      });
+    }
+
+    if (req.method === "GET" && req.url?.startsWith("/api/qa/session")) {
+      const url = new URL(req.url, "http://127.0.0.1");
+      const session = await getOrCreateQaSession(url.searchParams.get("session_id"), dataInfo.data_dir);
+      return json(res, 200, {
+        session,
+        messages: await listQaMessages(session.session_id, dataInfo.data_dir)
+      });
+    }
+
+    if (req.method === "POST" && req.url === "/api/qa/session/new") {
+      const session = await createQaSession({}, dataInfo.data_dir);
+      return json(res, 200, {
+        session,
+        messages: []
+      });
+    }
+
+    if (req.method === "POST" && req.url === "/api/qa/session/rename") {
+      const body = await readJson(req);
+      if (!body.session_id) return json(res, 400, { error: "bad_request", message: "缺少 session_id" });
+      const session = await renameQaSession(body.session_id, body.title, dataInfo.data_dir);
+      if (!session) return json(res, 404, { error: "not_found", message: "会话不存在" });
+      return json(res, 200, { session });
+    }
+
+    if (req.method === "POST" && req.url === "/api/qa/session/delete") {
+      const body = await readJson(req);
+      if (!body.session_id) return json(res, 400, { error: "bad_request", message: "缺少 session_id" });
+      await deleteQaSession(body.session_id, dataInfo.data_dir);
+      return json(res, 200, { session_id: body.session_id, deleted: true });
+    }
+
+    if (req.method === "POST" && req.url === "/api/qa/session/clear") {
+      const body = await readJson(req);
+      const session = await getOrCreateQaSession(body.session_id, dataInfo.data_dir);
+      const cleared = await clearQaSession(session.session_id, dataInfo.data_dir);
+      return json(res, 200, {
+        session: cleared,
+        messages: []
+      });
+    }
+
+    if (req.method === "POST" && req.url === "/api/memory/govern/qa") {
+      return json(res, 200, await runQaMemoryAutoGovernance(dataInfo.data_dir));
+    }
+
+    if (req.method === "GET" && req.url === "/api/external/mcp/status") {
+      return json(res, 200, await getMcpStatus());
+    }
+
+    if (req.method === "GET" && req.url === "/api/connectors") {
+      return json(res, 200, {
+        connectors: await listExternalConnectors(dataInfo.data_dir)
+      });
+    }
+
+    if (req.method === "GET" && req.url === "/api/source-folders") {
+      return json(res, 200, await listSourceFolders(dataInfo.data_dir));
+    }
+
+    if (req.method === "POST" && req.url === "/api/source-folders") {
+      const body = await readJson(req);
+      return json(res, 200, {
+        folder: await createSourceFolder(body, dataInfo.data_dir)
+      });
+    }
+
+    if (req.method === "POST" && req.url === "/api/source-folders/move") {
+      const body = await readJson(req);
+      return json(res, 200, await moveSourceToFolder(body, dataInfo.data_dir));
+    }
+
+    if (req.method === "POST" && req.url === "/api/connectors") {
+      const body = await readJson(req);
+      return json(res, 200, {
+        connector: await saveExternalConnector(body, dataInfo.data_dir)
+      });
+    }
+
+    if (req.method === "POST" && req.url === "/api/connectors/sync") {
+      const body = await readJson(req);
+      const synced = await markConnectorSync(body, dataInfo.data_dir);
+      if (body.platform === "feishu") {
+        return json(res, 200, {
+          connector: synced.connector,
+          result: await syncFeishuConnector(synced.connector, dataInfo.data_dir)
+        });
+      }
+      if (body.platform === "tencent_docs") {
+        return json(res, 200, {
+          connector: synced.connector,
+          result: await syncTencentDocsConnector(synced.connector)
+        });
+      }
+      return json(res, 200, synced);
     }
 
     if (req.method === "GET" && req.url?.startsWith("/api/search")) {
@@ -77,6 +288,10 @@ const server = http.createServer(async (req, res) => {
       });
     }
 
+    if (req.method === "POST" && req.url === "/api/vector/rebuild") {
+      return json(res, 200, await rebuildVectorIndex(dataInfo.data_dir));
+    }
+
     if (req.method === "GET" && req.url?.startsWith("/api/segments")) {
       const url = new URL(req.url, "http://127.0.0.1");
       const sourceId = url.searchParams.get("source_id");
@@ -92,8 +307,38 @@ const server = http.createServer(async (req, res) => {
       return json(res, 200, await getImpactScope(sourceId));
     }
 
-    if (req.method === "GET" && req.url === "/api/graph") {
-      return json(res, 200, await getGraph());
+    if (req.method === "GET" && req.url?.startsWith("/api/graph/neighbors")) {
+      const url = new URL(req.url, "http://127.0.0.1");
+      return json(res, 200, await getGraphNeighbors(url.searchParams.get("node_id"), dataInfo.data_dir, {
+        limit: Number(url.searchParams.get("limit") || 120)
+      }));
+    }
+
+    if (req.method === "GET" && req.url === "/api/graph/communities") {
+      return json(res, 200, await getGraphCommunities(dataInfo.data_dir));
+    }
+
+    if (req.method === "GET" && req.url?.startsWith("/api/graph/type")) {
+      const url = new URL(req.url, "http://127.0.0.1");
+      return json(res, 200, await getGraphByNodeType(url.searchParams.get("node_type"), dataInfo.data_dir, {
+        seedLimit: Number(url.searchParams.get("limit") || 80)
+      }));
+    }
+
+    if (req.method === "GET" && new URL(req.url, "http://127.0.0.1").pathname === "/api/graph") {
+      const url = new URL(req.url, "http://127.0.0.1");
+      return json(res, 200, await getGraph(dataInfo.data_dir, {
+        limit: Number(url.searchParams.get("limit") || 200)
+      }));
+    }
+
+    if (req.method === "POST" && req.url === "/api/graph/rebuild") {
+      return json(res, 200, await rebuildGraphIndex(dataInfo.data_dir));
+    }
+
+    if (req.method === "GET" && req.url?.startsWith("/api/graph/subgraph")) {
+      const url = new URL(req.url, "http://127.0.0.1");
+      return json(res, 200, await searchGraphSubgraph(url.searchParams.get("q") || "", dataInfo.data_dir));
     }
 
     if (req.method === "GET" && req.url?.startsWith("/api/graph/search")) {
@@ -114,25 +359,55 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method === "POST" && req.url === "/api/ask") {
       const body = await readJson(req);
-      let results = await searchAllSqlite(body.question || "");
-      if (results.length === 0) {
-        results = await listSourcesSqlite();
+      const session = await getOrCreateQaSession(body.session_id, dataInfo.data_dir);
+      const history = await listRecentQaMessages(session.session_id, dataInfo.data_dir, { limit: 6 });
+      await appendQaMessage({
+        session_id: session.session_id,
+        role: "user",
+        content: body.question || ""
+      }, dataInfo.data_dir);
+      let results = await retrieveQuestionContext(body.question || "", dataInfo.data_dir);
+      if (results.length === 0 && body.fallback_recent_memory === true) {
+        results = await listFallbackQuestionContext(dataInfo.data_dir);
       }
-      return json(
-        res,
-        200,
-        await routeChat({
-          provider_id: body.provider_id || "mock",
-          question: body.question || "",
-          context: results.slice(0, 5),
-          config: body.config || {}
-        })
-      );
+      const policy = await getModelPolicy("chat", dataInfo.data_dir);
+      // provider_id 与 config 必须基于同一个生效 provider 解析，否则会出现
+      // routeChat 选中策略 provider、但 config 仍按默认 mock 解析为空的情况。
+      const chatProviderId = body.provider_id || policy?.provider_id || "mock";
+      const answer = await routeChat({
+        provider_id: chatProviderId,
+        question: body.question || "",
+        context: results.slice(0, 5),
+        history,
+        config: await resolveModelConfig(body, dataInfo.data_dir, chatProviderId)
+      }, dataInfo.data_dir);
+      const conversationMemory = body.persist_memory === false
+        ? { status: "skipped", reason: "disabled_by_request" }
+        : await persistConversationTurn({
+            question: body.question || "",
+            answer: answer.answer || "",
+            citations: answer.citations || []
+          }, dataInfo.data_dir);
+      await appendQaMessage({
+        session_id: session.session_id,
+        role: "assistant",
+        content: answer.answer || "",
+        model: answer.model || answer.provider_id || "",
+        citations: answer.citations || [],
+        memory_status: conversationMemory.status === "persisted"
+          ? `本次对话已入记忆，源资料 ID：${conversationMemory.source_id}`
+          : conversationMemory.reason || conversationMemory.status || ""
+      }, dataInfo.data_dir);
+      return json(res, 200, {
+        ...answer,
+        session,
+        conversation_memory: conversationMemory
+      });
     }
 
     if (req.method === "POST" && req.url === "/api/sources/quarantine") {
       const body = await readJson(req);
-      await quarantineSourceCascade(body.source_id);
+      await quarantineSourceCascade(body.source_id, dataInfo.data_dir);
       return json(res, 200, {
         status: "quarantined",
         source_id: body.source_id
@@ -141,9 +416,47 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method === "POST" && req.url === "/api/sources/restore") {
       const body = await readJson(req);
-      await restoreSourceCascade(body.source_id);
+      await restoreSourceCascade(body.source_id, dataInfo.data_dir);
       return json(res, 200, {
         status: "restored",
+        source_id: body.source_id
+      });
+    }
+
+    if (req.method === "POST" && req.url === "/api/sources/external-deleted") {
+      const body = await readJson(req);
+      await markSourceExternalDeleted(body.source_id, dataInfo.data_dir);
+      return json(res, 200, {
+        status: "external_deleted",
+        source_id: body.source_id
+      });
+    }
+
+    if (req.method === "POST" && req.url === "/api/sources/delete") {
+      const body = await readJson(req);
+      const source = await getSourceById(body.source_id, dataInfo.data_dir);
+      if (!source) return json(res, 404, { error: "source_not_found" });
+      const trash_path = body.delete_source_file === false
+        ? null
+        : await moveToTrash(source.local_file_path, dataInfo.data_dir).catch((error) => ({ error: error.message }));
+      if (body.delete_derived !== false) {
+        await quarantineSourceCascade(body.source_id, dataInfo.data_dir);
+      }
+      await markSourceDeleted(body.source_id, dataInfo.data_dir);
+      return json(res, 200, {
+        status: "deleted",
+        source_id: body.source_id,
+        trash_path
+      });
+    }
+
+    if (req.method === "POST" && req.url === "/api/sources/open") {
+      const body = await readJson(req);
+      const source = await getSourceById(body.source_id, dataInfo.data_dir);
+      if (!source?.local_file_path) return json(res, 404, { error: "source_file_not_found" });
+      await openLocalPath(source.local_file_path);
+      return json(res, 200, {
+        status: "opened",
         source_id: body.source_id
       });
     }
@@ -178,4 +491,54 @@ async function readJson(req) {
   const chunks = [];
   for await (const chunk of req) chunks.push(chunk);
   return JSON.parse(Buffer.concat(chunks).toString("utf8") || "{}");
+}
+
+async function openLocalPath(filePath) {
+  if (process.platform === "darwin") return execFileAsync("open", [filePath]);
+  if (process.platform === "win32") return execFileAsync("cmd", ["/c", "start", "", filePath]);
+  return execFileAsync("xdg-open", [filePath]);
+}
+
+async function getMcpStatus() {
+  const url = process.env.LMH_MCP_HEALTH_URL || "http://127.0.0.1:4318/health";
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(1000) });
+    if (!res.ok) return { status: "unhealthy", url, http_status: res.status };
+    const data = await res.json();
+    return { status: data.ok ? "running" : "unhealthy", url, service: data.service || "unknown" };
+  } catch (error) {
+    return { status: "stopped", url, message: error.message };
+  }
+}
+
+async function mergeProviderTemplatesWithConfigs(dataDir) {
+  const configs = await listProviderConfigs(dataDir);
+  return listProviderTemplates().map((template) => {
+    const config = configs.find((item) => item.provider_id === template.provider_id);
+    return {
+      ...template,
+      configured: Boolean(config?.enabled && (!template.requires_key || config.has_api_key)),
+      configured_model: config?.model || "",
+      configured_embedding_model: config?.embedding_model || "",
+      configured_base_url: config?.base_url || ""
+    };
+  });
+}
+
+async function syncTencentDocsConnector(connector) {
+  if (!connector.root_url) throw new Error("腾讯文档连接器缺少同步链接");
+  const imported = await handleImport({
+    entrypoint: "tencent_docs_connector_sync",
+    source_hint: "url",
+    payload: {
+      title: connector.account_name || "腾讯文档",
+      url: connector.root_url
+    }
+  }, dataInfo.data_dir);
+  return {
+    status: "export_required",
+    imported_count: 1,
+    source_id: imported.source.source_id,
+    message: "腾讯文档链接已进入源资料库。当前需要导出原文后再解析。"
+  };
 }

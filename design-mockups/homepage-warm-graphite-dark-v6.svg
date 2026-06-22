@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1440" height="900" viewBox="0 0 1440 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="shadow" x="0" y="0" width="1440" height="900" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="24" stdDeviation="32" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+    <style>
+      .cn { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Noto Sans SC', 'PingFang SC', sans-serif; }
+      .mono { font-family: 'SF Mono', ui-monospace, Menlo, monospace; }
+      .muted { fill: #A8A199; }
+      .text { fill: #EEE8DD; }
+      .soft { fill: #D7C7A3; }
+      .line { stroke: #3B3833; stroke-width: 1; }
+      .edge { stroke: #BFA66B; stroke-width: 1; stroke-opacity: .36; }
+      .edge-faint { stroke: #4A4640; stroke-width: 1; stroke-opacity: .34; }
+    </style>
+  </defs>
+  <rect width="1440" height="900" rx="24" fill="#050505"/>
+  <rect x="42" y="36" width="1356" height="828" rx="18" fill="#11100E" stroke="#302C26" filter="url(#shadow)"/>
+  <rect x="42" y="36" width="1356" height="62" rx="18" fill="#171512"/>
+  <line x1="42" y1="98" x2="1398" y2="98" stroke="#302C26"/>
+  <circle cx="68" cy="66" r="6" fill="#FF5F57"/><circle cx="88" cy="66" r="6" fill="#FEBC2E"/><circle cx="108" cy="66" r="6" fill="#28C840"/>
+  <text x="132" y="71" class="cn text" font-size="14" font-weight="600">Local Memory Hub</text>
+  <rect x="542" y="50" width="356" height="34" rx="17" fill="#24221E" stroke="#39352F"/>
+  <circle cx="562" cy="67" r="5" fill="#918B82"/>
+  <text x="580" y="72" class="cn muted" font-size="13">搜索，或向本地记忆提问</text>
+  <rect x="1152" y="50" width="138" height="34" rx="17" fill="#24221E" stroke="#39352F"/>
+  <circle cx="1172" cy="67" r="5" fill="#7FA57D"/>
+  <text x="1190" y="72" class="cn text" font-size="12" font-weight="600">模型已连接</text>
+  <rect x="1304" y="50" width="72" height="34" rx="17" fill="#24221E" stroke="#39352F"/>
+  <text x="1322" y="72" class="cn muted" font-size="12" font-weight="600">队列 3</text>
+
+  <rect x="42" y="98" width="224" height="766" fill="#181612"/>
+  <line x1="266" y1="98" x2="266" y2="864" stroke="#302C26"/>
+  <text x="68" y="148" class="cn text" font-size="22" font-weight="700">记忆库</text>
+  <text x="68" y="170" class="cn muted" font-size="12">本地数据可升级保留</text>
+  
+  <rect x="58" y="206" width="192" height="36" rx="10" fill="#2B2517"/>
+  <circle cx="80" cy="224" r="5" fill="#C8A96A"/>
+  <text x="100" y="229" class="cn text" font-size="13" font-weight="600">图谱</text>
+  <rect x="58" y="250" width="192" height="36" rx="10" fill="#181612"/>
+  <circle cx="80" cy="268" r="5" fill="#8D887F"/>
+  <text x="100" y="273" class="cn muted" font-size="13" font-weight="600">快捷导入</text>
+  <rect x="58" y="294" width="192" height="36" rx="10" fill="#181612"/>
+  <circle cx="80" cy="312" r="5" fill="#8D887F"/>
+  <text x="100" y="317" class="cn muted" font-size="13" font-weight="600">源资料</text>
+  <rect x="58" y="338" width="192" height="36" rx="10" fill="#181612"/>
+  <circle cx="80" cy="356" r="5" fill="#8D887F"/>
+  <text x="100" y="361" class="cn muted" font-size="13" font-weight="600">问答搜索</text>
+  <rect x="58" y="382" width="192" height="36" rx="10" fill="#181612"/>
+  <circle cx="80" cy="400" r="5" fill="#8D887F"/>
+  <text x="100" y="405" class="cn muted" font-size="13" font-weight="600">污染治理</text>
+  <rect x="58" y="426" width="192" height="36" rx="10" fill="#181612"/>
+  <circle cx="80" cy="444" r="5" fill="#8D887F"/>
+  <text x="100" y="449" class="cn muted" font-size="13" font-weight="600">模型配置</text>
+  <rect x="60" y="774" width="188" height="42" rx="13" fill="#C8A96A"/>
+  <text x="124" y="800" class="cn" font-size="14" font-weight="700" fill="#11100E">快捷导入</text>
+  <text x="66" y="844" class="mono muted" font-size="11">~/Library/LocalMemory</text>
+
+  <rect x="266" y="98" width="1132" height="766" fill="#100F0D"/>
+  <text x="294" y="154" class="cn text" font-size="26" font-weight="800">记忆工作台</text>
+  <text x="294" y="178" class="cn muted" font-size="13">让资料进入、被理解、可追溯，并以图谱方式探索。</text>
+
+  <rect x="294" y="202" width="774" height="500" rx="18" fill="#1C1A16" stroke="#343029"/>
+  <text x="316" y="240" class="cn text" font-size="15" font-weight="700">图谱探索</text>
+  
+  <rect x="398" y="216" width="58" height="32" rx="16" fill="#302817" stroke="#39352F"/>
+  <text x="416" y="237" class="cn" font-size="12" font-weight="600" fill="#C8A96A">全部</text>
+  <rect x="474" y="216" width="58" height="32" rx="16" fill="#242119" stroke="#39352F"/>
+  <text x="492" y="237" class="cn" font-size="12" font-weight="600" fill="#A8A199">文档</text>
+  <rect x="550" y="216" width="58" height="32" rx="16" fill="#242119" stroke="#39352F"/>
+  <text x="568" y="237" class="cn" font-size="12" font-weight="600" fill="#A8A199">视频</text>
+  <rect x="626" y="216" width="66" height="32" rx="16" fill="#242119" stroke="#39352F"/>
+  <text x="644" y="237" class="cn" font-size="12" font-weight="600" fill="#A8A199">源文件</text>
+  <rect x="704" y="216" width="88" height="32" rx="16" fill="#242119" stroke="#39352F"/>
+  <text x="722" y="237" class="cn" font-size="12" font-weight="600" fill="#A8A199">污染隔离</text>
+
+  <!-- graph edges -->
+  <line x1="676" y1="448" x2="546" y2="370" class="edge"/><line x1="676" y1="448" x2="814" y2="352" class="edge"/>
+  <line x1="676" y1="448" x2="884" y2="474" class="edge"/><line x1="676" y1="448" x2="704" y2="582" class="edge"/>
+  <line x1="676" y1="448" x2="512" y2="520" class="edge"/><line x1="546" y1="370" x2="414" y2="328" class="edge-faint"/>
+  <line x1="546" y1="370" x2="560" y2="454" class="edge-faint"/><line x1="512" y1="520" x2="380" y2="620" class="edge-faint"/>
+  <line x1="704" y1="582" x2="594" y2="544" class="edge-faint"/><line x1="814" y1="352" x2="966" y2="286" class="edge-faint"/>
+  <line x1="884" y1="474" x2="1016" y2="558" class="edge-faint"/><line x1="966" y1="412" x2="1052" y2="324" class="edge-faint"/>
+  <line x1="380" y1="514" x2="486" y2="514" class="edge-faint"/><line x1="414" y1="328" x2="618" y2="250" class="edge-faint"/>
+  <line x1="780" y1="282" x2="814" y2="352" class="edge-faint"/>
+  
+  
+  <circle cx="676" cy="448" r="24" fill="#C8A96A" opacity="0.13"/><circle cx="676" cy="448" r="8" fill="#C8A96A"/>
+  <text x="689" y="453" class="cn" font-size="12" font-weight="700" fill="#EEE8DD">AI记忆系统</text>
+  <circle cx="546" cy="370" r="4" fill="#8E8A82"/>
+  <text x="559" y="375" class="cn" font-size="12" font-weight="500" fill="#A8A199">飞书</text>
+  <circle cx="814" cy="352" r="4" fill="#8E8A82"/>
+  <text x="827" y="357" class="cn" font-size="12" font-weight="500" fill="#A8A199">视频摘录</text>
+  <circle cx="884" cy="474" r="4.5" fill="#8E8A82"/>
+  <text x="897" y="479" class="cn" font-size="12" font-weight="500" fill="#A8A199">源文件</text>
+  <circle cx="704" cy="582" r="3.5" fill="#8E8A82"/>
+  <text x="717" y="587" class="cn" font-size="12" font-weight="500" fill="#A8A199">清洗脚本</text>
+  <circle cx="512" cy="520" r="3.5" fill="#8E8A82"/>
+  <text x="525" y="525" class="cn" font-size="12" font-weight="500" fill="#A8A199">产品想法</text>
+  <circle cx="966" cy="412" r="3" fill="#8E8A82"/>
+  <text x="979" y="417" class="cn" font-size="12" font-weight="500" fill="#A8A199">模型配置</text>
+  <circle cx="956" cy="604" r="3" fill="#8E8A82"/>
+  <text x="969" y="609" class="cn" font-size="12" font-weight="500" fill="#A8A199">污染数据</text>
+  <circle cx="380" cy="514" r="2" fill="#8E8A82"/>
+  
+  <circle cx="410" cy="620" r="2" fill="#8E8A82"/>
+  
+  <circle cx="594" cy="544" r="2" fill="#8E8A82"/>
+  
+  <circle cx="780" cy="282" r="1.5" fill="#8E8A82"/>
+  
+  <circle cx="1040" cy="664" r="1.5" fill="#8E8A82"/>
+  
+  <circle cx="650" cy="276" r="1.5" fill="#8E8A82"/>
+  
+  <circle cx="560" cy="250" r="1.5" fill="#8E8A82"/>
+  
+  <circle cx="388" cy="346" r="1.5" fill="#8E8A82"/>
+  
+  <rect x="316" y="644" width="180" height="36" rx="18" fill="#242119" stroke="#39352F"/>
+  <text x="338" y="667" class="cn muted" font-size="12" font-weight="600">−  +  适配  筛选  局部</text>
+
+  <rect x="1090" y="202" width="280" height="500" rx="18" fill="#1C1A16" stroke="#343029"/>
+  <text x="1112" y="240" class="cn text" font-size="15" font-weight="700">问答入口</text>
+  <text x="1112" y="270" class="cn muted" font-size="12">优先用本地索引和原文片段，</text>
+  <text x="1112" y="288" class="cn muted" font-size="12">必要时请求外部模型。</text>
+  <rect x="1112" y="296" width="236" height="36" rx="18" fill="#302817" stroke="#443A26"/>
+  <text x="1204" y="319" class="cn soft" font-size="12" font-weight="700" text-anchor="middle">问这个记忆库</text>
+  <line x1="1112" y1="356" x2="1348" y2="356" stroke="#343029"/>
+  <text x="1112" y="398" class="cn text" font-size="15" font-weight="700">节点详情</text>
+  <text x="1112" y="438" class="cn text" font-size="24" font-weight="800">AI记忆系统</text>
+  <text x="1112" y="466" class="cn muted" font-size="12">5 个源文件，42 个片段，12 条关系。</text>
+  
+  <rect x="1112" y="494" width="70" height="62" rx="14" fill="#151410" stroke="#343029"/>
+  <text x="1147" y="526" class="cn text" font-size="20" font-weight="800" text-anchor="middle">5</text>
+  <text x="1147" y="546" class="cn muted" font-size="12" text-anchor="middle">源文件</text>
+  <rect x="1194" y="494" width="70" height="62" rx="14" fill="#151410" stroke="#343029"/>
+  <text x="1229" y="526" class="cn text" font-size="20" font-weight="800" text-anchor="middle">42</text>
+  <text x="1229" y="546" class="cn muted" font-size="12" text-anchor="middle">片段</text>
+  <rect x="1276" y="494" width="70" height="62" rx="14" fill="#151410" stroke="#343029"/>
+  <text x="1311" y="526" class="cn text" font-size="20" font-weight="800" text-anchor="middle">12</text>
+  <text x="1311" y="546" class="cn muted" font-size="12" text-anchor="middle">关系</text>
+  <text x="1112" y="596" class="cn text" font-size="13" font-weight="700">相关记忆</text>
+  <rect x="1112" y="614" width="236" height="32" rx="12" fill="#151410" stroke="#343029"/><text x="1126" y="635" class="cn muted" font-size="12">飞书字段映射</text>
+  <rect x="1112" y="656" width="236" height="32" rx="12" fill="#151410" stroke="#343029"/><text x="1126" y="677" class="cn muted" font-size="12">视频摘要进入索引</text>
+
+  <rect x="294" y="724" width="774" height="104" rx="18" fill="#1C1A16" stroke="#343029"/>
+  <text x="316" y="762" class="cn text" font-size="14" font-weight="700">最近导入流</text>
+  
+  <rect x="316" y="770" width="224" height="44" rx="14" fill="#242119" stroke="#39352F"/>
+  <circle cx="332" cy="792" r="5" fill="#C8A96A"/>
+  <text x="348" y="789" class="cn text" font-size="12" font-weight="700">产品想法.md</text>
+  <text x="348" y="807" class="cn muted" font-size="11">飞书 · 解析成功 · 已入记忆</text>
+  <rect x="560" y="770" width="224" height="44" rx="14" fill="#242119" stroke="#39352F"/>
+  <circle cx="576" cy="792" r="5" fill="#8E8A82"/>
+  <text x="592" y="789" class="cn text" font-size="12" font-weight="700">AI记忆系统.mp4</text>
+  <text x="592" y="807" class="cn muted" font-size="11">视频链接 · 本地解析中</text>
+  <rect x="804" y="770" width="224" height="44" rx="14" fill="#242119" stroke="#39352F"/>
+  <circle cx="820" cy="792" r="5" fill="#8E8A82"/>
+  <text x="836" y="789" class="cn text" font-size="12" font-weight="700">草稿.txt</text>
+  <text x="836" y="807" class="cn muted" font-size="11">本地文件 · 等待模型兜底</text>
+
+  <rect x="1090" y="724" width="280" height="104" rx="18" fill="#1C1A16" stroke="#343029"/>
+  <text x="1112" y="762" class="cn text" font-size="14" font-weight="700">系统状态</text>
+  <text x="1112" y="790" class="cn muted" font-size="12">可信进入</text><text x="1314" y="790" class="cn text" font-size="12" font-weight="700">92%</text>
+  <text x="1112" y="812" class="cn muted" font-size="12">向量索引</text><text x="1314" y="812" class="cn text" font-size="12" font-weight="700">正常</text>
+  <text x="1112" y="834" class="cn muted" font-size="12">污染隔离</text><text x="1314" y="834" class="cn" font-size="12" font-weight="700" fill="#D28A7E">2 条</text>
+</svg>

@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1440" height="900" viewBox="0 0 1440 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <linearGradient id="appGlow" x1="0" y1="0" x2="1440" y2="900">
+    <stop offset="0" stop-color="#17262F"/>
+    <stop offset="0.38" stop-color="#0A1015"/>
+    <stop offset="1" stop-color="#0B1116"/>
+  </linearGradient>
+  <linearGradient id="activeNav" x1="0" y1="0" x2="230" y2="0">
+    <stop offset="0" stop-color="#164B41"/>
+    <stop offset="1" stop-color="#17232A"/>
+  </linearGradient>
+  <linearGradient id="cardGlow" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#18252E"/>
+    <stop offset="1" stop-color="#0F171D"/>
+  </linearGradient>
+  <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+    <feDropShadow dx="0" dy="20" stdDeviation="24" flood-color="#000000" flood-opacity="0.28"/>
+  </filter>
+  <style>
+    .cn { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'PingFang SC', 'Noto Sans SC', sans-serif; }
+    .mono { font-family: 'SF Mono', ui-monospace, Menlo, monospace; }
+  </style>
+</defs>
+
+    <rect x="0" y="0" width="1440" height="900" rx="10" fill="#070B0F" />
+    <rect x="2" y="2" width="1436" height="896" rx="10" fill="url(#appGlow)" stroke="#33444E" />
+    <rect x="2" y="2" width="1436" height="42" rx="10" fill="#0B1116" />
+    <circle cx="20" cy="24" r="6" fill="#FF5F57" opacity="1"/><circle cx="40" cy="24" r="6" fill="#FFBD2E" opacity="1"/><circle cx="60" cy="24" r="6" fill="#28C840" opacity="1"/>
+    <g transform="translate(82,11)">
+    <path d="M14 2 L26 8.5 V21.5 L14 28 L2 21.5 V8.5 L14 2Z" fill="#23D391"/>
+    <path d="M14 2 L26 8.5 L14 15 L2 8.5 L14 2Z" fill="#70F0B7"/>
+    <path d="M2 8.5 L14 15 V28 L2 21.5 V8.5Z" fill="#1AA779"/>
+    <path d="M26 8.5 L14 15 V28 L26 21.5 V8.5Z" fill="#22C98E"/>
+    <path d="M14 15 L14 28" stroke="#0B6A53" stroke-width="1.4"/>
+  </g><text x="122" y="30" class="cn" font-size="14" font-weight="800" fill="#E7EEF3" >Local Memory Hub</text>
+    <rect x="580" y="10" width="300" height="34" rx="16" fill="#0B1116" stroke="#33444E" />
+    <circle cx="600" cy="27" r="6" fill="none" opacity="1" stroke="#91A0AA"/><line x1="604" y1="31" x2="610" y2="37" stroke="#91A0AA" stroke-opacity="1" stroke-width="1.5"/>
+    <text x="626" y="31" class="cn" font-size="13" font-weight="500" fill="#91A0AA" >搜索记忆、节点、标签…</text><text x="836" y="31" class="mono" font-size="11" font-weight="700" fill="#91A0AA" >⌘K</text>
+    <text x="1328" y="29" class="cn" font-size="18" font-weight="500" fill="#91A0AA" >—</text><rect x="1364" y="18" width="10" height="10" rx="1" fill="none" stroke="#91A0AA" /><line x1="1407" y1="18" x2="1398" y2="28" stroke="#91A0AA" stroke-opacity="1" stroke-width="1.3"/><line x1="1398" y1="18" x2="1407" y2="28" stroke="#91A0AA" stroke-opacity="1" stroke-width="1.3"/>
+    <rect x="2" y="44" width="226" height="854" rx="0" fill="#0B1218" /><line x1="228" y1="44" x2="228" y2="898" stroke="#33444E" stroke-opacity="1" stroke-width="1"/>
+    <text x="28" y="92" class="cn" font-size="12" font-weight="500" fill="#65737D" >工作区</text>
+    
+    
+    <g><path d="M29 122 L40 113 L51 122" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M33 121 V133 H47 V121" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="66" y="129" class="cn" font-size="14" font-weight="600" fill="#BCC7CF" >概览</text>
+    
+    <g><circle cx="33" cy="164" r="2.6" fill="#B5C0C8" opacity="1"/><circle cx="48" cy="163" r="2.6" fill="#B5C0C8" opacity="1"/><circle cx="44" cy="178" r="2.6" fill="#B5C0C8" opacity="1"/><path d="M35 165 L46 163 M34 166 L42 176 M47 166 L45 176" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="66" y="177" class="cn" font-size="14" font-weight="600" fill="#BCC7CF" >图谱</text><rect x="12" y="196" width="206" height="44" rx="8" fill="url(#activeNav)" />
+    <rect x="12" y="196" width="3" height="44" rx="2" fill="#31D49B" />
+    <g><path d="M33 210 H43 L49 216 V229 H33 Z" stroke="#31D49B" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M43 210 V216 H49" stroke="#31D49B" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="66" y="225" class="cn" font-size="14" font-weight="800" fill="#BFFFE7" >源资料库</text>
+    
+    <g><path d="M32 260 H50 V272 H40 L35 277 V272 H32 Z" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M37 265 H46 M37 269 H43" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="66" y="273" class="cn" font-size="14" font-weight="600" fill="#BCC7CF" >搜索与问答</text>
+    
+    <g><path d="M41 305 V320" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M35 314 L41 320 L47 314" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M32 325 H50" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="66" y="321" class="cn" font-size="14" font-weight="600" fill="#BCC7CF" >导入中心</text>
+    <line x1="28" y1="366" x2="208" y2="366" stroke="#26343D" stroke-opacity="1" stroke-width="1"/>
+    <text x="28" y="406" class="cn" font-size="12" font-weight="500" fill="#65737D" >数据管理</text>
+    
+    
+    <g><path d="M41 427 L50 431 V438 C50 444 46 447 41 449 C36 447 32 444 32 438 V431 Z" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M37 438 L40 441 L46 434" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="66" y="443" class="cn" font-size="14" font-weight="600" fill="#BCC7CF" >污染治理</text>
+    
+    <g><ellipse cx="41" cy="478" rx="9" ry="4" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M32 478 V492 C32 497 50 497 50 492 V478 M32 485 C32 490 50 490 50 485" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="66" y="491" class="cn" font-size="14" font-weight="600" fill="#BCC7CF" >向量索引</text>
+    
+    <g><path d="M33 525 H44 L50 531 L40 542 L30 532 Z" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="41" cy="529" r="1.8" fill="#B5C0C8" opacity="1"/></g>
+    <text x="66" y="539" class="cn" font-size="14" font-weight="600" fill="#BCC7CF" >标签管理</text>
+    <line x1="28" y1="704" x2="208" y2="704" stroke="#26343D" stroke-opacity="1" stroke-width="1"/>
+    <text x="28" y="740" class="cn" font-size="12" font-weight="600" fill="#91A0AA" >本地存储</text>
+    <rect x="28" y="758" width="180" height="7" rx="4" fill="#1D2B33" /><rect x="28" y="758" width="64" height="7" rx="4" fill="#31D49B" />
+    <text x="28" y="786" class="cn" font-size="12" font-weight="500" fill="#91A0AA" >482.6 GB / 1.0 TB</text>
+    <circle cx="36" cy="842" r="16" fill="#375B4E" opacity="1"/><text x="31" y="847" class="cn" font-size="13" font-weight="800" fill="#E8FFF4" >L</text><text x="66" y="840" class="cn" font-size="13" font-weight="700" fill="#E7EEF3" >Local User</text><text x="66" y="860" class="cn" font-size="11" font-weight="700" fill="#31D49B" >本地模式</text>
+    <rect x="228" y="44" width="1210" height="854" rx="0" fill="#0D151B" />
+    <text x="254" y="92" class="cn" font-size="24" font-weight="900" fill="#E7EEF3" >源资料库</text>
+    <text x="254" y="118" class="cn" font-size="13" font-weight="500" fill="#91A0AA" >源数据保存、分类、日期排序、源文件检索、入记忆状态和解析状态必须一屏可见。</text>
+    
+    <rect x="254" y="134" width="940" height="44" rx="0" fill="none" />
+    <text x="260" y="164" class="cn" font-size="14" font-weight="900" fill="#31D49B" >源文件检索</text><rect x="256" y="176" width="84" height="2" rx="1" fill="#31D49B" />
+    <text x="372" y="164" class="cn" font-size="14" font-weight="700" fill="#91A0AA" >文件夹</text>
+    <line x1="254" y1="188" x2="1168" y2="188" stroke="#33444E" stroke-opacity="1" stroke-width="1"/>
+    <rect x="254" y="210" width="110" height="30" rx="5" fill="#0F171D" stroke="#33444E" /><text x="266" y="230" class="cn" font-size="12" font-weight="700" fill="#91A0AA" >日期：全部</text><rect x="374" y="210" width="110" height="30" rx="5" fill="#0F171D" stroke="#33444E" /><text x="386" y="230" class="cn" font-size="12" font-weight="700" fill="#91A0AA" >类型：全部</text><rect x="494" y="210" width="110" height="30" rx="5" fill="#0F171D" stroke="#33444E" /><text x="506" y="230" class="cn" font-size="12" font-weight="700" fill="#91A0AA" >来源：全部</text><rect x="614" y="210" width="110" height="30" rx="5" fill="#0F171D" stroke="#33444E" /><text x="626" y="230" class="cn" font-size="12" font-weight="700" fill="#91A0AA" >处理状态：全部</text><rect x="734" y="210" width="132" height="30" rx="5" fill="#0F171D" stroke="#33444E" /><text x="746" y="230" class="cn" font-size="12" font-weight="700" fill="#91A0AA" >是否入记忆：全部</text>
+    <rect x="862" y="210" width="236" height="30" rx="5" fill="#0F171D" stroke="#33444E" /><circle cx="884" cy="225" r="7" fill="none" opacity="1" stroke="#91A0AA"/><line x1="889" y1="230" x2="896" y2="237" stroke="#91A0AA" stroke-opacity="1" stroke-width="1"/><text x="910" y="230" class="cn" font-size="12" font-weight="500" fill="#65737D" >搜索文件名、内容或来源</text>
+    <rect x="1108" y="210" width="40" height="30" rx="5" fill="#141F27" stroke="#33444E" /><text x="1128" y="230" class="cn" font-size="12" font-weight="700" fill="#E7EEF3" text-anchor="middle">筛选</text>
+    <rect x="254" y="262" width="914" height="38" rx="0" fill="#19232A" />
+    <text x="298" y="286" class="cn" font-size="12" font-weight="800" fill="#E7EEF3" >文件名</text><text x="462" y="286" class="cn" font-size="12" font-weight="800" fill="#E7EEF3" >日期</text><text x="610" y="286" class="cn" font-size="12" font-weight="800" fill="#E7EEF3" >类型</text><text x="690" y="286" class="cn" font-size="12" font-weight="800" fill="#E7EEF3" >来源</text><text x="780" y="286" class="cn" font-size="12" font-weight="800" fill="#E7EEF3" >处理状态</text><text x="878" y="286" class="cn" font-size="12" font-weight="800" fill="#E7EEF3" >是否入记忆</text><text x="982" y="286" class="cn" font-size="12" font-weight="800" fill="#E7EEF3" >解析是否成功</text><text x="1100" y="286" class="cn" font-size="12" font-weight="800" fill="#E7EEF3" >可追溯状态</text>
+    
+      <rect x="254" y="301" width="914" height="40" rx="0" fill="#111A21" stroke="#26343D" />
+      <rect x="266" y="316" width="12" height="12" rx="2" fill="none" stroke="#33444E" />
+      <text x="298" y="326" class="cn" font-size="12" font-weight="700" fill="#E7EEF3" >产品资料</text>
+      <text x="462" y="326" class="cn" font-size="12" font-weight="500" fill="#91A0AA" >2025-05-22 10:15</text>
+      <text x="610" y="326" class="cn" font-size="12" font-weight="500" fill="#91A0AA" >文件夹</text>
+      <text x="690" y="326" class="cn" font-size="12" font-weight="500" fill="#91A0AA" >本地导入</text>
+      <rect x="780" y="310" width="64" height="22" rx="5" fill="#12372D" /><text x="812" y="325" class="cn" font-size="11" font-weight="800" fill="#6AF2B7" text-anchor="middle">已完成</text>
+      <rect x="878" y="310" width="64" height="22" rx="5" fill="#12372D" /><text x="910" y="325" class="cn" font-size="11" font-weight="800" fill="#6AF2B7" text-anchor="middle">已入记忆</text>
+      <rect x="982" y="310" width="64" height="22" rx="5" fill="#12372D" /><text x="1014" y="325" class="cn" font-size="11" font-weight="800" fill="#6AF2B7" text-anchor="middle">全部成功</text>
+      <rect x="1100" y="310" width="64" height="22" rx="5" fill="#12372D" /><text x="1132" y="325" class="cn" font-size="11" font-weight="800" fill="#6AF2B7" text-anchor="middle">可追溯</text>
+    
+      <rect x="254" y="343" width="914" height="40" rx="0" fill="#0D151B" stroke="#26343D" />
+      <rect x="266" y="358" width="12" height="12" rx="2" fill="none" stroke="#33444E" />
+      <text x="298" y="368" class="cn" font-size="12" font-weight="700" fill="#E7EEF3" >用户手册_v2.1.pdf</text>
+      <text x="462" y="368" class="cn" font-size="12" font-weight="500" fill="#91A0AA" >2025-05-21 14:33</text>
+      <text x="610" y="368" class="cn" font-size="12" font-weight="500" fill="#91A0AA" >PDF</text>
+      <text x="690" y="368" class="cn" font-size="12" font-weight="500" fill="#91A0AA" >本地导入</text>
+      <rect x="780" y="352" width="64" height="22" rx="5" fill="#12372D" /><text x="812" y="367" class="cn" font-size="11" font-weight="800" fill="#6AF2B7" text-anchor="middle">已完成</text>
+      <rect x="878" y="352" width="64" height="22" rx="5" fill="#12372D" /><text x="910" y="367" class="cn" font-size="11" font-weight="800" fill="#6AF2B7" text-anchor="middle">已入记忆</text>
+      <rect x="982" y="352" width="64" height="22" rx="5" fill="#12372D" /><text x="1014" y="367" class="cn" font-size="11" font-weight="800" fill="#6AF2B7" text-anchor="middle">成功</text>
+      <rect x="1100" y="352" width="64" height="22" rx="5" fill="#12372D" /><text x="1132" y="367" class="cn" font-size="11" font-weight="800" fill="#6AF2B7" text-anchor="middle">可追溯</text>
+    
+      <rect x="254" y="385" width="914" height="40" rx="0" fill="#111A21" stroke="#26343D" />
+      <rect x="266" y="400" width="12" height="12" rx="2" fill="none" stroke="#33444E" />
+      <text x="298" y="410" class="cn" font-size="12" font-weight="700" fill="#E7EEF3" >竞品分析报告.docx</text>
+      <text x="462" y="410" class="cn" font-size="12" font-weight="500" fill="#91A0AA" >2025-05-20 16:08</text>
+      <text x="610" y="410" class="cn" font-size="12" font-weight="500" fill="#91A0AA" >DOCX</text>
+      <text x="690" y="410" class="cn" font-size="12" font-weight="500" fill="#91A0AA" >本地导入</text>
+      <rect x="780" y="394" width="64" height="22" rx="5" fill="#12372D" /><text x="812" y="409" class="cn" font-size="11" font-weight="800" fill="#6AF2B7" text-anchor="middle">已完成</text>
+      <rect x="878" y="394" width="64" height="22" rx="5" fill="#12372D" /><text x="910" y="409" class="cn" font-size="11" font-weight="800" fill="#6AF2B7" text-anchor="middle">已入记忆</text>
+      <rect x="982" y="394" width="64" height="22" rx="5" fill="#12372D" /><text x="1014" y="409" class="cn" font-size="11" font-weight="800" fill="#6AF2B7" text-anchor="middle">成功</text>
+      <rect x="1100" y="394" width="64" height="22" rx="5" fill="#12372D" /><text x="1132" y="409" class="cn" font-size="11" font-weight="800" fill="#6AF2B7" text-anchor="middle">可追溯</text>
+    
+      <rect x="254" y="427" width="914" height="40" rx="0" fill="#0F4039" stroke="#31D49B" />
+      <rect x="266" y="442" width="12" height="12" rx="2" fill="#31D49B" stroke="#31D49B" /><text x="269" y="452" class="cn" font-size="10" font-weight="900" fill="#05241E" >✓</text>
+      <text x="298" y="452" class="cn" font-size="12" font-weight="700" fill="#EFFFF8" >供应商报价单_2025Q2.pdf</text>
+      <text x="462" y="452" class="cn" font-size="12" font-weight="500" fill="#91A0AA" >2025-05-18 10:22</text>
+      <text x="610" y="452" class="cn" font-size="12" font-weight="500" fill="#91A0AA" >PDF</text>
+      <text x="690" y="452" class="cn" font-size="12" font-weight="500" fill="#91A0AA" >邮件导入</text>
+      <rect x="780" y="436" width="64" height="22" rx="5" fill="#12372D" /><text x="812" y="451" class="cn" font-size="11" font-weight="800" fill="#6AF2B7" text-anchor="middle">已完成</text>
+      <rect x="878" y="436" width="64" height="22" rx="5" fill="#12372D" /><text x="910" y="451" class="cn" font-size="11" font-weight="800" fill="#6AF2B7" text-anchor="middle">已入记忆</text>
+      <rect x="982" y="436" width="64" height="22" rx="5" fill="#3A1A1D" /><text x="1014" y="451" class="cn" font-size="11" font-weight="800" fill="#FF7773" text-anchor="middle">解析失败</text>
+      <rect x="1100" y="436" width="64" height="22" rx="5" fill="#3A1A1D" /><text x="1132" y="451" class="cn" font-size="11" font-weight="800" fill="#FF7773" text-anchor="middle">部分不可追溯</text>
+    
+      <rect x="254" y="469" width="914" height="40" rx="0" fill="#111A21" stroke="#26343D" />
+      <rect x="266" y="484" width="12" height="12" rx="2" fill="none" stroke="#33444E" />
+      <text x="298" y="494" class="cn" font-size="12" font-weight="700" fill="#E7EEF3" >会议纪要_0515.txt</text>
+      <text x="462" y="494" class="cn" font-size="12" font-weight="500" fill="#91A0AA" >2025-05-15 17:21</text>
+      <text x="610" y="494" class="cn" font-size="12" font-weight="500" fill="#91A0AA" >TXT</text>
+      <text x="690" y="494" class="cn" font-size="12" font-weight="500" fill="#91A0AA" >本地导入</text>
+      <rect x="780" y="478" width="64" height="22" rx="5" fill="#12372D" /><text x="812" y="493" class="cn" font-size="11" font-weight="800" fill="#6AF2B7" text-anchor="middle">已完成</text>
+      <rect x="878" y="478" width="64" height="22" rx="5" fill="#12372D" /><text x="910" y="493" class="cn" font-size="11" font-weight="800" fill="#6AF2B7" text-anchor="middle">已入记忆</text>
+      <rect x="982" y="478" width="64" height="22" rx="5" fill="#12372D" /><text x="1014" y="493" class="cn" font-size="11" font-weight="800" fill="#6AF2B7" text-anchor="middle">成功</text>
+      <rect x="1100" y="478" width="64" height="22" rx="5" fill="#12372D" /><text x="1132" y="493" class="cn" font-size="11" font-weight="800" fill="#6AF2B7" text-anchor="middle">可追溯</text>
+    
+      <rect x="254" y="511" width="914" height="40" rx="0" fill="#0D151B" stroke="#26343D" />
+      <rect x="266" y="526" width="12" height="12" rx="2" fill="none" stroke="#33444E" />
+      <text x="298" y="536" class="cn" font-size="12" font-weight="700" fill="#E7EEF3" >技术方案_v3.txt</text>
+      <text x="462" y="536" class="cn" font-size="12" font-weight="500" fill="#91A0AA" >2025-05-08 11:02</text>
+      <text x="610" y="536" class="cn" font-size="12" font-weight="500" fill="#91A0AA" >TXT</text>
+      <text x="690" y="536" class="cn" font-size="12" font-weight="500" fill="#91A0AA" >本地导入</text>
+      <rect x="780" y="520" width="64" height="22" rx="5" fill="#35280B" /><text x="812" y="535" class="cn" font-size="11" font-weight="800" fill="#E7B64A" text-anchor="middle">处理中</text>
+      <rect x="878" y="520" width="64" height="22" rx="5" fill="#35280B" /><text x="910" y="535" class="cn" font-size="11" font-weight="800" fill="#E7B64A" text-anchor="middle">未入记忆</text>
+      <rect x="982" y="520" width="64" height="22" rx="5" fill="#35280B" /><text x="1014" y="535" class="cn" font-size="11" font-weight="800" fill="#E7B64A" text-anchor="middle">—</text>
+      <rect x="1100" y="520" width="64" height="22" rx="5" fill="#12372D" /><text x="1132" y="535" class="cn" font-size="11" font-weight="800" fill="#6AF2B7" text-anchor="middle">—</text>
+    
+      <rect x="254" y="553" width="914" height="40" rx="0" fill="#111A21" stroke="#26343D" />
+      <rect x="266" y="568" width="12" height="12" rx="2" fill="none" stroke="#33444E" />
+      <text x="298" y="578" class="cn" font-size="12" font-weight="700" fill="#E7EEF3" >客户案例集.pdf</text>
+      <text x="462" y="578" class="cn" font-size="12" font-weight="500" fill="#91A0AA" >2025-05-04 09:33</text>
+      <text x="610" y="578" class="cn" font-size="12" font-weight="500" fill="#91A0AA" >PDF</text>
+      <text x="690" y="578" class="cn" font-size="12" font-weight="500" fill="#91A0AA" >本地导入</text>
+      <rect x="780" y="562" width="64" height="22" rx="5" fill="#3A1A1D" /><text x="812" y="577" class="cn" font-size="11" font-weight="800" fill="#FF7773" text-anchor="middle">已隔离</text>
+      <rect x="878" y="562" width="64" height="22" rx="5" fill="#35280B" /><text x="910" y="577" class="cn" font-size="11" font-weight="800" fill="#E7B64A" text-anchor="middle">未入记忆</text>
+      <rect x="982" y="562" width="64" height="22" rx="5" fill="#3A1A1D" /><text x="1014" y="577" class="cn" font-size="11" font-weight="800" fill="#FF7773" text-anchor="middle">解析失败</text>
+      <rect x="1100" y="562" width="64" height="22" rx="5" fill="#3A1A1D" /><text x="1132" y="577" class="cn" font-size="11" font-weight="800" fill="#FF7773" text-anchor="middle">不可追溯</text>
+    
+    <text x="254" y="844" class="cn" font-size="12" font-weight="500" fill="#91A0AA" >共 1,248 条</text><rect x="768" y="820" width="28" height="28" rx="5" fill="#31D49B" /><text x="782" y="840" class="cn" font-size="13" font-weight="900" fill="#05241E" text-anchor="middle">1</text><text x="824" y="840" class="cn" font-size="12" font-weight="500" fill="#91A0AA" >2</text><text x="862" y="840" class="cn" font-size="12" font-weight="500" fill="#91A0AA" >3</text><text x="1096" y="840" class="cn" font-size="12" font-weight="500" fill="#91A0AA" >20 条/页</text>
+  
+    
+    <line x1="1180" y1="44" x2="1180" y2="898" stroke="#33444E" stroke-opacity="1" stroke-width="1"/>
+    <text x="1202" y="92" class="cn" font-size="20" font-weight="900" fill="#E7EEF3" >影响范围</text><text x="1390" y="92" class="cn" font-size="24" font-weight="500" fill="#91A0AA" >×</text>
+    <rect x="1202" y="132" width="196" height="64" rx="5" fill="#30270F" stroke="#D9A52C" /><text x="1224" y="158" class="cn" font-size="12" font-weight="700" fill="#FFD76A" >该源文件解析失败，删除或隔离</text><text x="1224" y="178" class="cn" font-size="12" font-weight="700" fill="#FFD76A" >将影响下游关联数据。</text>
+    <rect x="1202" y="218" width="196" height="94" rx="6" fill="#141F27" stroke="#33444E" /><text x="1220" y="248" class="cn" font-size="15" font-weight="900" fill="#E7EEF3" >文本片段</text><text x="1220" y="272" class="cn" font-size="11" font-weight="500" fill="#91A0AA" >由该文件生成或关联</text><text x="1220" y="302" class="cn" font-size="24" font-weight="900" fill="#FF7B76" >312</text><g><path d="M1355 246 H1365 L1371 252 V265 H1355 Z" stroke="#F25F5C" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M1365 246 V252 H1371" stroke="#F25F5C" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g><rect x="1202" y="340" width="196" height="94" rx="6" fill="#141F27" stroke="#33444E" /><text x="1220" y="370" class="cn" font-size="15" font-weight="900" fill="#E7EEF3" >向量索引</text><text x="1220" y="394" class="cn" font-size="11" font-weight="500" fill="#91A0AA" >由该文件生成或关联</text><text x="1220" y="424" class="cn" font-size="24" font-weight="900" fill="#FF7B76" >312</text><g><ellipse cx="1363" cy="370" rx="9" ry="4" stroke="#5FA8FF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M1354 370 V384 C1354 389 1372 389 1372 384 V370 M1354 377 C1354 382 1372 382 1372 377" stroke="#5FA8FF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g><rect x="1202" y="462" width="196" height="94" rx="6" fill="#141F27" stroke="#33444E" /><text x="1220" y="492" class="cn" font-size="15" font-weight="900" fill="#E7EEF3" >图谱节点</text><text x="1220" y="516" class="cn" font-size="11" font-weight="500" fill="#91A0AA" >由该文件生成或关联</text><text x="1220" y="546" class="cn" font-size="24" font-weight="900" fill="#FF7B76" >86</text><g><circle cx="1355" cy="492" r="2.6" fill="#B98CFF" opacity="1"/><circle cx="1370" cy="491" r="2.6" fill="#B98CFF" opacity="1"/><circle cx="1366" cy="506" r="2.6" fill="#B98CFF" opacity="1"/><path d="M1357 493 L1368 491 M1356 494 L1364 504 M1369 494 L1367 504" stroke="#B98CFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="1202" y="614" class="cn" font-size="14" font-weight="900" fill="#E7EEF3" >处理方式</text>
+    <rect x="1202" y="634" width="196" height="116" rx="6" fill="#0F171D" stroke="#33444E" />
+    <circle cx="1218" cy="658" r="7" fill="none" opacity="1" stroke="#F25F5C"/><circle cx="1218" cy="658" r="3" fill="#F25F5C" opacity="1"/>
+    <text x="1236" y="662" class="cn" font-size="13" font-weight="800" fill="#E7EEF3" >删除源文件</text>
+    <rect x="1236" y="690" width="12" height="12" rx="2" fill="#F25F5C" /><text x="1254" y="701" class="cn" font-size="12" font-weight="500" fill="#91A0AA" >同时删除向量</text>
+    <rect x="1236" y="720" width="12" height="12" rx="2" fill="#F25F5C" /><text x="1254" y="731" class="cn" font-size="12" font-weight="500" fill="#91A0AA" >同时删除图谱</text>
+    <rect x="1202" y="768" width="196" height="46" rx="6" fill="#0F171D" stroke="#33444E" /><circle cx="1218" cy="792" r="8" fill="none" opacity="1" stroke="#91A0AA"/><text x="1236" y="796" class="cn" font-size="13" font-weight="800" fill="#91A0AA" >仅隔离</text>
+    <rect x="1202" y="844" width="88" height="36" rx="5" fill="#141F27" stroke="#33444E" /><text x="1246" y="867" class="cn" font-size="13" font-weight="800" fill="#E7EEF3" text-anchor="middle">恢复</text>
+    <rect x="1310" y="844" width="88" height="36" rx="5" fill="#F25F5C" /><text x="1354" y="867" class="cn" font-size="13" font-weight="900" fill="#fff" text-anchor="middle">删除</text>
+  
+  
+</svg>

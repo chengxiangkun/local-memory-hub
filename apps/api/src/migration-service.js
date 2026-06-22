@@ -3,7 +3,7 @@ import path from "node:path";
 import { getDataDir, initDataDir } from "./data-store.js";
 import { dbPath, initSqlite, listSourcesSqlite } from "./sqlite-store.js";
 
-const LATEST_SCHEMA_VERSION = 2;
+const LATEST_SCHEMA_VERSION = 4;
 
 export async function getVersionInfo(dataDir = getDataDir()) {
   await initDataDir(dataDir);

@@ -424,14 +424,55 @@ ImportService.handle(request)
 
 ## 7. 外部文档连接器
 
+外部文档不只支持“一次性导入”，还需要支持“持续同步”。但不同平台开放能力差异很大，不能用同一个实时同步承诺覆盖所有平台。
+
+连接器能力分级：
+
+```text
+Level 1：链接保存
+  保存外部链接、平台、标题、document_id，等待用户授权或导出。
+
+Level 2：授权拉取
+  用户授权后拉取文档内容，形成 SourceRecord 和版本快照。
+
+Level 3：轮询同步
+  定时检查外部文档的更新时间或版本号，发现变化后重新拉取。
+
+Level 4：事件同步
+  平台支持事件订阅/Webhook 时，收到变更事件后触发增量拉取。
+```
+
+V1 目标：
+
+- 飞书：优先做到 Level 2，技术上可向 Level 4 演进。
+- 腾讯文档：优先做到 Level 2 + Level 3。
+- 有道云：优先做到 Level 1 + 手动导出/复制兜底；只有用户已有可用 API Key 或平台新接口可用时再做 Level 2。
+
+同步后仍然必须进入统一导入流水线：
+
+```text
+ConnectorSyncEvent
+  ↓
+FetchExternalDocument
+  ↓
+CreateSourceRevision
+  ↓
+ParsePipeline
+  ↓
+MemorySegment / VectorIndex / GraphNode
+  ↓
+旧版本标记为 superseded，保留可追溯历史
+```
+
 ### 7.1 飞书
 
 飞书导入能力分层：
 
 1. 粘贴链接导入。
 2. 用户授权后通过 API 拉取。
-3. API 不可用时提示用户导出文件上传。
-4. 保留源链接、文档 ID、空间信息和标题。
+3. 订阅云文档事件，收到文件编辑、标题变更等事件后触发同步。
+4. API 不可用时提示用户导出文件上传。
+5. 保留源链接、文档 ID、空间信息和标题。
 
 飞书相关逻辑放在：
 
@@ -440,9 +481,43 @@ FeishuImporter
 FeishuClient
 FeishuAuthProvider
 FeishuMetadataMapper
+FeishuSyncScheduler
+FeishuEventReceiver
 ```
 
-### 7.2 有道云
+技术判断：
+
+- 可直接连接：可行，但需要用户或企业授权。
+- 及时同步：可行，飞书开放平台支持云文档事件订阅，但需要订阅权限，且通常要求应用或用户具备文档所有者/管理者等权限。
+- V1 不应该承诺“所有飞书文档自动全量同步”，应该先做用户选择文档后的单文档/文件夹同步。
+
+### 7.2 腾讯文档
+
+腾讯文档导入能力分层：
+
+1. 粘贴腾讯文档链接。
+2. 用户 OAuth 授权后通过 Open API 拉取文档内容。
+3. 通过定时轮询文件列表、文档元信息或更新时间判断是否需要重新同步。
+4. API 不可用或权限不足时保存链接，并提示用户导出文件或复制内容。
+5. 保留源链接、文档 ID、标题、授权账号和最近同步时间。
+
+腾讯文档相关逻辑放在：
+
+```text
+TencentDocImporter
+TencentDocClient
+TencentDocAuthProvider
+TencentDocMetadataMapper
+TencentDocSyncScheduler
+```
+
+技术判断：
+
+- 可直接连接：可行，腾讯文档开放平台提供 OAuth2.0 授权和 Open API。
+- 及时同步：建议 V1 使用轮询，不优先承诺 Webhook 级实时同步。
+- 同步频率：默认 15 到 60 分钟，可在用户打开应用、打开源资料库、手动点击“立即同步”时触发补偿同步。
+
+### 7.3 有道云
 
 有道云导入能力分层：
 
@@ -460,7 +535,40 @@ YoudaoAuthProvider
 YoudaoMetadataMapper
 ```
 
-### 7.3 通用网页文档
+技术判断：
+
+- 可直接连接：不应作为 V1 默认承诺。有道云笔记 OpenAPI 官方页面已提示停止新增申请。
+- 及时同步：V1 不承诺自动同步。
+- 推荐方案：导出文件、复制内容、链接保存、未来适配用户已有 API Key 或官方新 MCP/API。
+
+### 7.4 同步状态
+
+外部连接器需要在源资料库中展示同步状态：
+
+```text
+sync_disabled      未开启同步
+sync_connected     已连接
+sync_polling       定时检查中
+sync_event_ready   已开启事件订阅
+syncing            同步中
+sync_success       同步成功
+sync_failed        同步失败
+auth_expired       授权失效
+export_required    需要导出导入
+external_deleted   外部已删除
+```
+
+用户可见文案必须中文化：
+
+```text
+已连接飞书，最近同步 5 分钟前。
+该腾讯文档授权已过期，请重新连接。
+有道云暂不支持自动同步，请导出文件后导入。
+检测到外部文档更新，已生成新版本并重新入记忆。
+检测到外部文档已删除，本地资料和记忆已保留，请选择是否清理向量和图谱。
+```
+
+### 7.5 通用网页文档
 
 通用网页文档走：
 
@@ -674,4 +782,3 @@ DouyinImporter
 ```
 
 V1 的关键不是平台覆盖多，而是架构上保证新增平台不会污染主流程。
-

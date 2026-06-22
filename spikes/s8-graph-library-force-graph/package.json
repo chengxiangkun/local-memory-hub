@@ -1,0 +1,19 @@
+{
+  "name": "s8-graph-library-force-graph",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "vite --host 127.0.0.1 --port 5188",
+    "build": "vite build",
+    "check": "node --check src/main.js"
+  },
+  "dependencies": {
+    "force-graph": "^1.51.4",
+    "vite": "^7.2.7"
+  },
+  "devDependencies": {},
+  "overrides": {
+    "esbuild": "^0.28.1"
+  }
+}

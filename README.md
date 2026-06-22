@@ -8,7 +8,7 @@
 - 验证本地数据目录初始化。
 - 验证 SourceRecord。
 - 验证统一 Import Pipeline。
-- 验证本地解析、记忆片段、图谱、向量索引、污染治理、模型 Provider、MCP-like 外部调用和升级迁移。
+- 验证本地解析、记忆片段、图谱、向量索引、污染治理、模型 Provider、MCP-like 外部调用、升级迁移和本机能力检查。
 
 ## 目录结构
 
@@ -24,13 +24,20 @@ spikes/                   桌面壳等专项 spike
 ## 运行
 
 ```bash
-npm run dev:api
+npm start
 ```
 
 默认服务地址：
 
 ```text
-http://127.0.0.1:4317
+API: http://127.0.0.1:4317
+Web: http://127.0.0.1:3100
+```
+
+停止服务：
+
+```bash
+npm run stop
 ```
 
 默认数据目录：
@@ -57,6 +64,9 @@ npm run test:fallback
 npm run test:mcp
 npm run test:migration
 npm run test:vector
+npm run test:doctor
+npm run test:connectors
+npm run test:source-folders
 ```
 
 ## Git

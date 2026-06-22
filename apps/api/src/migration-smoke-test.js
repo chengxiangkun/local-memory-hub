@@ -1,22 +1,40 @@
-import { writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
+import { initDataDir } from "./data-store.js";
+import { handleImport } from "./import-pipeline.js";
+import { getVersionInfo, migrateIfNeeded } from "./migration-service.js";
+import { initModelProviders } from "./model-provider.js";
+import { parseSource } from "./parser-service.js";
+import { listMemorySegments, listVectors } from "./sqlite-store.js";
 
-const baseUrl = `http://127.0.0.1:${process.env.LMH_PORT || 4317}`;
-const dataDir = process.env.LMH_DATA_DIR;
+const dataDir = await mkdtemp(path.join(os.tmpdir(), "lmh-migration-"));
+
+try {
+  await main();
+  console.log("Migration smoke test passed");
+} catch (error) {
+  console.error(error);
+  process.exit(1);
+}
 
 async function main() {
-  if (!dataDir) throw new Error("LMH_DATA_DIR is required");
+  initModelProviders();
+  await initDataDir(dataDir);
+  const imported = await handleImport(
+    {
+      entrypoint: "migration_smoke_test",
+      source_hint: "text",
+      payload: {
+        title: "升级保留测试",
+        text: "升级后这条源资料应该仍然存在。"
+      }
+    },
+    dataDir
+  );
+  await parseSource(imported.source.source_id, {}, dataDir);
 
-  const imported = await post("/api/import", {
-    entrypoint: "onboarding",
-    source_hint: "text",
-    payload: {
-      title: "升级保留测试",
-      text: "升级后这条源资料应该仍然存在。"
-    }
-  });
-  await post("/api/parse", { source_id: imported.source.source_id });
-
+  await mkdir(path.join(dataDir, "app-meta"), { recursive: true });
   await writeFile(
     path.join(dataDir, "app-meta", "schema-version.json"),
     JSON.stringify(
@@ -30,39 +48,26 @@ async function main() {
     )
   );
 
-  const before = await get("/api/system/version");
+  const before = await getVersionInfo(dataDir);
   assert(before.needs_migration, "version should need migration");
 
-  const migrated = await post("/api/system/migrate", {});
+  const migrated = await migrateIfNeeded(dataDir);
   assert(migrated.status === "migrated", "migration should run");
   assert(migrated.source_count_before === migrated.source_count_after, "source count should be preserved");
 
-  const after = await get("/api/system/version");
+  const after = await getVersionInfo(dataDir);
   assert(!after.needs_migration, "version should be up to date");
-
-  console.log("Migration smoke test passed");
+  assert(after.schema_version === 4, "migration should update to schema version 4");
+  const segments = await listMemorySegments(imported.source.source_id, dataDir);
+  assert(segments[0].content_hash, "migration should expose segment content hash");
+  assert(segments[0].parser_version, "migration should expose segment parser version");
+  assert(segments[0].updated_at, "migration should expose segment updated_at");
+  const vectors = await listVectors(dataDir);
+  assert(vectors[0].embedding_model, "migration should expose vector embedding model");
+  assert(vectors[0].embedding_dimension, "migration should expose vector embedding dimension");
   console.log(JSON.stringify(migrated, null, 2));
-}
-
-async function get(pathname) {
-  const res = await fetch(`${baseUrl}${pathname}`);
-  return res.json();
-}
-
-async function post(pathname, body) {
-  const res = await fetch(`${baseUrl}${pathname}`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify(body)
-  });
-  return res.json();
 }
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
-
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});

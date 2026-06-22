@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1440" height="900" viewBox="0 0 1440 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <linearGradient id="appGlow" x1="0" y1="0" x2="1440" y2="900">
+    <stop offset="0" stop-color="#17262F"/>
+    <stop offset="0.38" stop-color="#0A1015"/>
+    <stop offset="1" stop-color="#0B1116"/>
+  </linearGradient>
+  <linearGradient id="activeNav" x1="0" y1="0" x2="230" y2="0">
+    <stop offset="0" stop-color="#164B41"/>
+    <stop offset="1" stop-color="#17232A"/>
+  </linearGradient>
+  <linearGradient id="cardGlow" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#18252E"/>
+    <stop offset="1" stop-color="#0F171D"/>
+  </linearGradient>
+  <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+    <feDropShadow dx="0" dy="20" stdDeviation="24" flood-color="#000000" flood-opacity="0.28"/>
+  </filter>
+  <style>
+    .cn { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'PingFang SC', 'Noto Sans SC', sans-serif; }
+    .mono { font-family: 'SF Mono', ui-monospace, Menlo, monospace; }
+  </style>
+</defs>
+
+    <rect x="0" y="0" width="1440" height="900" rx="10" fill="#070B0F" />
+    <rect x="2" y="2" width="1436" height="896" rx="10" fill="url(#appGlow)" stroke="#33444E" />
+    <rect x="2" y="2" width="1436" height="42" rx="10" fill="#0B1116" />
+    <circle cx="20" cy="24" r="6" fill="#FF5F57" opacity="1"/><circle cx="40" cy="24" r="6" fill="#FFBD2E" opacity="1"/><circle cx="60" cy="24" r="6" fill="#28C840" opacity="1"/>
+    <g transform="translate(82,11)">
+    <path d="M14 2 L26 8.5 V21.5 L14 28 L2 21.5 V8.5 L14 2Z" fill="#23D391"/>
+    <path d="M14 2 L26 8.5 L14 15 L2 8.5 L14 2Z" fill="#70F0B7"/>
+    <path d="M2 8.5 L14 15 V28 L2 21.5 V8.5Z" fill="#1AA779"/>
+    <path d="M26 8.5 L14 15 V28 L26 21.5 V8.5Z" fill="#22C98E"/>
+    <path d="M14 15 L14 28" stroke="#0B6A53" stroke-width="1.4"/>
+  </g><text x="122" y="30" class="cn" font-size="14" font-weight="800" fill="#E7EEF3" >Local Memory Hub</text>
+    <rect x="580" y="10" width="300" height="34" rx="16" fill="#0B1116" stroke="#33444E" />
+    <circle cx="600" cy="27" r="6" fill="none" opacity="1" stroke="#91A0AA"/><line x1="604" y1="31" x2="610" y2="37" stroke="#91A0AA" stroke-opacity="1" stroke-width="1.5"/>
+    <text x="626" y="31" class="cn" font-size="13" font-weight="500" fill="#91A0AA" >搜索记忆、节点、标签…</text><text x="836" y="31" class="mono" font-size="11" font-weight="700" fill="#91A0AA" >⌘K</text>
+    <text x="1328" y="29" class="cn" font-size="18" font-weight="500" fill="#91A0AA" >—</text><rect x="1364" y="18" width="10" height="10" rx="1" fill="none" stroke="#91A0AA" /><line x1="1407" y1="18" x2="1398" y2="28" stroke="#91A0AA" stroke-opacity="1" stroke-width="1.3"/><line x1="1398" y1="18" x2="1407" y2="28" stroke="#91A0AA" stroke-opacity="1" stroke-width="1.3"/>
+    <rect x="2" y="44" width="226" height="854" rx="0" fill="#0B1218" /><line x1="228" y1="44" x2="228" y2="898" stroke="#33444E" stroke-opacity="1" stroke-width="1"/>
+    <text x="28" y="92" class="cn" font-size="12" font-weight="500" fill="#65737D" >工作区</text>
+    
+    
+    <g><path d="M29 122 L40 113 L51 122" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M33 121 V133 H47 V121" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="66" y="129" class="cn" font-size="14" font-weight="600" fill="#BCC7CF" >概览</text>
+    
+    <g><circle cx="33" cy="164" r="2.6" fill="#B5C0C8" opacity="1"/><circle cx="48" cy="163" r="2.6" fill="#B5C0C8" opacity="1"/><circle cx="44" cy="178" r="2.6" fill="#B5C0C8" opacity="1"/><path d="M35 165 L46 163 M34 166 L42 176 M47 166 L45 176" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="66" y="177" class="cn" font-size="14" font-weight="600" fill="#BCC7CF" >图谱</text>
+    
+    <g><path d="M33 210 H43 L49 216 V229 H33 Z" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M43 210 V216 H49" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="66" y="225" class="cn" font-size="14" font-weight="600" fill="#BCC7CF" >源资料库</text><rect x="12" y="244" width="206" height="44" rx="8" fill="url(#activeNav)" />
+    <rect x="12" y="244" width="3" height="44" rx="2" fill="#31D49B" />
+    <g><path d="M32 260 H50 V272 H40 L35 277 V272 H32 Z" stroke="#31D49B" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M37 265 H46 M37 269 H43" stroke="#31D49B" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="66" y="273" class="cn" font-size="14" font-weight="800" fill="#BFFFE7" >搜索与问答</text>
+    
+    <g><path d="M41 305 V320" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M35 314 L41 320 L47 314" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M32 325 H50" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="66" y="321" class="cn" font-size="14" font-weight="600" fill="#BCC7CF" >导入中心</text>
+    <line x1="28" y1="366" x2="208" y2="366" stroke="#26343D" stroke-opacity="1" stroke-width="1"/>
+    <text x="28" y="406" class="cn" font-size="12" font-weight="500" fill="#65737D" >数据管理</text>
+    
+    
+    <g><path d="M41 427 L50 431 V438 C50 444 46 447 41 449 C36 447 32 444 32 438 V431 Z" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M37 438 L40 441 L46 434" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="66" y="443" class="cn" font-size="14" font-weight="600" fill="#BCC7CF" >污染治理</text>
+    
+    <g><ellipse cx="41" cy="478" rx="9" ry="4" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M32 478 V492 C32 497 50 497 50 492 V478 M32 485 C32 490 50 490 50 485" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="66" y="491" class="cn" font-size="14" font-weight="600" fill="#BCC7CF" >向量索引</text>
+    
+    <g><path d="M33 525 H44 L50 531 L40 542 L30 532 Z" stroke="#B5C0C8" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="41" cy="529" r="1.8" fill="#B5C0C8" opacity="1"/></g>
+    <text x="66" y="539" class="cn" font-size="14" font-weight="600" fill="#BCC7CF" >标签管理</text>
+    <line x1="28" y1="704" x2="208" y2="704" stroke="#26343D" stroke-opacity="1" stroke-width="1"/>
+    <text x="28" y="740" class="cn" font-size="12" font-weight="600" fill="#91A0AA" >本地存储</text>
+    <rect x="28" y="758" width="180" height="7" rx="4" fill="#1D2B33" /><rect x="28" y="758" width="64" height="7" rx="4" fill="#31D49B" />
+    <text x="28" y="786" class="cn" font-size="12" font-weight="500" fill="#91A0AA" >482.6 GB / 1.0 TB</text>
+    <circle cx="36" cy="842" r="16" fill="#375B4E" opacity="1"/><text x="31" y="847" class="cn" font-size="13" font-weight="800" fill="#E8FFF4" >L</text><text x="66" y="840" class="cn" font-size="13" font-weight="700" fill="#E7EEF3" >Local User</text><text x="66" y="860" class="cn" font-size="11" font-weight="700" fill="#31D49B" >本地模式</text>
+    <rect x="228" y="44" width="1210" height="854" rx="0" fill="#0D151B" />
+    <text x="254" y="92" class="cn" font-size="24" font-weight="900" fill="#E7EEF3" >搜索与问答</text>
+    <text x="254" y="118" class="cn" font-size="13" font-weight="500" fill="#91A0AA" >先用本地检索和源资料引用回答；必要时请求外部模型，没有模型时提供本地兜底。</text>
+    
+    <text x="276" y="170" class="cn" font-size="14" font-weight="900" fill="#31D49B" >本地检索</text><line x1="262" y1="186" x2="388" y2="186" stroke="#31D49B" stroke-opacity="1" stroke-width="2"/>
+    <text x="500" y="170" class="cn" font-size="14" font-weight="700" fill="#E7EEF3" >向量搜索</text><line x1="390" y1="170" x2="478" y2="170" stroke="#91A0AA" stroke-opacity="0.45" stroke-width="1.5"/>
+    <text x="700" y="170" class="cn" font-size="14" font-weight="700" fill="#E7EEF3" >回谱扩展</text><line x1="610" y1="170" x2="680" y2="170" stroke="#91A0AA" stroke-opacity="0.45" stroke-width="1.5"/>
+    <text x="920" y="170" class="cn" font-size="14" font-weight="700" fill="#E7EEF3" >请求大模型</text><line x1="806" y1="170" x2="900" y2="170" stroke="#91A0AA" stroke-opacity="0.45" stroke-width="1.5"/>
+    <text x="1088" y="170" class="cn" font-size="14" font-weight="900" fill="#D9A52C" >无模型兜底</text>
+    <rect x="254" y="214" width="674" height="82" rx="8" fill="#141F27" stroke="#33444E" /><text x="276" y="250" class="cn" font-size="14" font-weight="600" fill="#E7EEF3" >2024 年中国新能源汽车市场的主要趋势是什么？有哪些关键数据和政策影响？</text>
+    <rect x="862" y="236" width="42" height="40" rx="8" fill="#31D49B" /><text x="883" y="262" class="cn" font-size="20" font-weight="900" fill="#06251F" text-anchor="middle">↗</text>
+    <rect x="254" y="318" width="674" height="314" rx="8" fill="#0F171D" stroke="#33444E" />
+    <text x="276" y="352" class="cn" font-size="14" font-weight="900" fill="#E7EEF3" >回答（基于本地知识库）</text><circle cx="420" cy="348" r="6" fill="#31D49B" opacity="1"/>
+    <text x="276" y="394" class="cn" font-size="13" font-weight="500" fill="#E7EEF3" >2024 年中国新能源汽车市场呈现出高增长、结构优化和政策持续驱动的特点。</text>
+    <text x="276" y="432" class="cn" font-size="13" font-weight="500" fill="#E7EEF3" >1. 市场规模持续增长：预计销量达到 1,280 万辆，同比约增长 35%。</text>
+    <text x="276" y="470" class="cn" font-size="13" font-weight="500" fill="#E7EEF3" >2. 结构优化：纯电与插混双线提升，中高端车型销量占比扩大。</text>
+    <text x="276" y="508" class="cn" font-size="13" font-weight="500" fill="#E7EEF3" >3. 政策影响：以旧换新补贴、地方购车优惠和充电设施建设推动需求释放。</text>
+    <text x="276" y="546" class="cn" font-size="13" font-weight="500" fill="#E7EEF3" >4. 技术与产业链：电池效率、智能配置与供应链协同继续强化。</text>
+    <text x="276" y="608" class="cn" font-size="13" font-weight="900" fill="#E7EEF3" >引用来源</text>
+    <rect x="276" y="638" width="188" height="38" rx="6" fill="#141F27" stroke="#33444E" /><text x="288" y="662" class="cn" font-size="11" font-weight="700" fill="#91A0AA" >[1] 中汽协_2024新能源销量.pdf</text><rect x="424" y="648" width="28" height="18" rx="4" fill="#713C3B" /><text x="438" y="661" class="cn" font-size="9" font-weight="800" fill="#FFD6D4" text-anchor="middle">PDF</text><rect x="478" y="638" width="188" height="38" rx="6" fill="#141F27" stroke="#33444E" /><text x="490" y="662" class="cn" font-size="11" font-weight="700" fill="#91A0AA" >[2] 乘联会_市场分析报告.pdf</text><rect x="626" y="648" width="28" height="18" rx="4" fill="#713C3B" /><text x="640" y="661" class="cn" font-size="9" font-weight="800" fill="#FFD6D4" text-anchor="middle">PDF</text><rect x="680" y="638" width="188" height="38" rx="6" fill="#141F27" stroke="#33444E" /><text x="692" y="662" class="cn" font-size="11" font-weight="700" fill="#91A0AA" >[3] 国务院_产业发展规划.pdf</text><rect x="828" y="648" width="28" height="18" rx="4" fill="#713C3B" /><text x="842" y="661" class="cn" font-size="9" font-weight="800" fill="#FFD6D4" text-anchor="middle">PDF</text>
+    <rect x="254" y="746" width="674" height="48" rx="7" fill="#3B2B0B" stroke="#D9A52C" /><text x="276" y="776" class="cn" font-size="12" font-weight="800" fill="#FFD76A" >未检测到可用大模型服务，已启用本地规则引擎兜底，回答基于检索内容生成。</text><rect x="808" y="758" width="86" height="26" rx="5" fill="none" stroke="#D9A52C" /><text x="851" y="776" class="cn" font-size="12" font-weight="800" fill="#FFD76A" text-anchor="middle">去配置模型</text>
+    <rect x="254" y="812" width="674" height="52" rx="8" fill="#141F27" stroke="#33444E" /><text x="276" y="844" class="cn" font-size="13" font-weight="500" fill="#65737D" >继续追问（Enter 发送，Shift+Enter 换行）</text>
+  
+    
+    <line x1="952" y1="44" x2="952" y2="898" stroke="#33444E" stroke-opacity="1" stroke-width="1"/>
+    <rect x="972" y="46" width="434" height="852" rx="12" fill="#111A21" stroke="#33444E" />
+    <text x="994" y="92" class="cn" font-size="18" font-weight="900" fill="#E7EEF3" >选择模型</text><text x="1372" y="92" class="cn" font-size="24" font-weight="500" fill="#91A0AA" >×</text>
+    <text x="994" y="144" class="cn" font-size="12" font-weight="700" fill="#91A0AA" >国内模型服务</text>
+    <rect x="994" y="166" width="376" height="56" rx="7" fill="#141F27" stroke="#33444E" /><circle cx="1028" cy="194" r="20" fill="#F6F8FF" opacity="1"/><text x="1064" y="200" class="cn" font-size="14" font-weight="800" fill="#E7EEF3" >DeepSeek</text><circle cx="1066" cy="214" r="3" fill="#31D49B" opacity="1"/><text x="1076" y="218" class="cn" font-size="11" font-weight="700" fill="#31D49B" >可用</text><text x="1342" y="201" class="cn" font-size="16" font-weight="500" fill="#91A0AA" >⚙</text><rect x="994" y="236" width="376" height="56" rx="7" fill="#141F27" stroke="#33444E" /><circle cx="1028" cy="264" r="20" fill="#775CFF" opacity="1"/><text x="1064" y="270" class="cn" font-size="14" font-weight="800" fill="#E7EEF3" >通义千问</text><circle cx="1066" cy="284" r="3" fill="#31D49B" opacity="1"/><text x="1076" y="288" class="cn" font-size="11" font-weight="700" fill="#31D49B" >可用</text><text x="1342" y="271" class="cn" font-size="16" font-weight="500" fill="#91A0AA" >⚙</text><rect x="994" y="306" width="376" height="56" rx="7" fill="#141F27" stroke="#33444E" /><circle cx="1028" cy="334" r="20" fill="#D6F1FF" opacity="1"/><text x="1064" y="340" class="cn" font-size="14" font-weight="800" fill="#E7EEF3" >豆包</text><circle cx="1066" cy="354" r="3" fill="#31D49B" opacity="1"/><text x="1076" y="358" class="cn" font-size="11" font-weight="700" fill="#31D49B" >可用</text><text x="1342" y="341" class="cn" font-size="16" font-weight="500" fill="#91A0AA" >⚙</text><rect x="994" y="376" width="376" height="56" rx="7" fill="#141F27" stroke="#33444E" /><circle cx="1028" cy="404" r="20" fill="#FFFFFF" opacity="1"/><text x="1064" y="410" class="cn" font-size="14" font-weight="800" fill="#E7EEF3" >智谱 GLM</text><circle cx="1066" cy="424" r="3" fill="#31D49B" opacity="1"/><text x="1076" y="428" class="cn" font-size="11" font-weight="700" fill="#31D49B" >可用</text><text x="1342" y="411" class="cn" font-size="16" font-weight="500" fill="#91A0AA" >⚙</text><rect x="994" y="446" width="376" height="56" rx="7" fill="#141F27" stroke="#33444E" /><circle cx="1028" cy="474" r="20" fill="#0A0A0A" opacity="1"/><text x="1064" y="480" class="cn" font-size="14" font-weight="800" fill="#E7EEF3" >Kimi</text><circle cx="1066" cy="494" r="3" fill="#31D49B" opacity="1"/><text x="1076" y="498" class="cn" font-size="11" font-weight="700" fill="#31D49B" >可用</text><text x="1342" y="481" class="cn" font-size="16" font-weight="500" fill="#91A0AA" >⚙</text>
+    <text x="994" y="548" class="cn" font-size="12" font-weight="700" fill="#91A0AA" >通用与本地模型服务</text>
+    <rect x="994" y="570" width="376" height="56" rx="7" fill="#141F27" stroke="#33444E" /><circle cx="1028" cy="598" r="20" fill="#F4F4F2" opacity="1"/><text x="1064" y="604" class="cn" font-size="14" font-weight="800" fill="#E7EEF3" >OpenAI-Compatible</text><circle cx="1066" cy="618" r="3" fill="#31D49B" opacity="1"/><text x="1076" y="622" class="cn" font-size="11" font-weight="700" fill="#31D49B" >可用</text><text x="1342" y="605" class="cn" font-size="16" font-weight="500" fill="#91A0AA" >⚙</text><rect x="994" y="640" width="376" height="56" rx="7" fill="#141F27" stroke="#33444E" /><circle cx="1028" cy="668" r="20" fill="#F4F4F2" opacity="1"/><text x="1064" y="674" class="cn" font-size="14" font-weight="800" fill="#E7EEF3" >Ollama</text><circle cx="1066" cy="688" r="3" fill="#31D49B" opacity="1"/><text x="1076" y="692" class="cn" font-size="11" font-weight="700" fill="#31D49B" >可用</text><text x="1342" y="675" class="cn" font-size="16" font-weight="500" fill="#91A0AA" >⚙</text>
+    <rect x="994" y="728" width="376" height="72" rx="7" fill="#0F171D" stroke="#33444E" /><text x="1018" y="760" class="cn" font-size="13" font-weight="800" fill="#E7EEF3" >本地保存 API Key</text><rect x="1320" y="750" width="32" height="18" rx="9" fill="#31D49B" /><circle cx="1342" cy="759" r="7" fill="#FFFFFF" opacity="1"/>
+    <text x="1018" y="786" class="cn" font-size="12" font-weight="500" fill="#91A0AA" >API Key 仅保存在本地，不会上传或同步。</text>
+    <rect x="994" y="820" width="376" height="40" rx="6" fill="#141F27" stroke="#33444E" /><text x="1182" y="845" class="cn" font-size="13" font-weight="800" fill="#E7EEF3" text-anchor="middle">模型设置</text>
+  
+  
+</svg>

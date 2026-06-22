@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1440" height="900" viewBox="0 0 1440 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="shadow" x="0" y="0" width="1440" height="900" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="24" stdDeviation="32" flood-color="#000000" flood-opacity="0.26"/>
+    </filter>
+    <style>
+      .cn { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Noto Sans SC', 'PingFang SC', sans-serif; }
+      .mono { font-family: 'SF Mono', ui-monospace, Menlo, monospace; }
+    </style>
+  </defs>
+  
+    <rect x="0" y="0" width="1440" height="900" rx="24" fill="#050505" />
+    <rect x="42" y="36" width="1356" height="828" rx="18" fill="#080808" stroke="#2A2A2A" filter="url(#shadow)"/>
+    <rect x="42" y="36" width="1356" height="62" rx="18" fill="#080808" />
+    <line x1="42" y1="98" x2="1398" y2="98" stroke="#2A2A2A"/>
+    <circle cx="68" cy="66" r="6" fill="#FF5F57" opacity="1"/><circle cx="88" cy="66" r="6" fill="#FEBC2E" opacity="1"/><circle cx="108" cy="66" r="6" fill="#28C840" opacity="1"/>
+    
+    <g transform="translate(132,52)">
+      <path d="M2 6.2 C2 4.6 3.7 3.6 5.1 4.4 L13.2 9.1 V22.8 L4.5 18.3 C3 17.6 2 16.1 2 14.4 V6.2Z" fill="#63D995"/>
+      <path d="M26 6.2 C26 4.6 24.3 3.6 22.9 4.4 L14.8 9.1 V22.8 L23.5 18.3 C25 17.6 26 16.1 26 14.4 V6.2Z" fill="#4FC383"/>
+      <path d="M5.2 4.5 L14 9.5 L22.8 4.5 L14 1.8 L5.2 4.5Z" fill="#8AF0B5"/>
+      <path d="M13.2 9.1 L14 9.5 L14.8 9.1 V22.8 L14 23.2 L13.2 22.8 V9.1Z" fill="#2F8C63" opacity="0.78"/>
+    </g>
+    <text x="170" y="71" class="cn" font-size="14" font-weight="700" fill="#E9E6DD" >Local Memory Hub</text>
+    <rect x="542" y="50" width="356" height="34" rx="17" fill="#0A0A0A" stroke="#343434" />
+    <circle cx="562" cy="67" r="5" fill="#99958D" opacity="1"/>
+    <text x="580" y="72" class="cn" font-size="13" font-weight="500" fill="#99958D" >搜索，或向本地记忆提问</text>
+    <rect x="1152" y="50" width="138" height="34" rx="17" fill="#0A0A0A" stroke="#343434" />
+    <circle cx="1172" cy="67" r="5" fill="#6F876E" opacity="1"/>
+    <text x="1190" y="72" class="cn" font-size="12" font-weight="700" fill="#E9E6DD" >模型已连接</text>
+    <rect x="1304" y="50" width="72" height="34" rx="17" fill="#0A0A0A" stroke="#343434" />
+    <text x="1322" y="72" class="cn" font-size="12" font-weight="700" fill="#99958D" >队列 3</text>
+    <rect x="42" y="98" width="224" height="766" rx="0" fill="#0D0D0D" />
+    <line x1="266" y1="98" x2="266" y2="864" stroke="#2A2A2A"/>
+    <text x="68" y="148" class="cn" font-size="22" font-weight="800" fill="#E9E6DD" >记忆库</text>
+    <text x="68" y="170" class="cn" font-size="12" font-weight="500" fill="#99958D" >本地数据可升级保留</text>
+    
+    <rect x="58" y="206" width="192" height="38" rx="10" fill="#0D0D0D" />
+    <g><circle cx="79" cy="220" r="3" fill="#99958D" opacity="1"/><circle cx="94" cy="217" r="3" fill="#99958D" opacity="1"/><circle cx="90" cy="234" r="3" fill="#99958D" opacity="1"/><path d="M82 220 L91 218 M81 222 L88 232 M93 220 L91 231" stroke="#99958D" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="112" y="230" class="cn" font-size="13" font-weight="700" fill="#99958D" >图谱</text>
+    <rect x="58" y="250" width="192" height="38" rx="10" fill="#0D0D0D" />
+    <g><path d="M87 259 V275" stroke="#99958D" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M81 269 L87 275 L93 269" stroke="#99958D" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M78 279 H96" stroke="#99958D" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="112" y="274" class="cn" font-size="13" font-weight="700" fill="#99958D" >快捷导入</text>
+    <rect x="58" y="294" width="192" height="38" rx="10" fill="#0D0D0D" />
+    <g><path d="M80 304 H90 L96 310 V324 H80 Z" stroke="#99958D" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M90 304 V310 H96" stroke="#99958D" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="112" y="318" class="cn" font-size="13" font-weight="700" fill="#99958D" >源资料</text>
+    <rect x="58" y="338" width="192" height="38" rx="10" fill="#221F17" />
+    <g><path d="M78 350 H96 V363 H86 L81 368 V363 H78 Z" stroke="#B69A5B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M83 355 H92 M83 359 H89" stroke="#B69A5B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="112" y="362" class="cn" font-size="13" font-weight="700" fill="#E9E6DD" >问答搜索</text>
+    <rect x="58" y="382" width="192" height="38" rx="10" fill="#0D0D0D" />
+    <g><path d="M87 391 L97 401 L87 411 L77 401 Z" stroke="#99958D" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M87 396 V406 M82 401 H92" stroke="#99958D" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="112" y="406" class="cn" font-size="13" font-weight="700" fill="#99958D" >污染治理</text>
+    <rect x="58" y="426" width="192" height="38" rx="10" fill="#0D0D0D" />
+    <g><circle cx="87" cy="445" r="9" stroke="#99958D" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M87 440 V445 L91 448" stroke="#99958D" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="112" y="450" class="cn" font-size="13" font-weight="700" fill="#99958D" >模型配置</text>
+    <rect x="60" y="774" width="188" height="42" rx="13" fill="#B69A5B" />
+    <text x="124" y="800" class="cn" font-size="14" font-weight="800" fill="#0A0A0A" >快捷导入</text>
+    <text x="66" y="844" class="mono" font-size="11" fill="#99958D">~/Library/LocalMemory</text>
+    <rect x="266" y="98" width="1132" height="766" rx="0" fill="#080808" />
+    <text x="294" y="154" class="cn" font-size="26" font-weight="800" fill="#E9E6DD" >问答搜索</text>
+    <text x="294" y="178" class="cn" font-size="13" font-weight="500" fill="#99958D" >结合源文件检索、向量搜索和模型请求，给出可追溯回答。</text>
+    
+    <rect x="294" y="202" width="774" height="626" rx="18" fill="#121212" stroke="#2A2A2A" />
+    <text x="316" y="242" class="cn" font-size="18" font-weight="800" fill="#E9E6DD" >问答搜索</text>
+    <rect x="316" y="282" width="730" height="52" rx="18" fill="#0A0A0A" stroke="#343434" />
+    <text x="342" y="314" class="cn" font-size="15" font-weight="700" fill="#E9E6DD" >这套本地记忆系统应该先做哪些功能？</text>
+    <rect x="316" y="374" width="730" height="162" rx="16" fill="#080808" stroke="#2A2A2A" />
+    <text x="342" y="414" class="cn" font-size="15" font-weight="800" fill="#E9E6DD" >回答</text>
+    <text x="342" y="444" class="cn" font-size="13" font-weight="500" fill="#99958D" >第一阶段应该优先保证资料可信进入系统，其次是解析循环和搜索问答。图谱可以作为首页探索入口，但治理能力必须和源文件追溯绑定。</text>
+    <rect x="342" y="484" width="110" height="32" rx="16" fill="#221F17" stroke="#343434" /><text x="366" y="505" class="cn" font-size="12" font-weight="800" fill="#E9E6DD" >来自 5 个源</text>
+    <text x="316" y="586" class="cn" font-size="15" font-weight="800" fill="#E9E6DD" >引用片段</text>
+    <rect x="316" y="616" width="730" height="40" rx="12" fill="#0A0A0A" stroke="#343434" /><text x="338" y="641" class="cn" font-size="13" font-weight="700" fill="#E9E6DD" >PRD / 先让资料可信进入系统</text><rect x="316" y="672" width="730" height="40" rx="12" fill="#0A0A0A" stroke="#343434" /><text x="338" y="697" class="cn" font-size="13" font-weight="700" fill="#E9E6DD" >导入设计 / 本地解析失败后模型兜底</text><rect x="316" y="728" width="730" height="40" rx="12" fill="#0A0A0A" stroke="#343434" /><text x="338" y="753" class="cn" font-size="13" font-weight="700" fill="#E9E6DD" >治理设计 / 删除源文件时选择是否删除向量和图谱</text>
+  
+    
+    <rect x="1090" y="202" width="280" height="626" rx="18" fill="#121212" stroke="#2A2A2A" />
+    <text x="1112" y="242" class="cn" font-size="18" font-weight="800" fill="#E9E6DD" >搜索模式</text>
+    <rect x="1112" y="292" width="236" height="38" rx="12" fill="#0A0A0A" stroke="#343434" /><text x="1132" y="316" class="cn" font-size="13" font-weight="800" fill="#99958D" >仅本地</text><rect x="1112" y="346" width="236" height="38" rx="12" fill="#221F17" stroke="#343434" /><text x="1132" y="370" class="cn" font-size="13" font-weight="800" fill="#E9E6DD" >本地 + 外部模型</text><rect x="1112" y="400" width="236" height="38" rx="12" fill="#0A0A0A" stroke="#343434" /><text x="1132" y="424" class="cn" font-size="13" font-weight="800" fill="#99958D" >仅源文件检索</text>
+    <line x1="1112" y1="480" x2="1348" y2="480" stroke="#2A2A2A"/>
+    <text x="1112" y="522" class="cn" font-size="15" font-weight="800" fill="#E9E6DD" >模型 Provider</text>
+    <rect x="1112" y="552" width="236" height="32" rx="12" fill="#0A0A0A" stroke="#343434" /><text x="1130" y="573" class="cn" font-size="12" font-weight="700" fill="#E9E6DD" >DeepSeek</text><circle cx="1326" cy="568" r="5" fill="#6F876E" opacity="1"/><rect x="1112" y="596" width="236" height="32" rx="12" fill="#0A0A0A" stroke="#343434" /><text x="1130" y="617" class="cn" font-size="12" font-weight="700" fill="#E9E6DD" >通义千问</text><circle cx="1326" cy="612" r="5" fill="#6F876E" opacity="1"/><rect x="1112" y="640" width="236" height="32" rx="12" fill="#0A0A0A" stroke="#343434" /><text x="1130" y="661" class="cn" font-size="12" font-weight="700" fill="#E9E6DD" >OpenAI</text><circle cx="1326" cy="656" r="5" fill="#7C7A72" opacity="1"/><rect x="1112" y="684" width="236" height="32" rx="12" fill="#0A0A0A" stroke="#343434" /><text x="1130" y="705" class="cn" font-size="12" font-weight="700" fill="#E9E6DD" >Claude</text><circle cx="1326" cy="700" r="5" fill="#7C7A72" opacity="1"/>
+  
+    
+  
+</svg>

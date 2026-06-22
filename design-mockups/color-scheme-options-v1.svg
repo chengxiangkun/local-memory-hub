@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1440" height="900" viewBox="0 0 1440 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .cn { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Noto Sans SC', 'PingFang SC', sans-serif; }
+      .mono { font-family: 'SF Mono', ui-monospace, Menlo, monospace; }
+    </style>
+  </defs>
+  <rect width="1440" height="900" fill="#F2EFE8"/>
+  <text x="80" y="76" class="cn" font-size="30" font-weight="900" fill="#24211D">Local Memory Hub 配色方案</text>
+  <text x="80" y="108" class="cn" font-size="14" fill="#746D63">目标：保留 Apple 式桌面质感，避免科技蓝、纯白、脏绿、脏黄。主视觉尽量中性，状态色小面积使用。</text>
+  
+  <g transform="translate(80,150)">
+    <rect width="388" height="600" rx="28" fill="#F5F2EB" stroke="#000" stroke-opacity="0.08"/>
+    <text x="30" y="48" class="cn" font-size="22" font-weight="800" fill="#25221D">浅色主题 / Warm Paper</text>
+    <text x="30" y="78" class="cn" font-size="13" fill="#716B62">默认主题。温润、可信、适合长时间阅读。</text>
+    <rect x="30" y="112" width="328" height="190" rx="18" fill="#FBF9F4" stroke="#D7D0C5"/>
+    <text x="52" y="148" class="cn" font-size="16" font-weight="700" fill="#25221D">记忆工作台</text>
+    <text x="52" y="172" class="cn" font-size="12" fill="#716B62">图谱、问答、源资料与治理状态</text>
+    <rect x="52" y="202" width="132" height="34" rx="17" fill="#F4F1EA" stroke="#D7D0C5"/>
+    <circle cx="70" cy="219" r="5" fill="#4E514C"/>
+    <text x="86" y="223" class="cn" font-size="12" font-weight="700" fill="#25221D">图谱</text>
+    <rect x="198" y="202" width="116" height="34" rx="17" fill="#4E514C"/>
+    <text x="256" y="223" text-anchor="middle" class="cn" font-size="12" font-weight="800" fill="#E9E6DE">快捷导入</text>
+    <line x1="70" y1="270" x2="180" y2="248" stroke="#4E514C" stroke-opacity="0.46"/>
+    <line x1="180" y1="248" x2="286" y2="278" stroke="#D7D0C5"/>
+    <circle cx="180" cy="248" r="12" fill="#4E514C" opacity="0.18"/><circle cx="180" cy="248" r="6" fill="#4E514C"/>
+    <circle cx="70" cy="270" r="4" fill="#716B62"/><circle cx="286" cy="278" r="4" fill="#716B62"/>
+    <text x="198" y="253" class="cn" font-size="11" font-weight="700" fill="#25221D">AI记忆系统</text>
+    <g transform="translate(30,340)">
+      <rect x="0" y="0" width="28" height="28" rx="8" fill="#E9E6DE" stroke="#000" stroke-opacity="0.12"/><text x="38" y="12" class="cn" font-size="11" fill="#716B62">背景</text><text x="38" y="28" class="mono" font-size="10" fill="#25221D">#E9E6DE</text><rect x="168" y="0" width="28" height="28" rx="8" fill="#F5F2EB" stroke="#000" stroke-opacity="0.12"/><text x="206" y="12" class="cn" font-size="11" fill="#716B62">窗口</text><text x="206" y="28" class="mono" font-size="10" fill="#25221D">#F5F2EB</text><rect x="0" y="42" width="28" height="28" rx="8" fill="#FBF9F4" stroke="#000" stroke-opacity="0.12"/><text x="38" y="54" class="cn" font-size="11" fill="#716B62">面板</text><text x="38" y="70" class="mono" font-size="10" fill="#25221D">#FBF9F4</text><rect x="168" y="42" width="28" height="28" rx="8" fill="#F4F1EA" stroke="#000" stroke-opacity="0.12"/><text x="206" y="54" class="cn" font-size="11" fill="#716B62">次面板</text><text x="206" y="70" class="mono" font-size="10" fill="#25221D">#F4F1EA</text><rect x="0" y="84" width="28" height="28" rx="8" fill="#D7D0C5" stroke="#000" stroke-opacity="0.12"/><text x="38" y="96" class="cn" font-size="11" fill="#716B62">边框</text><text x="38" y="112" class="mono" font-size="10" fill="#25221D">#D7D0C5</text><rect x="168" y="84" width="28" height="28" rx="8" fill="#25221D" stroke="#000" stroke-opacity="0.12"/><text x="206" y="96" class="cn" font-size="11" fill="#716B62">文字</text><text x="206" y="112" class="mono" font-size="10" fill="#25221D">#25221D</text><rect x="0" y="126" width="28" height="28" rx="8" fill="#716B62" stroke="#000" stroke-opacity="0.12"/><text x="38" y="138" class="cn" font-size="11" fill="#716B62">次文字</text><text x="38" y="154" class="mono" font-size="10" fill="#25221D">#716B62</text><rect x="168" y="126" width="28" height="28" rx="8" fill="#4E514C" stroke="#000" stroke-opacity="0.12"/><text x="206" y="138" class="cn" font-size="11" fill="#716B62">主强调</text><text x="206" y="154" class="mono" font-size="10" fill="#25221D">#4E514C</text><rect x="0" y="168" width="28" height="28" rx="8" fill="#667C68" stroke="#000" stroke-opacity="0.12"/><text x="38" y="180" class="cn" font-size="11" fill="#716B62">状态</text><text x="38" y="196" class="mono" font-size="10" fill="#25221D">#667C68</text><rect x="168" y="168" width="28" height="28" rx="8" fill="#B8655A" stroke="#000" stroke-opacity="0.12"/><text x="206" y="180" class="cn" font-size="11" fill="#716B62">危险</text><text x="206" y="196" class="mono" font-size="10" fill="#25221D">#B8655A</text>
+    </g>
+  </g>
+  <g transform="translate(520,150)">
+    <rect width="388" height="600" rx="28" fill="#11100E" stroke="#000" stroke-opacity="0.08"/>
+    <text x="30" y="48" class="cn" font-size="22" font-weight="800" fill="#F0ECE4">深色主题 / Neutral Graphite</text>
+    <text x="30" y="78" class="cn" font-size="13" fill="#A9A49C">夜间工作台。去掉黑绿和脏黄，主视觉去色彩化。</text>
+    <rect x="30" y="112" width="328" height="190" rx="18" fill="#1A1917" stroke="#34322E"/>
+    <text x="52" y="148" class="cn" font-size="16" font-weight="700" fill="#F0ECE4">记忆工作台</text>
+    <text x="52" y="172" class="cn" font-size="12" fill="#A9A49C">图谱、问答、源资料与治理状态</text>
+    <rect x="52" y="202" width="132" height="34" rx="17" fill="#23221F" stroke="#34322E"/>
+    <circle cx="70" cy="219" r="5" fill="#D8D2C6"/>
+    <text x="86" y="223" class="cn" font-size="12" font-weight="700" fill="#F0ECE4">图谱</text>
+    <rect x="198" y="202" width="116" height="34" rx="17" fill="#D8D2C6"/>
+    <text x="256" y="223" text-anchor="middle" class="cn" font-size="12" font-weight="800" fill="#050505">快捷导入</text>
+    <line x1="70" y1="270" x2="180" y2="248" stroke="#D8D2C6" stroke-opacity="0.46"/>
+    <line x1="180" y1="248" x2="286" y2="278" stroke="#34322E"/>
+    <circle cx="180" cy="248" r="12" fill="#D8D2C6" opacity="0.18"/><circle cx="180" cy="248" r="6" fill="#D8D2C6"/>
+    <circle cx="70" cy="270" r="4" fill="#A9A49C"/><circle cx="286" cy="278" r="4" fill="#A9A49C"/>
+    <text x="198" y="253" class="cn" font-size="11" font-weight="700" fill="#F0ECE4">AI记忆系统</text>
+    <g transform="translate(30,340)">
+      <rect x="0" y="0" width="28" height="28" rx="8" fill="#050505" stroke="#000" stroke-opacity="0.12"/><text x="38" y="12" class="cn" font-size="11" fill="#A9A49C">背景</text><text x="38" y="28" class="mono" font-size="10" fill="#F0ECE4">#050505</text><rect x="168" y="0" width="28" height="28" rx="8" fill="#11100E" stroke="#000" stroke-opacity="0.12"/><text x="206" y="12" class="cn" font-size="11" fill="#A9A49C">窗口</text><text x="206" y="28" class="mono" font-size="10" fill="#F0ECE4">#11100E</text><rect x="0" y="42" width="28" height="28" rx="8" fill="#1A1917" stroke="#000" stroke-opacity="0.12"/><text x="38" y="54" class="cn" font-size="11" fill="#A9A49C">面板</text><text x="38" y="70" class="mono" font-size="10" fill="#F0ECE4">#1A1917</text><rect x="168" y="42" width="28" height="28" rx="8" fill="#23221F" stroke="#000" stroke-opacity="0.12"/><text x="206" y="54" class="cn" font-size="11" fill="#A9A49C">次面板</text><text x="206" y="70" class="mono" font-size="10" fill="#F0ECE4">#23221F</text><rect x="0" y="84" width="28" height="28" rx="8" fill="#34322E" stroke="#000" stroke-opacity="0.12"/><text x="38" y="96" class="cn" font-size="11" fill="#A9A49C">边框</text><text x="38" y="112" class="mono" font-size="10" fill="#F0ECE4">#34322E</text><rect x="168" y="84" width="28" height="28" rx="8" fill="#F0ECE4" stroke="#000" stroke-opacity="0.12"/><text x="206" y="96" class="cn" font-size="11" fill="#A9A49C">文字</text><text x="206" y="112" class="mono" font-size="10" fill="#F0ECE4">#F0ECE4</text><rect x="0" y="126" width="28" height="28" rx="8" fill="#A9A49C" stroke="#000" stroke-opacity="0.12"/><text x="38" y="138" class="cn" font-size="11" fill="#A9A49C">次文字</text><text x="38" y="154" class="mono" font-size="10" fill="#F0ECE4">#A9A49C</text><rect x="168" y="126" width="28" height="28" rx="8" fill="#D8D2C6" stroke="#000" stroke-opacity="0.12"/><text x="206" y="138" class="cn" font-size="11" fill="#A9A49C">主强调</text><text x="206" y="154" class="mono" font-size="10" fill="#F0ECE4">#D8D2C6</text><rect x="0" y="168" width="28" height="28" rx="8" fill="#7FA57D" stroke="#000" stroke-opacity="0.12"/><text x="38" y="180" class="cn" font-size="11" fill="#A9A49C">状态</text><text x="38" y="196" class="mono" font-size="10" fill="#F0ECE4">#7FA57D</text><rect x="168" y="168" width="28" height="28" rx="8" fill="#C9857B" stroke="#000" stroke-opacity="0.12"/><text x="206" y="180" class="cn" font-size="11" fill="#A9A49C">危险</text><text x="206" y="196" class="mono" font-size="10" fill="#F0ECE4">#C9857B</text>
+    </g>
+  </g>
+  <g transform="translate(960,150)">
+    <rect width="388" height="600" rx="28" fill="#E7E4DC" stroke="#000" stroke-opacity="0.08"/>
+    <text x="30" y="48" class="cn" font-size="22" font-weight="800" fill="#252521">中性色主题 / Stone Grey</text>
+    <text x="30" y="78" class="cn" font-size="13" fill="#6D6961">介于明暗之间，更像专业桌面工具，适合 Windows。</text>
+    <rect x="30" y="112" width="328" height="190" rx="18" fill="#EFEEE9" stroke="#C1BCB2"/>
+    <text x="52" y="148" class="cn" font-size="16" font-weight="700" fill="#252521">记忆工作台</text>
+    <text x="52" y="172" class="cn" font-size="12" fill="#6D6961">图谱、问答、源资料与治理状态</text>
+    <rect x="52" y="202" width="132" height="34" rx="17" fill="#E0DDD5" stroke="#C1BCB2"/>
+    <circle cx="70" cy="219" r="5" fill="#5E625C"/>
+    <text x="86" y="223" class="cn" font-size="12" font-weight="700" fill="#252521">图谱</text>
+    <rect x="198" y="202" width="116" height="34" rx="17" fill="#5E625C"/>
+    <text x="256" y="223" text-anchor="middle" class="cn" font-size="12" font-weight="800" fill="#D8D6CF">快捷导入</text>
+    <line x1="70" y1="270" x2="180" y2="248" stroke="#5E625C" stroke-opacity="0.46"/>
+    <line x1="180" y1="248" x2="286" y2="278" stroke="#C1BCB2"/>
+    <circle cx="180" cy="248" r="12" fill="#5E625C" opacity="0.18"/><circle cx="180" cy="248" r="6" fill="#5E625C"/>
+    <circle cx="70" cy="270" r="4" fill="#6D6961"/><circle cx="286" cy="278" r="4" fill="#6D6961"/>
+    <text x="198" y="253" class="cn" font-size="11" font-weight="700" fill="#252521">AI记忆系统</text>
+    <g transform="translate(30,340)">
+      <rect x="0" y="0" width="28" height="28" rx="8" fill="#D8D6CF" stroke="#000" stroke-opacity="0.12"/><text x="38" y="12" class="cn" font-size="11" fill="#6D6961">背景</text><text x="38" y="28" class="mono" font-size="10" fill="#252521">#D8D6CF</text><rect x="168" y="0" width="28" height="28" rx="8" fill="#E7E4DC" stroke="#000" stroke-opacity="0.12"/><text x="206" y="12" class="cn" font-size="11" fill="#6D6961">窗口</text><text x="206" y="28" class="mono" font-size="10" fill="#252521">#E7E4DC</text><rect x="0" y="42" width="28" height="28" rx="8" fill="#EFEEE9" stroke="#000" stroke-opacity="0.12"/><text x="38" y="54" class="cn" font-size="11" fill="#6D6961">面板</text><text x="38" y="70" class="mono" font-size="10" fill="#252521">#EFEEE9</text><rect x="168" y="42" width="28" height="28" rx="8" fill="#E0DDD5" stroke="#000" stroke-opacity="0.12"/><text x="206" y="54" class="cn" font-size="11" fill="#6D6961">次面板</text><text x="206" y="70" class="mono" font-size="10" fill="#252521">#E0DDD5</text><rect x="0" y="84" width="28" height="28" rx="8" fill="#C1BCB2" stroke="#000" stroke-opacity="0.12"/><text x="38" y="96" class="cn" font-size="11" fill="#6D6961">边框</text><text x="38" y="112" class="mono" font-size="10" fill="#252521">#C1BCB2</text><rect x="168" y="84" width="28" height="28" rx="8" fill="#252521" stroke="#000" stroke-opacity="0.12"/><text x="206" y="96" class="cn" font-size="11" fill="#6D6961">文字</text><text x="206" y="112" class="mono" font-size="10" fill="#252521">#252521</text><rect x="0" y="126" width="28" height="28" rx="8" fill="#6D6961" stroke="#000" stroke-opacity="0.12"/><text x="38" y="138" class="cn" font-size="11" fill="#6D6961">次文字</text><text x="38" y="154" class="mono" font-size="10" fill="#252521">#6D6961</text><rect x="168" y="126" width="28" height="28" rx="8" fill="#5E625C" stroke="#000" stroke-opacity="0.12"/><text x="206" y="138" class="cn" font-size="11" fill="#6D6961">主强调</text><text x="206" y="154" class="mono" font-size="10" fill="#252521">#5E625C</text><rect x="0" y="168" width="28" height="28" rx="8" fill="#70816D" stroke="#000" stroke-opacity="0.12"/><text x="38" y="180" class="cn" font-size="11" fill="#6D6961">状态</text><text x="38" y="196" class="mono" font-size="10" fill="#252521">#70816D</text><rect x="168" y="168" width="28" height="28" rx="8" fill="#A9625B" stroke="#000" stroke-opacity="0.12"/><text x="206" y="180" class="cn" font-size="11" fill="#6D6961">危险</text><text x="206" y="196" class="mono" font-size="10" fill="#252521">#A9625B</text>
+    </g>
+  </g>
+  <text x="80" y="806" class="cn" font-size="14" font-weight="800" fill="#24211D">建议</text>
+  <text x="80" y="832" class="cn" font-size="13" fill="#746D63">默认用浅色 Warm Paper；暗色用 Neutral Graphite；中性色 Stone Grey 可作为 Windows 或办公场景主题。三套都避免把绿色或黄色作为大面积主色。</text>
+</svg>
