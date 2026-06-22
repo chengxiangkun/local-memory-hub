@@ -1,11 +1,11 @@
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
+import Database from "better-sqlite3";
+import { mkdirSync } from "node:fs";
 import path from "node:path";
 import { createHash, randomUUID } from "node:crypto";
 import { getDataDir, initDataDir } from "./data-store.js";
 
-const execFileAsync = promisify(execFile);
 const sqliteInitPromises = new Map();
+const dbCache = new Map();
 
 export function dbPath(dataDir = getDataDir()) {
   return path.join(dataDir, "database", "main.sqlite");
@@ -1171,33 +1171,70 @@ async function getSourceByHash(contentHash, dataDir) {
   return rows[0] || null;
 }
 
+// 进程内 better-sqlite3 连接,按数据库文件缓存(替代逐次 spawn sqlite3 CLI)。
+// 既消除了高维向量整表 JSON 的 1MB 缓冲限制,也避免了 shell SQL 转义风险。
+function getDb(dataDir) {
+  const file = dbPath(dataDir);
+  const cached = dbCache.get(file);
+  if (cached && cached.open) return cached;
+  mkdirSync(path.dirname(file), { recursive: true });
+  const db = new Database(file);
+  db.pragma("journal_mode = WAL");
+  db.pragma("busy_timeout = 5000");
+  dbCache.set(file, db);
+  return db;
+}
+
+// 仅绑定 SQL 中实际引用的 $命名参数,并规整 undefined→null、boolean→0/1,
+// 以兼容 better-sqlite3 的绑定约束,并允许调用方传入更宽的参数对象。
+function pickParams(sql, params) {
+  const out = {};
+  for (const match of sql.matchAll(/\$([a-zA-Z_][a-zA-Z0-9_]*)/g)) {
+    const key = match[1];
+    if (key in out) continue;
+    let value = params[key];
+    if (value === undefined) value = null;
+    else if (typeof value === "boolean") value = value ? 1 : 0;
+    out[key] = value;
+  }
+  return out;
+}
+
+function splitStatements(sql) {
+  return sql.split(";").map((statement) => statement.trim()).filter(Boolean);
+}
+
+function runOne(db, statement, params) {
+  const bound = pickParams(statement, params);
+  const prepared = db.prepare(statement);
+  if (Object.keys(bound).length > 0) prepared.run(bound);
+  else prepared.run();
+}
+
 async function queryJson(sql, dataDir, params = {}) {
-  const { stdout } = await sqliteExec(sql, dataDir, params, true);
-  return stdout.trim() ? JSON.parse(stdout) : [];
+  const db = getDb(dataDir);
+  const statement = splitStatements(sql)[0] || sql;
+  const prepared = db.prepare(statement);
+  const bound = pickParams(statement, params);
+  return Object.keys(bound).length > 0 ? prepared.all(bound) : prepared.all();
 }
 
 async function runSql(sql, dataDir, params = {}) {
-  await sqliteExec(sql, dataDir, params, false);
-}
-
-async function sqliteExec(sql, dataDir, params, json) {
-  const args = [];
-  if (json) args.push("-json");
-  args.push("-cmd", ".timeout 5000");
-
-  for (const [key, value] of Object.entries(params)) {
-    args.push("-cmd", `.parameter set $${key} ${escapeParam(value)}`);
+  const db = getDb(dataDir);
+  const statements = splitStatements(sql);
+  if (statements.length <= 1) {
+    runOne(db, statements[0] || sql, params);
+    return;
   }
-
-  args.push(dbPath(dataDir), sql);
-  // 高维向量(如 e5 的 384/1024 维)整表 JSON 会超过 execFile 默认 1MB 缓冲,
-  // 调大上限。根治方案见 P2.1(内嵌 SQLite)。
-  return execFileAsync("sqlite3", args, { maxBuffer: 256 * 1024 * 1024 });
-}
-
-function escapeParam(value) {
-  if (value === null || value === undefined) return "NULL";
-  return `'${String(value).replaceAll("'", "''")}'`;
+  // 多语句:无参数(如建表)直接 exec;有共享参数则在事务内逐条预编译执行。
+  if (Object.keys(params).length === 0) {
+    db.exec(sql);
+    return;
+  }
+  const tx = db.transaction(() => {
+    for (const statement of statements) runOne(db, statement, params);
+  });
+  tx();
 }
 
 function sqlPlaceholders(prefix, count) {

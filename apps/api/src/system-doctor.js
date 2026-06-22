@@ -8,11 +8,11 @@ const execFileAsync = promisify(execFile);
 const COMMAND_CHECKS = [
   {
     id: "sqlite3",
-    label: "SQLite",
+    label: "SQLite CLI（可选）",
     command: "sqlite3",
     args: ["--version"],
-    required: true,
-    missing_message: "缺少 sqlite3，本地资料库和图谱存储不可用。"
+    required: false,
+    missing_message: "未检测到系统 sqlite3 命令行；已内嵌 better-sqlite3，无需系统 sqlite3，仅影响手动排查。"
   },
   {
     id: "ffmpeg",
