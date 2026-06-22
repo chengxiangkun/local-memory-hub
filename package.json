@@ -50,6 +50,7 @@
   ],
   "dependencies": {
     "@huggingface/transformers": "^4.2.0",
-    "better-sqlite3": "^12.11.1"
+    "better-sqlite3": "^12.11.1",
+    "force-graph": "^1.51.4"
   }
 }

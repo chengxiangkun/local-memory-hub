@@ -6,7 +6,7 @@ import {
   renderQaGovernanceResult
 } from "./js/governance-view.js";
 import { renderEmptyNodeDetail, renderSelectedNode } from "./js/graph-detail-view.js";
-import { renderGraph as renderGraphSvg, updateGraphSelection } from "./js/graph-renderer.js";
+import { renderGraph as renderGraphSvg, updateGraphSelection } from "./js/graph-renderer-force.js";
 import { importExampleText as runExampleImport, importFile as runFileImport, importText as runTextImport, importUrl as runUrlImport } from "./js/import-flow.js";
 import { renderMetrics as renderMetricCounters } from "./js/metrics-view.js";
 import {

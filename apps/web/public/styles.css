@@ -2775,3 +2775,7 @@ svg.is-dragging {
 
 /* 连接器配置/限频提示 */
 .connector-hint { display: block; margin-top: 6px; color: var(--warn); font-size: 11px; line-height: 1.5; }
+
+/* force-graph 渲染容器:填满画布区 */
+.graph-force { position: absolute; inset: 0; }
+.graph-force canvas { display: block; }

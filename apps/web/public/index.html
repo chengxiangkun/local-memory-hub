@@ -91,7 +91,8 @@
               </div>
 
               <div class="graph-canvas">
-                <svg id="graph" viewBox="0 0 1120 720" aria-label="记忆图谱"></svg>
+                <div id="graphForce" class="graph-force"></div>
+                <svg id="graph" class="hidden" viewBox="0 0 1120 720" aria-label="记忆图谱"></svg>
                 <div class="graph-zoom-control" aria-label="图谱缩放">
                   <span>缩放</span>
                   <input id="graphZoomSlider" type="range" min="55" max="240" value="100" aria-label="图谱缩放比例" />
@@ -574,6 +575,7 @@
       </div>
     </div>
 
+    <script src="/lib/force-graph.min.js"></script>
     <script type="module" src="/main.js"></script>
   </body>
 </html>
