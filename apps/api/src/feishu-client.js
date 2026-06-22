@@ -1,5 +1,21 @@
 const FEISHU_BASE_URL = "https://open.feishu.cn";
 
+// 飞书频控(2026-06 核对):多级限频,典型 1000 次/分 + 50 次/秒;修改节点
+// 状态/结构类接口更严(5 QPS + 每日 10000 次);超限返回 HTTP 429 并带建议等待。
+// 飞书无"终身累计总次数"限制,按 QPS/QPM/每日 维度。tenant_access_token 有效期约
+// 2 小时,这里做缓存复用,避免每次同步/解析都重新换取,显著减少调用次数。
+// 为安全留足余量,所有调用经过 ~4 QPS 的串行节流。
+const MIN_CALL_GAP_MS = 250;
+let lastCallAt = 0;
+const tokenCache = new Map(); // appId -> { token, expireAt }
+
+async function throttle() {
+  const now = Date.now();
+  const wait = Math.max(0, lastCallAt + MIN_CALL_GAP_MS - now);
+  lastCallAt = now + wait;
+  if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
+}
+
 export function extractFeishuDocxToken(url) {
   const parsed = new URL(url);
   const parts = parsed.pathname.split("/").filter(Boolean);
@@ -18,11 +34,16 @@ export function extractFeishuWikiToken(url) {
 
 export async function getFeishuTenantAccessToken({ appId, appSecret }) {
   if (!appId || !appSecret) throw new Error("缺少飞书 APP_ID 或 APP_SECRET");
+  const cached = tokenCache.get(appId);
+  // 提前 2 分钟过期,避免边界失效。
+  if (cached && cached.expireAt > Date.now() + 120000) return cached.token;
   const data = await feishuPost("/open-apis/auth/v3/tenant_access_token/internal", {
     app_id: appId,
     app_secret: appSecret
   });
   if (!data.tenant_access_token) throw new Error(`飞书 token 响应缺少 tenant_access_token：${data.msg || data.code}`);
+  const expireSeconds = Number(data.expire) > 0 ? Number(data.expire) : 7200;
+  tokenCache.set(appId, { token: data.tenant_access_token, expireAt: Date.now() + expireSeconds * 1000 });
   return data.tenant_access_token;
 }
 
@@ -132,6 +153,7 @@ export function feishuBlocksToText(blocks) {
 }
 
 async function feishuGet(path, token) {
+  await throttle();
   const res = await fetch(`${FEISHU_BASE_URL}${path}`, {
     headers: { authorization: `Bearer ${token}` }
   });
@@ -139,6 +161,7 @@ async function feishuGet(path, token) {
 }
 
 async function feishuPost(path, body) {
+  await throttle();
   const res = await fetch(`${FEISHU_BASE_URL}${path}`, {
     method: "POST",
     headers: { "content-type": "application/json; charset=utf-8" },

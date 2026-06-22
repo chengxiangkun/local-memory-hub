@@ -2772,3 +2772,6 @@ svg.is-dragging {
 /* 连接器自动同步间隔 */
 .connector-autosync { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; margin: 0; }
 .connector-autosync select { width: auto; padding: 6px 28px 6px 8px; font-size: 12px; }
+
+/* 连接器配置/限频提示 */
+.connector-hint { display: block; margin-top: 6px; color: var(--warn); font-size: 11px; line-height: 1.5; }

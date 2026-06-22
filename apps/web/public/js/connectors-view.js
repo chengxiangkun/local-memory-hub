@@ -12,14 +12,19 @@ const CONNECTOR_TEMPLATES = [
   {
     platform: "feishu",
     display_name: "飞书文档",
-    description: "OAuth/API 拉取，可扩展事件订阅同步",
-    sync_mode: "event"
+    description: "App 凭证拉取 wiki/docx，已支持增量/修改/删除轮询同步",
+    sync_mode: "event",
+    // 飞书频控:典型 1000 次/分 + 50 次/秒;节点结构类接口 5 QPS + 每日 10000 次;
+    // 无终身总次数限制。本应用已做 token 缓存 + ~4 QPS 节流 + 未变跳过以省调用。
+    hint: "凭证存于本地 .env.local（FEISHU_APP_ID/SECRET）。频控:约 1000 次/分、50 次/秒，节点接口每日上限 1 万次；无累计总额度。已自动节流并跳过未变文档以减少调用。"
   },
   {
     platform: "tencent_docs",
     display_name: "腾讯文档",
-    description: "OAuth/API 拉取，定时轮询检查变更",
-    sync_mode: "polling"
+    description: "需在腾讯文档开放平台注册应用并授权（OAuth）",
+    sync_mode: "polling",
+    // 腾讯文档:每应用免费 20000 次 API 调用(累计总次数,2025-07-01 起),超出需采买。
+    hint: "接入需开发者应用凭证:到 docs.qq.com/open 控制台创建应用拿 client_id/secret 并完成 OAuth 用户授权。⚠️ 每个应用免费累计 20000 次 API 调用,超出需采买资源包——务必控制同步频率与文档数量。当前仅支持保存链接兜底,真实拉取待配置凭证后接入。"
   }
 ];
 
@@ -32,6 +37,7 @@ export function renderConnectorCards(container, connectors, { onChanged } = {}) 
         <strong>${escapeHtml(template.display_name)}</strong>
         <span>${escapeHtml(template.description)}</span>
         <small>${formatConnectorStatus(connector, template)}</small>
+        ${template.hint ? `<small class="connector-hint">${escapeHtml(template.hint)}</small>` : ""}
         <div class="connector-actions">
           <button class="ghost-button" type="button" data-connect-platform="${template.platform}">${connectorButtonText(connector)}</button>
           <button class="ghost-button" type="button" data-sync-platform="${template.platform}" ${connector ? "" : "disabled"}>立即同步</button>
