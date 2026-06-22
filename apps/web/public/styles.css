@@ -2768,3 +2768,7 @@ svg.is-dragging {
 .embedding-rebuild-hint { color: var(--muted); font-size: 11px; }
 .embedding-rebuild-status { font-size: 12px; color: var(--accent); }
 .embedding-empty, .embedding-catalog > .embedding-empty { color: var(--muted); font-size: 13px; padding: 8px; }
+
+/* 连接器自动同步间隔 */
+.connector-autosync { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; margin: 0; }
+.connector-autosync select { width: auto; padding: 6px 28px 6px 8px; font-size: 12px; }

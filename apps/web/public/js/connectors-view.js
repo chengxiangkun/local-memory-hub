@@ -35,6 +35,11 @@ export function renderConnectorCards(container, connectors, { onChanged } = {}) 
         <div class="connector-actions">
           <button class="ghost-button" type="button" data-connect-platform="${template.platform}">${connectorButtonText(connector)}</button>
           <button class="ghost-button" type="button" data-sync-platform="${template.platform}" ${connector ? "" : "disabled"}>立即同步</button>
+          <label class="connector-autosync">自动同步
+            <select data-autosync-platform="${template.platform}" ${connector ? "" : "disabled"}>
+              ${autoSyncOptions(connector?.auto_sync_minutes || 0)}
+            </select>
+          </label>
           ${template.platform === "feishu" ? `<a class="ghost-button help-link" href="/docs/integrations/feishu.md" target="_blank" rel="noreferrer">帮助</a>` : ""}
         </div>
       </div>
@@ -68,6 +73,28 @@ export function renderConnectorCards(container, connectors, { onChanged } = {}) 
       await onChanged?.();
     });
   });
+
+  container.querySelectorAll("[data-autosync-platform]").forEach((select) => {
+    select.addEventListener("change", async () => {
+      await post("/api/connectors", {
+        platform: select.dataset.autosyncPlatform,
+        auto_sync_minutes: Number(select.value)
+      });
+      await onChanged?.();
+    });
+  });
+}
+
+function autoSyncOptions(current) {
+  const options = [
+    [0, "关闭"],
+    [15, "每 15 分钟"],
+    [30, "每 30 分钟"],
+    [60, "每小时"]
+  ];
+  return options
+    .map(([value, label]) => `<option value="${value}" ${Number(current) === value ? "selected" : ""}>${label}</option>`)
+    .join("");
 }
 
 export function renderConnectorTimeline(container, connectors) {

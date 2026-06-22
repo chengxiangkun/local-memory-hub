@@ -6,6 +6,7 @@ import { persistConversationTurn } from "./conversation-memory-service.js";
 import { initDataDir, moveToTrash } from "./data-store.js";
 import { testEmbeddingProvider } from "./embedding-service.js";
 import { listExternalConnectors, markConnectorSync, saveExternalConnector } from "./external-connector-store.js";
+import { armConnectorSchedules } from "./connector-scheduler.js";
 import { handleImport } from "./import-pipeline.js";
 import { syncFeishuConnector } from "./feishu-sync-service.js";
 import { getUserHabitProfile } from "./memory-organizer-agent.js";
@@ -67,6 +68,23 @@ await initSqlite(dataInfo.data_dir);
 initModelProviders();
 runQaMemoryAutoGovernance(dataInfo.data_dir).catch((error) => {
   console.error("QA memory auto governance failed", error);
+});
+
+// 连接器同步:手动触发与自动调度共用。先登记同步状态,再按平台执行拉取。
+async function runConnectorSync(platform) {
+  const synced = await markConnectorSync({ platform }, dataInfo.data_dir);
+  if (platform === "feishu") {
+    return { connector: synced.connector, result: await syncFeishuConnector(synced.connector, dataInfo.data_dir) };
+  }
+  if (platform === "tencent_docs") {
+    return { connector: synced.connector, result: await syncTencentDocsConnector(synced.connector) };
+  }
+  return synced;
+}
+
+// 启动时按连接器 auto_sync_minutes 编排自动同步(默认关闭)。
+armConnectorSchedules(dataInfo.data_dir, runConnectorSync).catch((error) => {
+  console.error("连接器自动同步编排失败", error.message);
 });
 
 // 本地 embedding 模型下载状态(进程内,按目录条目 id)。
@@ -288,27 +306,15 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method === "POST" && req.url === "/api/connectors") {
       const body = await readJson(req);
-      return json(res, 200, {
-        connector: await saveExternalConnector(body, dataInfo.data_dir)
-      });
+      const connector = await saveExternalConnector(body, dataInfo.data_dir);
+      // 配置变更后重新编排自动同步定时器。
+      armConnectorSchedules(dataInfo.data_dir, runConnectorSync).catch(() => {});
+      return json(res, 200, { connector });
     }
 
     if (req.method === "POST" && req.url === "/api/connectors/sync") {
       const body = await readJson(req);
-      const synced = await markConnectorSync(body, dataInfo.data_dir);
-      if (body.platform === "feishu") {
-        return json(res, 200, {
-          connector: synced.connector,
-          result: await syncFeishuConnector(synced.connector, dataInfo.data_dir)
-        });
-      }
-      if (body.platform === "tencent_docs") {
-        return json(res, 200, {
-          connector: synced.connector,
-          result: await syncTencentDocsConnector(synced.connector)
-        });
-      }
-      return json(res, 200, synced);
+      return json(res, 200, await runConnectorSync(body.platform));
     }
 
     if (req.method === "GET" && req.url?.startsWith("/api/search")) {

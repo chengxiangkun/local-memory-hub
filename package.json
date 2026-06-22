@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "npm run test:api && npm run test:model && npm run test:retrieval && npm run test:model-provider && npm run test:model-config && npm run test:model-config-resolver && npm run test:embedding && npm run test:embedding-pluggable && npm run test:model-config-api && npm run test:connectors && npm run test:source-folders && npm run test:model-policy && npm run test:model-policy-api && npm run test:qa-governance && npm run test:governance-audit && npm run test:source-detail && npm run test:delete-scope && npm run test:fallback && npm run test:mcp && npm run test:migration && npm run test:vector && npm run test:data-dir && npm run test:parser && npm run test:media && npm run test:doctor && npm run test:feishu-client",
+    "test": "npm run test:api && npm run test:model && npm run test:retrieval && npm run test:model-provider && npm run test:model-config && npm run test:model-config-resolver && npm run test:embedding && npm run test:embedding-pluggable && npm run test:model-config-api && npm run test:connectors && npm run test:source-folders && npm run test:model-policy && npm run test:model-policy-api && npm run test:qa-governance && npm run test:governance-audit && npm run test:source-detail && npm run test:delete-scope && npm run test:fallback && npm run test:mcp && npm run test:migration && npm run test:vector && npm run test:data-dir && npm run test:parser && npm run test:media && npm run test:doctor && npm run test:feishu-client && npm run test:feishu-sync",
     "start": "node apps/api/src/local-cli.js start",
     "stop": "node apps/api/src/local-cli.js stop",
     "restart": "node apps/api/src/local-cli.js restart",
@@ -38,6 +38,7 @@
     "test:media": "node apps/api/src/media-smoke-test.js",
     "test:doctor": "node apps/api/src/system-doctor.test.js",
     "test:feishu-client": "node apps/api/src/feishu-client.test.js",
+    "test:feishu-sync": "node apps/api/src/feishu-sync.test.js",
     "test:feishu-real": "node apps/api/src/feishu-real-smoke-test.js",
     "test:feishu-folder-real": "node apps/api/src/feishu-folder-real-smoke-test.js",
     "test:feishu-wiki-probe": "node apps/api/src/feishu-wiki-probe.js",

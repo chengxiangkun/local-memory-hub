@@ -175,6 +175,41 @@ async function initSqliteOnce(dataDir) {
   );
   await ensureMemorySegmentColumns(dataDir);
   await ensureVectorIndexColumns(dataDir);
+  await ensureSourceColumns(dataDir);
+}
+
+// 外部来源(如飞书)的远端追踪列,用于增量同步:对比 remote_edit_time 判断是否变化,
+// 用 remote_node_token 作为远端节点与本地源的稳定映射键。兼容老库(按需 ALTER)。
+async function ensureSourceColumns(dataDir) {
+  const columns = await queryJson("PRAGMA table_info(sources);", dataDir);
+  const existing = new Set(columns.map((column) => column.name));
+  const additions = [
+    ["remote_node_token", "TEXT NOT NULL DEFAULT ''"],
+    ["remote_edit_time", "TEXT NOT NULL DEFAULT ''"]
+  ];
+  for (const [name, definition] of additions) {
+    if (!existing.has(name)) {
+      await runSql(`ALTER TABLE sources ADD COLUMN ${name} ${definition};`, dataDir);
+    }
+  }
+}
+
+export async function setSourceRemoteMeta(sourceId, meta, dataDir = getDataDir()) {
+  await initSqlite(dataDir);
+  await runSql(
+    `
+    UPDATE sources
+    SET remote_node_token = $remote_node_token,
+        remote_edit_time = $remote_edit_time
+    WHERE source_id = $source_id;
+    `,
+    dataDir,
+    {
+      source_id: sourceId,
+      remote_node_token: String(meta.remote_node_token || ""),
+      remote_edit_time: String(meta.remote_edit_time || "")
+    }
+  );
 }
 
 export async function insertSourceSqlite(source, dataDir = getDataDir()) {

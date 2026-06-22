@@ -27,6 +27,9 @@ export async function saveExternalConnector(input, dataDir = getDataDir()) {
     preserve_remote_structure: input.preserve_remote_structure !== false,
     sync_updates_as_revision: input.sync_updates_as_revision !== false,
     delete_remote_cleanup: input.delete_remote_cleanup === true,
+    auto_sync_minutes: normalizeAutoSyncMinutes(
+      input.auto_sync_minutes !== undefined ? input.auto_sync_minutes : existing?.auto_sync_minutes
+    ),
     last_sync_at: existing?.last_sync_at || null,
     created_at: existing?.created_at || now,
     updated_at: now
@@ -94,10 +97,18 @@ function toPublicConnector(connector) {
     preserve_remote_structure: connector.preserve_remote_structure !== false,
     sync_updates_as_revision: connector.sync_updates_as_revision !== false,
     delete_remote_cleanup: connector.delete_remote_cleanup === true,
+    auto_sync_minutes: normalizeAutoSyncMinutes(connector.auto_sync_minutes),
     last_sync_at: connector.last_sync_at,
     created_at: connector.created_at,
     updated_at: connector.updated_at
   };
+}
+
+// 自动同步间隔(分钟)。0 表示关闭;最小 5 分钟,避免频繁拉取。
+function normalizeAutoSyncMinutes(value) {
+  const minutes = Number(value);
+  if (!Number.isFinite(minutes) || minutes <= 0) return 0;
+  return Math.max(5, Math.min(1440, Math.round(minutes)));
 }
 
 function platformName(platform) {
