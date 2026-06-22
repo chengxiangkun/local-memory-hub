@@ -20,6 +20,7 @@ import { runQaMemoryAutoGovernance } from "./qa-memory-governance-service.js";
 import { listFallbackQuestionContext, retrieveQuestionContext } from "./retrieval-service.js";
 import { createSourceFolder, listSourceFolders, moveSourceToFolder } from "./source-folder-store.js";
 import { runSystemDoctor } from "./system-doctor.js";
+import { getMcpPermissions, saveMcpPermissions, listExternalCalls } from "./mcp-permission-store.js";
 import { rebuildVectorIndex, vectorSearch } from "./vector-service.js";
 import { EMBEDDING_CATALOG, getCatalogEntry } from "./embedding-catalog.js";
 import { getEmbeddingConfig, saveEmbeddingConfig, defaultModelPath } from "./embedding-config-store.js";
@@ -280,6 +281,21 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method === "GET" && req.url === "/api/external/mcp/status") {
       return json(res, 200, await getMcpStatus());
+    }
+
+    if (req.method === "GET" && req.url === "/api/external/permissions") {
+      return json(res, 200, await getMcpPermissions(dataInfo.data_dir));
+    }
+
+    if (req.method === "POST" && req.url === "/api/external/permissions") {
+      const body = await readJson(req);
+      return json(res, 200, await saveMcpPermissions(body, dataInfo.data_dir));
+    }
+
+    if (req.method === "GET" && req.url?.startsWith("/api/external/calls")) {
+      const url = new URL(req.url, "http://127.0.0.1");
+      const limit = Number(url.searchParams.get("limit") || 50);
+      return json(res, 200, { calls: await listExternalCalls(dataInfo.data_dir, { limit }) });
     }
 
     if (req.method === "GET" && req.url === "/api/connectors") {

@@ -2779,3 +2779,20 @@ svg.is-dragging {
 /* force-graph 渲染容器:填满画布区 */
 .graph-force { position: absolute; inset: 0; }
 .graph-force canvas { display: block; }
+
+/* 外部 AI(MCP)访问设置 */
+.external-ai-panel { display: grid; gap: 16px; }
+.external-ai-panel h4 { margin: 0 0 8px; color: var(--muted); font-size: 13px; }
+.external-tool-row { display: flex; align-items: center; gap: 8px; margin: 0 0 6px; font-size: 13px; }
+.external-tool-row span strong { font-weight: 600; }
+.external-config-code {
+  margin: 0; padding: 12px; border: 1px solid var(--line); border-radius: 10px;
+  background: #0b0f14; color: var(--muted); font-size: 11px; line-height: 1.5; overflow: auto;
+  white-space: pre; font-family: ui-monospace, monospace;
+}
+.external-audit-list { display: grid; gap: 6px; max-height: 280px; overflow: auto; }
+.external-audit-row {
+  display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: 8px;
+  padding: 6px 8px; border: 1px solid var(--line-soft); border-radius: 8px; font-size: 12px;
+}
+.external-empty { color: var(--muted); font-size: 12px; padding: 8px; }

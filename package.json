@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "npm run test:api && npm run test:model && npm run test:retrieval && npm run test:model-provider && npm run test:model-config && npm run test:model-config-resolver && npm run test:embedding && npm run test:embedding-pluggable && npm run test:model-config-api && npm run test:connectors && npm run test:source-folders && npm run test:model-policy && npm run test:model-policy-api && npm run test:qa-governance && npm run test:governance-audit && npm run test:source-detail && npm run test:delete-scope && npm run test:fallback && npm run test:mcp && npm run test:migration && npm run test:vector && npm run test:data-dir && npm run test:parser && npm run test:media && npm run test:doctor && npm run test:feishu-client && npm run test:feishu-sync",
+    "test": "npm run test:api && npm run test:model && npm run test:retrieval && npm run test:model-provider && npm run test:model-config && npm run test:model-config-resolver && npm run test:embedding && npm run test:embedding-pluggable && npm run test:model-config-api && npm run test:connectors && npm run test:source-folders && npm run test:model-policy && npm run test:model-policy-api && npm run test:qa-governance && npm run test:governance-audit && npm run test:source-detail && npm run test:delete-scope && npm run test:fallback && npm run test:mcp && npm run test:mcp-stdio && npm run test:migration && npm run test:vector && npm run test:data-dir && npm run test:parser && npm run test:media && npm run test:doctor && npm run test:feishu-client && npm run test:feishu-sync",
     "start": "node apps/api/src/local-cli.js start",
     "stop": "node apps/api/src/local-cli.js stop",
     "restart": "node apps/api/src/local-cli.js restart",
@@ -31,6 +31,7 @@
     "test:delete-scope": "node apps/api/src/delete-scope-smoke-test.js",
     "test:fallback": "node apps/api/src/fallback-smoke-test.js",
     "test:mcp": "node apps/mcp/src/mcp-smoke-test.js",
+    "test:mcp-stdio": "node apps/mcp/src/mcp-stdio.test.js",
     "test:migration": "node apps/api/src/migration-smoke-test.js",
     "test:vector": "node apps/api/src/vector-smoke-test.js",
     "test:data-dir": "node apps/api/src/data-dir-smoke-test.js",
@@ -50,6 +51,7 @@
   ],
   "dependencies": {
     "@huggingface/transformers": "^4.2.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "better-sqlite3": "^12.11.1",
     "force-graph": "^1.51.4"
   }
