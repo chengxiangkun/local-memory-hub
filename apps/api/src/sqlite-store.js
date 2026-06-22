@@ -1155,7 +1155,9 @@ async function sqliteExec(sql, dataDir, params, json) {
   }
 
   args.push(dbPath(dataDir), sql);
-  return execFileAsync("sqlite3", args);
+  // 高维向量(如 e5 的 384/1024 维)整表 JSON 会超过 execFile 默认 1MB 缓冲,
+  // 调大上限。根治方案见 P2.1(内嵌 SQLite)。
+  return execFileAsync("sqlite3", args, { maxBuffer: 256 * 1024 * 1024 });
 }
 
 function escapeParam(value) {

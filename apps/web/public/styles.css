@@ -2731,3 +2731,40 @@ svg.is-dragging {
     animation: none !important;
   }
 }
+
+/* 可拔插 embedding 设置 */
+.embedding-catalog { display: grid; gap: 14px; }
+.embedding-pathline { display: grid; gap: 6px; }
+.embedding-path-row { display: flex; gap: 8px; }
+.embedding-path-row input {
+  flex: 1; min-width: 0; padding: 8px 10px;
+  border: 1px solid var(--line); border-radius: 9px; background: #0d1117; color: inherit;
+  font-family: ui-monospace, monospace; font-size: 12px;
+}
+.embedding-cards {
+  display: grid; gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+.embedding-card {
+  border: 1px solid var(--line); border-radius: 13px; padding: 14px;
+  background: #0d1117; display: grid; gap: 10px; align-content: start;
+}
+.embedding-card.active { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.embedding-card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.embedding-card-head strong { font-size: 13px; overflow-wrap: anywhere; }
+.embedding-card-meta { display: flex; flex-wrap: wrap; gap: 8px; color: var(--muted); font-size: 11px; }
+.embedding-card-meta span:empty { display: none; }
+.embedding-card-desc { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.embedding-card-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.embedding-dl-hint { color: var(--muted); font-size: 11px; }
+.embedding-dl-hint.bad { color: #f87171; }
+.embedding-name-form, .embedding-cloud-form { display: grid; gap: 6px; }
+.embedding-name-form { grid-template-columns: 1fr auto; align-items: center; }
+.embedding-name-form input, .embedding-cloud-form input {
+  padding: 6px 9px; border: 1px solid var(--line); border-radius: 8px;
+  background: #0b0f14; color: inherit; font-size: 12px; min-width: 0;
+}
+.embedding-rebuild-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.embedding-rebuild-hint { color: var(--muted); font-size: 11px; }
+.embedding-rebuild-status { font-size: 12px; color: var(--accent); }
+.embedding-empty, .embedding-catalog > .embedding-empty { color: var(--muted); font-size: 13px; padding: 8px; }

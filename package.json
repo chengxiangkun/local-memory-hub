@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "npm run test:api && npm run test:model && npm run test:retrieval && npm run test:model-provider && npm run test:model-config && npm run test:model-config-resolver && npm run test:embedding && npm run test:model-config-api && npm run test:connectors && npm run test:source-folders && npm run test:model-policy && npm run test:model-policy-api && npm run test:qa-governance && npm run test:governance-audit && npm run test:source-detail && npm run test:delete-scope && npm run test:fallback && npm run test:mcp && npm run test:migration && npm run test:vector && npm run test:data-dir && npm run test:parser && npm run test:media && npm run test:doctor && npm run test:feishu-client",
+    "test": "npm run test:api && npm run test:model && npm run test:retrieval && npm run test:model-provider && npm run test:model-config && npm run test:model-config-resolver && npm run test:embedding && npm run test:embedding-pluggable && npm run test:model-config-api && npm run test:connectors && npm run test:source-folders && npm run test:model-policy && npm run test:model-policy-api && npm run test:qa-governance && npm run test:governance-audit && npm run test:source-detail && npm run test:delete-scope && npm run test:fallback && npm run test:mcp && npm run test:migration && npm run test:vector && npm run test:data-dir && npm run test:parser && npm run test:media && npm run test:doctor && npm run test:feishu-client",
     "start": "node apps/api/src/local-cli.js start",
     "stop": "node apps/api/src/local-cli.js stop",
     "restart": "node apps/api/src/local-cli.js restart",
@@ -19,6 +19,7 @@
     "test:model-config": "node apps/api/src/model-config-store.test.js",
     "test:model-config-resolver": "node apps/api/src/model-config-resolver.test.js",
     "test:embedding": "node apps/api/src/embedding-service.test.js",
+    "test:embedding-pluggable": "node apps/api/src/embedding-pluggable.test.js",
     "test:model-config-api": "node apps/api/src/model-config-api-smoke-test.js",
     "test:connectors": "node apps/api/src/external-connector-store.test.js",
     "test:source-folders": "node apps/api/src/source-folder-store.test.js",
@@ -45,5 +46,8 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "@huggingface/transformers": "^4.2.0"
+  }
 }

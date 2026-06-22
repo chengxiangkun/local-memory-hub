@@ -20,6 +20,9 @@ import { listFallbackQuestionContext, retrieveQuestionContext } from "./retrieva
 import { createSourceFolder, listSourceFolders, moveSourceToFolder } from "./source-folder-store.js";
 import { runSystemDoctor } from "./system-doctor.js";
 import { rebuildVectorIndex, vectorSearch } from "./vector-service.js";
+import { EMBEDDING_CATALOG, getCatalogEntry } from "./embedding-catalog.js";
+import { getEmbeddingConfig, saveEmbeddingConfig, defaultModelPath } from "./embedding-config-store.js";
+import { isModelDownloaded, downloadModel } from "./embedding-local-runtime.js";
 import {
   getGraph,
   getGraphByNodeType,
@@ -65,6 +68,36 @@ initModelProviders();
 runQaMemoryAutoGovernance(dataInfo.data_dir).catch((error) => {
   console.error("QA memory auto governance failed", error);
 });
+
+// 本地 embedding 模型下载状态(进程内,按目录条目 id)。
+const embeddingDownloadStatus = new Map();
+
+async function buildEmbeddingCatalogView(dataDir) {
+  const config = await getEmbeddingConfig(dataDir);
+  const catalog = [];
+  for (const entry of EMBEDDING_CATALOG) {
+    const override = config.overrides[entry.id] || {};
+    const modelRef = override.model_ref || entry.model_ref;
+    const view = {
+      ...entry,
+      model_ref: modelRef,
+      active: config.active_id === entry.id,
+      download: embeddingDownloadStatus.get(entry.id) || null
+    };
+    if (entry.runtime === "transformers") {
+      view.downloaded = await isModelDownloaded(modelRef, config.model_path);
+    } else if (entry.runtime === "openai") {
+      view.configured = Boolean(override.api_key && (override.base_url || entry.default_base_url) && (override.model || entry.model_ref));
+      view.base_url = override.base_url || entry.default_base_url || "";
+      view.model = override.model || entry.model_ref || "";
+      view.has_api_key = Boolean(override.api_key);
+    } else {
+      view.downloaded = true;
+    }
+    catalog.push(view);
+  }
+  return { catalog, active_id: config.active_id, model_path: config.model_path };
+}
 
 const server = http.createServer(async (req, res) => {
   try {
@@ -298,6 +331,42 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method === "POST" && req.url === "/api/vector/rebuild") {
       return json(res, 200, await rebuildVectorIndex(dataInfo.data_dir));
+    }
+
+    if (req.method === "GET" && req.url === "/api/embedding/catalog") {
+      return json(res, 200, await buildEmbeddingCatalogView(dataInfo.data_dir));
+    }
+
+    if (req.method === "POST" && req.url === "/api/embedding/config") {
+      const body = await readJson(req);
+      const saved = await saveEmbeddingConfig(body, dataInfo.data_dir);
+      return json(res, 200, { status: "saved", config: { active_id: saved.active_id, model_path: saved.model_path } });
+    }
+
+    if (req.method === "POST" && req.url === "/api/embedding/download") {
+      const body = await readJson(req);
+      const entry = getCatalogEntry(body.id);
+      if (!entry) return json(res, 404, { error: "not_found", message: "目录中没有该模型" });
+      if (entry.runtime !== "transformers") return json(res, 400, { error: "bad_request", message: "该项无需下载" });
+      const config = await getEmbeddingConfig(dataInfo.data_dir);
+      const override = config.overrides[entry.id] || {};
+      const modelRef = override.model_ref || entry.model_ref;
+      const current = embeddingDownloadStatus.get(entry.id);
+      if (current?.state === "downloading") return json(res, 200, { status: "already_downloading", id: entry.id });
+      embeddingDownloadStatus.set(entry.id, { state: "downloading", model_ref: modelRef, started_at: new Date().toISOString() });
+      // 后台下载,不阻塞响应。
+      downloadModel(modelRef, config.model_path)
+        .then((result) => {
+          embeddingDownloadStatus.set(entry.id, { state: "downloaded", model_ref: modelRef, dimension: result.dimension, finished_at: new Date().toISOString() });
+        })
+        .catch((error) => {
+          embeddingDownloadStatus.set(entry.id, { state: "error", model_ref: modelRef, error: error.message });
+        });
+      return json(res, 200, { status: "started", id: entry.id, size_mb: entry.size_mb });
+    }
+
+    if (req.method === "GET" && req.url === "/api/embedding/download/status") {
+      return json(res, 200, { status: Object.fromEntries(embeddingDownloadStatus) });
     }
 
     if (req.method === "GET" && req.url?.startsWith("/api/segments")) {

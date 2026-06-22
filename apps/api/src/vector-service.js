@@ -24,7 +24,7 @@ export async function indexSegments(segments, dataDir = getDataDir()) {
 }
 
 export async function vectorSearch(query, dataDir = getDataDir(), options = {}) {
-  const embedded = await embedTexts([query], dataDir);
+  const embedded = await embedTexts([query], dataDir, { input_type: "query" });
   const queryVector = embedded.vectors[0];
   const queryTokens = extractMultilingualTokens(query);
   const vectors = await listVectors(dataDir);

@@ -3,11 +3,25 @@ import { getModelPolicy } from "./model-policy-store.js";
 import { listProviderTemplates } from "./model-provider.js";
 import { getDataDir } from "./data-store.js";
 import { extractMultilingualTokens } from "./text-tokenizer.js";
+import { resolveActiveEmbedding } from "./embedding-config-store.js";
+import { embedWithTransformers, isModelDownloaded } from "./embedding-local-runtime.js";
 
 const LOCAL_WEAK_DIMENSIONS = 32;
 
 export async function embedTexts(texts, dataDir = getDataDir(), options = {}) {
   const normalizedTexts = texts.map((text) => String(text || ""));
+  const inputType = options.input_type === "query" ? "query" : "passage";
+
+  // 新的可拔插激活选择优先(仅当未显式指定 provider_id 时)。
+  // 解析失败/模型未下载/配置不全 → 返回 null,继续走下面的旧策略/兜底。
+  if (!options.provider_id) {
+    const active = options.active || await resolveActiveEmbedding(dataDir);
+    if (active) {
+      const result = await embedByActiveSelection(normalizedTexts, active, inputType);
+      if (result) return result;
+    }
+  }
+
   const policy = options.policy || await getModelPolicy("embedding", dataDir);
   const providerId = options.provider_id || policy?.provider_id || "local_weak";
   if (providerId === "local_weak") {
@@ -53,6 +67,50 @@ export async function testEmbeddingProvider(input = {}, dataDir = getDataDir()) 
     embedding_dimension: result.embedding_dimension,
     fallback: result.fallback
   };
+}
+
+// 按可拔插激活选择嵌入。返回 null 表示无法用该选择(交回退)。
+async function embedByActiveSelection(texts, active, inputType) {
+  if (active.runtime === "builtin") {
+    return buildEmbeddingResult({
+      providerId: active.id,
+      model: active.model_ref || "local-weak-bigram-v1",
+      vectors: texts.map(embedLocalWeak),
+      fallback: active.id === "local_weak"
+    });
+  }
+
+  if (active.runtime === "transformers") {
+    try {
+      if (!active.model_ref || !active.model_path) return null;
+      if (!(await isModelDownloaded(active.model_ref, active.model_path))) return null;
+      const prefix = inputType === "query" ? active.query_prefix : active.passage_prefix;
+      const prefixed = texts.map((text) => `${prefix || ""}${text}`);
+      const vectors = await embedWithTransformers(prefixed, {
+        modelRef: active.model_ref,
+        cacheDir: active.model_path
+      });
+      return buildEmbeddingResult({ providerId: active.id, model: active.model_ref, vectors, fallback: false });
+    } catch {
+      return null;
+    }
+  }
+
+  if (active.runtime === "openai") {
+    if (!active.base_url || !active.api_key || !active.model) return null;
+    try {
+      const vectors = await callOpenAICompatibleEmbeddings(
+        texts,
+        { base_url: active.base_url, api_key: active.api_key, model: active.model },
+        active.id
+      );
+      return buildEmbeddingResult({ providerId: active.id, model: active.model, vectors, fallback: false });
+    } catch {
+      return null;
+    }
+  }
+
+  return null;
 }
 
 async function resolveEmbeddingConfig(providerId, dataDir) {

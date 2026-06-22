@@ -22,6 +22,7 @@ import {
   configureQaCitations
 } from "./js/qa-view.js";
 import { renderSettings } from "./js/settings-view.js";
+import { renderEmbeddingSettings } from "./js/embedding-settings-view.js";
 import { renderSources as renderSourcesViewModule } from "./js/sources-view.js";
 import { renderSourceDetail } from "./js/source-detail-view.js";
 import { state } from "./js/state.js";
@@ -796,6 +797,7 @@ function renderSettingsView() {
     systemDoctor: state.systemDoctor,
     onProviderSaved: refreshAll
   });
+  renderEmbeddingSettings(document.querySelector("#embeddingCatalog"), { onChanged: refreshAll }).catch(() => null);
 }
 
 function renderQaControls() {
