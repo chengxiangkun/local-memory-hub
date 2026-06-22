@@ -14,7 +14,8 @@ import {
   createQaSession,
   renameQaSession,
   deleteQaSession,
-  getCurrentSessionId
+  getCurrentSessionId,
+  configureQaCitations
 } from "./js/qa-view.js";
 import { renderSettings } from "./js/settings-view.js";
 import { renderSources as renderSourcesViewModule } from "./js/sources-view.js";
@@ -130,6 +131,11 @@ function bindEvents() {
 }
 
 async function boot() {
+  configureQaCitations({
+    onOpenSource: openCitationSource,
+    resolveSourceMeta,
+    onQuarantine: (sourceId) => mutateSource("/api/sources/quarantine", sourceId)
+  });
   await refreshAll();
   await loadQaSession({
     answerBox: els.answerBox,
@@ -510,6 +516,48 @@ function openSourceUrl(url) {
 async function openSourceFile(sourceId) {
   await post("/api/sources/open", { source_id: sourceId });
   setStatus("已打开本地源文件");
+}
+
+// 供问答引用追溯使用:按 source_id 返回该资料的实时状态。
+// 即使历史引用对应的资料后来被隔离/删除,也能如实反映当前状态。
+function resolveSourceMeta(sourceId) {
+  const source = (state.sources || []).find((item) => item.source_id === sourceId);
+  if (!source) return { exists: false, status: "deleted", label: "源已删除" };
+  if (source.import_status === "deleted") return { exists: true, status: "deleted", label: "已删除" };
+  if (source.pollution_status === "quarantined") return { exists: true, status: "quarantined", label: "已隔离" };
+  if (source.parse_status === "parse_failed") return { exists: true, status: "parse_failed", label: "解析失败" };
+  return { exists: true, status: "normal", label: "" };
+}
+
+// 从问答引用跳转到源资料库并定位该资料(清掉筛选、翻到对应分页、滚动闪烁高亮)。
+function openCitationSource(sourceId) {
+  const source = (state.sources || []).find((item) => item.source_id === sourceId);
+  if (!source) {
+    setStatus("源资料不存在或已删除");
+    return;
+  }
+  setView("sources");
+  state.sourceFilter = "";
+  state.sourceQuery = "";
+  state.selectedFolderId = null;
+  document.querySelectorAll("[data-source-filter]").forEach((item) =>
+    item.classList.toggle("active", !item.dataset.sourceFilter)
+  );
+  const sourceSearch = document.querySelector("#sourceSearch");
+  if (sourceSearch) sourceSearch.value = "";
+  const visible = filteredSourcesByFolder();
+  const index = visible.findIndex((item) => item.source_id === sourceId);
+  if (index >= 0) state.sourcePage = Math.floor(index / state.sourcePageSize) + 1;
+  renderSources();
+  requestAnimationFrame(() => {
+    const row = els.sourceTable?.querySelector(`[data-source-id="${sourceId}"]`);
+    if (row) {
+      row.scrollIntoView({ block: "center", behavior: "smooth" });
+      row.classList.add("flash");
+      setTimeout(() => row.classList.remove("flash"), 1600);
+    }
+  });
+  setStatus("已在源资料库定位该引用来源");
 }
 
 async function parseSourceFromLibrary(sourceId) {

@@ -1903,6 +1903,55 @@ svg.is-dragging {
   flex-wrap: wrap;
 }
 
+/* 答案正文里可点击的 [n] 引用标记。 */
+.citation-ref {
+  display: inline;
+  padding: 0 2px;
+  margin: 0 1px;
+  border: none;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.citation-ref:hover {
+  background: rgba(52, 211, 153, 0.16);
+  text-decoration: underline;
+}
+
+/* 点击 [n] 后右侧对应引用项的高亮闪烁。 */
+.context-item.highlight {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 8px;
+  animation: citation-pulse 1.4s ease-out;
+}
+
+@keyframes citation-pulse {
+  0% { background: rgba(52, 211, 153, 0.22); }
+  100% { background: transparent; }
+}
+
+/* 从引用跳到源资料库时,目标行短暂闪烁定位。 */
+.source-row.flash {
+  animation: source-flash 1.6s ease-out;
+}
+
+@keyframes source-flash {
+  0% { background: rgba(52, 211, 153, 0.28); }
+  100% { background: transparent; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .context-item.highlight,
+  .source-row.flash {
+    animation: none;
+  }
+}
+
 .checkbox-line {
   display: inline-flex;
   align-items: center;

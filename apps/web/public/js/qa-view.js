@@ -11,7 +11,25 @@ const conversation = [];
 const SESSION_STORAGE_KEY = "local-memory-hub.qa-session-id";
 let currentSessionId = window.localStorage.getItem(SESSION_STORAGE_KEY) || "";
 
+// 当前问答视图右侧引用面板的容器，供答案中可点击 [n] 引用回填使用。
+let activeContextList = null;
+
+// 引用追溯所需的宿主回调，由 main.js 在初始化时注入一次。
+// onOpenSource(sourceId)：在源资料库定位并打开该资料。
+// resolveSourceMeta(sourceId)：返回 { status, label, exists }，用于展示引用的实时源状态。
+// onQuarantine(sourceId)：标记该源资料为污染。
+const citationContext = {
+  onOpenSource: null,
+  resolveSourceMeta: null,
+  onQuarantine: null
+};
+
+export function configureQaCitations(handlers = {}) {
+  Object.assign(citationContext, handlers);
+}
+
 export async function loadQaSession({ answerBox, contextList } = {}) {
+  if (contextList) activeContextList = contextList;
   const data = await get(`/api/qa/session${currentSessionId ? `?session_id=${encodeURIComponent(currentSessionId)}` : ""}`);
   currentSessionId = data.session?.session_id || currentSessionId;
   if (currentSessionId) window.localStorage.setItem(SESSION_STORAGE_KEY, currentSessionId);
@@ -115,6 +133,9 @@ export async function askQuestion({ questionInput, answerBox, contextList, provi
   const question = questionInput.value.trim();
   if (!question) return;
 
+  if (contextList) activeContextList = contextList;
+  if (onQuarantineCitation) citationContext.onQuarantine = onQuarantineCitation;
+
   const providerId = providerSelect?.dataset.value || "mock";
   const userMessage = {
     role: "user",
@@ -154,7 +175,7 @@ export async function askQuestion({ questionInput, answerBox, contextList, provi
       pending: false
     });
     renderConversation(answerBox);
-    renderCitations(contextList, data.citations || [], onQuarantineCitation);
+    renderCitations(contextList, data.citations || []);
   } catch (error) {
     Object.assign(pendingMessage, {
       model: "问答失败",
@@ -210,20 +231,56 @@ function renderConversation(answerBox) {
     `;
     return;
   }
-  answerBox.innerHTML = conversation.map((message) => `
+  answerBox.innerHTML = conversation.map((message, messageIndex) => `
     <article class="chat-message ${message.role} ${message.pending ? "pending" : ""} ${message.error ? "error" : ""}">
       <div class="chat-message-meta">
         <strong>${escapeHtml(message.role === "user" ? "你" : message.model || "AI")}</strong>
         ${message.citation_count !== undefined ? `<span>${message.citation_count} 条引用</span>` : ""}
       </div>
-      <p>${escapeHtml(message.content || "").replaceAll("\n", "<br />")}</p>
+      <p>${renderMessageContent(message, messageIndex)}</p>
       ${message.memory_status ? `<span class="status-badge ok">${escapeHtml(message.memory_status)}</span>` : ""}
     </article>
   `).join("");
+
+  // 点击答案中的 [n] 引用：把该轮自己的引用回填到右侧面板并高亮对应项。
+  answerBox.querySelectorAll(".citation-ref").forEach((button) => {
+    button.addEventListener("click", () => {
+      const message = conversation[Number(button.dataset.msg)];
+      if (!message) return;
+      renderCitations(activeContextList, message.citations || []);
+      highlightCitation(Number(button.dataset.cite));
+    });
+  });
   answerBox.scrollTop = answerBox.scrollHeight;
 }
 
-function renderCitations(contextList, citations, onQuarantineCitation) {
+function renderMessageContent(message, messageIndex) {
+  const safe = escapeHtml(message.content || "");
+  const citations = message.citations || [];
+  let withRefs = safe;
+  if (message.role === "assistant" && citations.length > 0) {
+    const validIndexes = new Set(
+      citations.map((item, index) => (Number.isFinite(Number(item.index)) ? Number(item.index) : index + 1))
+    );
+    withRefs = safe.replace(/\[(\d+)\]/g, (match, num) => {
+      const citationIndex = Number(num);
+      if (!validIndexes.has(citationIndex)) return match;
+      return `<button class="citation-ref" type="button" data-msg="${messageIndex}" data-cite="${citationIndex}">[${citationIndex}]</button>`;
+    });
+  }
+  return withRefs.replaceAll("\n", "<br />");
+}
+
+function highlightCitation(citationIndex) {
+  if (!activeContextList) return;
+  const target = activeContextList.querySelector(`[data-citation-index="${citationIndex}"]`);
+  if (!target) return;
+  activeContextList.querySelectorAll(".context-item.highlight").forEach((item) => item.classList.remove("highlight"));
+  target.classList.add("highlight");
+  target.scrollIntoView({ block: "nearest", behavior: "smooth" });
+}
+
+function renderCitations(contextList, citations) {
   if (!contextList) return;
   contextList.innerHTML = (citations || []).map((item, index) => {
     const citationIndex = Number.isFinite(Number(item.index)) ? Number(item.index) : index + 1;
@@ -231,20 +288,39 @@ function renderCitations(contextList, citations, onQuarantineCitation) {
     const snippet = item.snippet || item.segment_text || item.extracted_preview || "该来源没有可展示的文本片段。";
     const preview = compactSnippet(snippet);
     const hitReason = item.hit_reason ? `<span class="status-badge">${escapeHtml(formatHitReason(item.hit_reason))}</span>` : "";
+    const sourceMeta = item.source_id ? citationContext.resolveSourceMeta?.(item.source_id) : null;
+    const statusBadge = renderSourceStatusBadge(sourceMeta);
+    const canOpen = item.source_id && sourceMeta?.exists !== false;
     return `
-      <div class="context-item">
+      <div class="context-item" data-citation-index="${citationIndex}">
         <strong>[${citationIndex}] ${escapeHtml(title)}</strong>
         <p>${escapeHtml(preview)}</p>
         <div class="context-actions">
           ${hitReason}
+          ${statusBadge}
+          ${canOpen ? `<button class="secondary-button" type="button" data-open-source="${escapeHtml(item.source_id)}">打开源资料</button>` : ""}
           ${item.source_id ? `<button class="secondary-button" type="button" data-quarantine-citation="${escapeHtml(item.source_id)}">标记污染</button>` : ""}
         </div>
       </div>
     `;
   }).join("") || `<div class="context-item"><strong>暂无引用</strong><p>没有命中本地上下文。</p></div>`;
-  contextList.querySelectorAll("[data-quarantine-citation]").forEach((button) => {
-    button.addEventListener("click", () => onQuarantineCitation?.(button.dataset.quarantineCitation));
+  contextList.querySelectorAll("[data-open-source]").forEach((button) => {
+    button.addEventListener("click", () => citationContext.onOpenSource?.(button.dataset.openSource));
   });
+  contextList.querySelectorAll("[data-quarantine-citation]").forEach((button) => {
+    button.addEventListener("click", () => citationContext.onQuarantine?.(button.dataset.quarantineCitation));
+  });
+}
+
+// 引用来源的实时状态徽标。sourceMeta 由宿主按 source_id 在当前源列表里查得，
+// 因此即使历史引用对应的源资料后来被隔离或删除，也能如实反映当前状态。
+function renderSourceStatusBadge(sourceMeta) {
+  if (!sourceMeta) return "";
+  if (sourceMeta.exists === false) return `<span class="status-badge bad">源已删除</span>`;
+  const label = sourceMeta.label || "";
+  if (!label || sourceMeta.status === "normal") return "";
+  const tone = sourceMeta.status === "deleted" ? "bad" : "warn";
+  return `<span class="status-badge ${tone}">${escapeHtml(label)}</span>`;
 }
 
 function formatProviderLabel(provider) {
