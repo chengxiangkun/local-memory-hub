@@ -8,6 +8,49 @@
 import { escapeHtml } from "./utils.js";
 import { post } from "./api.js";
 
+// 可输入的主题化下拉(combobox):选项始终全部可见(不像 <datalist> 会按当前值过滤),
+// 同时保留自定义输入。name 不变,FormData 行为与原 input 一致。
+function comboField(name, value, defaultValue, placeholder, options) {
+  const list = (options || [])
+    .map((model) => `<button type="button" role="option" data-combo-option="${escapeHtml(model)}">${escapeHtml(model)}</button>`)
+    .join("");
+  return `
+    <div class="combo" data-combo>
+      <input class="combo-input" name="${name}" placeholder="${escapeHtml(placeholder)}" value="${escapeHtml(value)}" data-default-value="${escapeHtml(defaultValue)}" autocomplete="off" />
+      <button class="combo-toggle" type="button" tabindex="-1" aria-label="展开${escapeHtml(placeholder)}列表"${list ? "" : " disabled"}><i aria-hidden="true"></i></button>
+      <div class="combo-menu" role="listbox">${list || ""}</div>
+    </div>`;
+}
+
+function wireComboboxes(root) {
+  if (!root) return;
+  root.querySelectorAll("[data-combo]").forEach((combo) => {
+    const input = combo.querySelector(".combo-input");
+    const toggle = combo.querySelector(".combo-toggle");
+    const closeAll = () => root.querySelectorAll("[data-combo].open").forEach((el) => el.classList.remove("open"));
+    toggle?.addEventListener("click", () => {
+      const willOpen = !combo.classList.contains("open");
+      closeAll();
+      if (willOpen) combo.classList.add("open");
+    });
+    combo.querySelectorAll("[data-combo-option]").forEach((option) => {
+      option.addEventListener("click", () => {
+        input.value = option.dataset.comboOption;
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        combo.classList.remove("open");
+      });
+    });
+  });
+  if (!root.dataset.comboOutsideWired) {
+    root.dataset.comboOutsideWired = "1";
+    document.addEventListener("click", (event) => {
+      if (!event.target.closest("[data-combo]")) {
+        root.querySelectorAll("[data-combo].open").forEach((el) => el.classList.remove("open"));
+      }
+    });
+  }
+}
+
 export function renderSettings({ providers, health, version, sources, graph, habits, modelPolicies, mcpStatus, systemDoctor, onProviderSaved }) {
   setText("#settingsDataPath", version?.data_dir || health?.data_dir || "");
   setText("#settingsAppVersion", `v${version?.app_version || "0.0.1"}`);
@@ -38,16 +81,10 @@ function renderProviderGrid(providerGrid, providers, onProviderSaved) {
           <button class="ghost-button" type="button" data-apply-provider-default="${escapeHtml(provider.provider_id)}">使用默认</button>
         </div>
         <input name="base_url" placeholder="Base URL" value="${escapeHtml(provider.configured_base_url || provider.default_base_url || "")}" data-default-value="${escapeHtml(provider.default_base_url || "")}" />
-        <input name="model" list="models-${escapeHtml(provider.provider_id)}" placeholder="模型名称" value="${escapeHtml(provider.configured_model || provider.default_model || "")}" data-default-value="${escapeHtml(provider.default_model || "")}" />
-        <datalist id="models-${escapeHtml(provider.provider_id)}">
-          ${(provider.model_options || []).map((model) => `<option value="${escapeHtml(model)}"></option>`).join("")}
-        </datalist>
-        ${provider.supports_embedding ? `
-          <input name="embedding_model" list="embedding-models-${escapeHtml(provider.provider_id)}" placeholder="Embedding 模型" value="${escapeHtml(provider.configured_embedding_model || provider.default_embedding_model || "")}" data-default-value="${escapeHtml(provider.default_embedding_model || "")}" />
-          <datalist id="embedding-models-${escapeHtml(provider.provider_id)}">
-            ${(provider.embedding_model_options || []).map((model) => `<option value="${escapeHtml(model)}"></option>`).join("")}
-          </datalist>
-        ` : ""}
+        ${comboField("model", provider.configured_model || provider.default_model || "", provider.default_model || "", "模型名称", provider.model_options || [])}
+        ${provider.supports_embedding
+          ? comboField("embedding_model", provider.configured_embedding_model || provider.default_embedding_model || "", provider.default_embedding_model || "", "Embedding 模型", provider.embedding_model_options || [])
+          : ""}
         ${provider.requires_key ? `<input name="api_key" type="password" placeholder="${provider.configured ? "留空则不修改 API Key" : "API Key"}" />` : ""}
         <div class="provider-action-row">
           <button type="submit">保存</button>
@@ -58,6 +95,7 @@ function renderProviderGrid(providerGrid, providers, onProviderSaved) {
       </form>
     </div>
   `).join("");
+  wireComboboxes(providerGrid);
   providerGrid.querySelectorAll("[data-config-provider]").forEach((button) => {
     button.addEventListener("click", () => {
       providerGrid.querySelector(`[data-provider-form="${button.dataset.configProvider}"]`)?.classList.toggle("hidden");
