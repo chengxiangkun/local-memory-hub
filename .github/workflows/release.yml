@@ -1,0 +1,57 @@
+name: Release
+
+# 打 tag(如 v0.1.0)或手动触发时,在 GitHub 的 macOS / Windows runner 上各自构建
+# 未签名安装包,并发布到 GitHub Releases(草稿)。开源项目无需任何签名证书。
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  release:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest   # 产出 .app / .dmg(未签名)
+          - platform: windows-latest # 产出 .msi / .exe(未签名)
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            apps/desktop/src-tauri/target
+          key: ${{ matrix.platform }}-cargo-${{ hashFiles('apps/desktop/src-tauri/Cargo.lock') }}
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build & publish (Tauri, unsigned)
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # 不签名:开源项目不提供证书。用户首次打开:
+          #   macOS  → 右键「打开」,或 xattr -dr com.apple.quarantine <App>
+          #   Windows → SmartScreen「更多信息」→「仍要运行」
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: "Local Memory Hub ${{ github.ref_name }}"
+          releaseDraft: true
+          prerelease: false
+          args: --config apps/desktop/src-tauri/tauri.conf.json
