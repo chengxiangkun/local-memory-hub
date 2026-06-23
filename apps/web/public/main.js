@@ -853,9 +853,20 @@ function renderQaControls() {
 }
 
 function renderMetrics() {
-  renderMetricCounters({ sources: state.sources, graph: state.graph });
+  renderMetricCounters({ sources: state.sources, graph: state.graph, externalActive: state.externalActive });
   const folderAllCount = document.querySelector("#folderAllCount");
   if (folderAllCount) folderAllCount.textContent = state.sources.length;
+  // 外部 AI 调用是否发生过(有调用记录即点亮),异步刷新一次。
+  fetch("/api/external/calls?limit=1")
+    .then((res) => res.json())
+    .then((data) => {
+      const active = (data.calls || []).length > 0;
+      if (active !== state.externalActive) {
+        state.externalActive = active;
+        renderMetricCounters({ sources: state.sources, graph: state.graph, externalActive: active });
+      }
+    })
+    .catch(() => {});
 }
 
 async function askQuestion() {
