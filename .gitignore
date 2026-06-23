@@ -41,3 +41,6 @@ apps/desktop/src-tauri/gen/
 
 # 本地加密密钥
 .secret-key
+
+# WIP 营销/视频素材(含大字体),不进仓库
+marketing/
