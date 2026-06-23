@@ -9,6 +9,7 @@ import { listExternalConnectors, markConnectorSync, saveExternalConnector } from
 import { armConnectorSchedules } from "./connector-scheduler.js";
 import { handleImport } from "./import-pipeline.js";
 import { syncFeishuConnector } from "./feishu-sync-service.js";
+import { syncTencentDocsConnector } from "./tencent-sync-service.js";
 import { getUserHabitProfile } from "./memory-organizer-agent.js";
 import { getProviderConfig, listProviderConfigs, saveProviderConfig } from "./model-config-store.js";
 import { resolveModelConfig } from "./model-config-resolver.js";
@@ -78,7 +79,7 @@ async function runConnectorSync(platform) {
     return { connector: synced.connector, result: await syncFeishuConnector(synced.connector, dataInfo.data_dir) };
   }
   if (platform === "tencent_docs") {
-    return { connector: synced.connector, result: await syncTencentDocsConnector(synced.connector) };
+    return { connector: synced.connector, result: await syncTencentDocsConnector(synced.connector, dataInfo.data_dir) };
   }
   return synced;
 }
@@ -743,20 +744,3 @@ async function mergeProviderTemplatesWithConfigs(dataDir) {
   });
 }
 
-async function syncTencentDocsConnector(connector) {
-  if (!connector.root_url) throw new Error("腾讯文档连接器缺少同步链接");
-  const imported = await handleImport({
-    entrypoint: "tencent_docs_connector_sync",
-    source_hint: "url",
-    payload: {
-      title: connector.account_name || "腾讯文档",
-      url: connector.root_url
-    }
-  }, dataInfo.data_dir);
-  return {
-    status: "export_required",
-    imported_count: 1,
-    source_id: imported.source.source_id,
-    message: "腾讯文档链接已进入源资料库。当前需要导出原文后再解析。"
-  };
-}

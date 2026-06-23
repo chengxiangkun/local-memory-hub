@@ -21,10 +21,10 @@ const CONNECTOR_TEMPLATES = [
   {
     platform: "tencent_docs",
     display_name: "腾讯文档",
-    description: "需在腾讯文档开放平台注册应用并授权（OAuth）",
+    description: "凭证拉取文件夹文档,已支持增量/修改/删除同步",
     sync_mode: "polling",
     // 腾讯文档:每应用免费 20000 次 API 调用(累计总次数,2025-07-01 起),超出需采买。
-    hint: "接入需开发者应用凭证:到 docs.qq.com/open 控制台创建应用拿 client_id/secret 并完成 OAuth 用户授权。⚠️ 每个应用免费累计 20000 次 API 调用,超出需采买资源包——务必控制同步频率与文档数量。当前仅支持保存链接兜底,真实拉取待配置凭证后接入。"
+    hint: "凭证存于本地 .env.local(TENCENT_CLIENT_ID/ACCESS_TOKEN/OPEN_ID,access_token 约 30 天有效)。同步链接填腾讯文档文件夹地址,会列出其中文档并导出正文入记忆。⚠️ 每个应用免费累计 20000 次 API,已自动节流 + 未变跳过 + 文件夹单层拉取以省额度。"
   }
 ];
 

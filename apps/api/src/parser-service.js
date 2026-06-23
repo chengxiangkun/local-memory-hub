@@ -31,6 +31,7 @@ import {
   getFeishuTenantAccessToken,
   resolveFeishuDocumentId
 } from "./feishu-client.js";
+import { exportTencentDocText } from "./tencent-client.js";
 
 const execFileAsync = promisify(execFile);
 const IMAGE_EXTENSIONS = new Set([".png", ".jpg", ".jpeg", ".bmp", ".tiff", ".tif", ".webp"]);
@@ -278,6 +279,13 @@ async function extractText(source, dataDir) {
 
   if (source.source_type === "url" && source.source_platform === "feishu") {
     return extractFeishuText(source.original_url || source.canonical_url);
+  }
+
+  if (source.source_type === "url" && source.source_platform === "tencent_docs") {
+    if (!source.remote_node_token) {
+      throw new Error("腾讯文档缺少文件 ID,请通过连接器同步导入(同步会写入可导出的 fileID)");
+    }
+    return exportTencentDocText(source.remote_node_token);
   }
 
   if (source.source_type === "text" || source.source_type === "url") {
