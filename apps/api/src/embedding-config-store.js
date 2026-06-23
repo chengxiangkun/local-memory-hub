@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { getDataDir, initDataDir } from "./data-store.js";
 import { getCatalogEntry } from "./embedding-catalog.js";
+import { encryptSecret, decryptSecret } from "./secret-store.js";
 
 /**
  * Embedding 选择与配置的本地持久化。
@@ -58,8 +59,8 @@ export async function saveEmbeddingConfig(patch, dataDir = getDataDir()) {
     for (const key of ["model_ref", "base_url", "model"]) {
       if (patch.override[key] !== undefined) merged[key] = String(patch.override[key] || "");
     }
-    // api_key:留空表示不修改,显式给值才覆盖。
-    if (patch.override.api_key) merged.api_key = String(patch.override.api_key);
+    // api_key:留空表示不修改,显式给值才覆盖;加密后落盘。
+    if (patch.override.api_key) merged.api_key = await encryptSecret(String(patch.override.api_key), dataDir);
     next.overrides = { ...current.overrides, [id]: merged };
   }
   const file = embeddingConfigPath(dataDir);
@@ -86,9 +87,9 @@ export async function resolveActiveEmbedding(dataDir = getDataDir()) {
     query_prefix: entry.query_prefix || "",
     passage_prefix: entry.passage_prefix || "",
     model_path: config.model_path,
-    // 云端字段
+    // 云端字段(api_key 落盘为密文,这里解密供调用)
     base_url: override.base_url || entry.default_base_url || "",
-    api_key: override.api_key || "",
+    api_key: await decryptSecret(override.api_key || "", dataDir),
     model: override.model || entry.model_ref || ""
   };
 }

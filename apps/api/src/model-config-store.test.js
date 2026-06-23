@@ -34,7 +34,8 @@ assert(privateConfig.api_key === "secret-key", "private config should keep api k
 assert(privateConfig.embedding_model === "text-embedding-v3", "private config should keep embedding model");
 
 const raw = await readFile(providerConfigPath(dataDir), "utf8");
-assert(raw.includes("secret-key"), "spike config file stores key locally");
+assert(!raw.includes("secret-key"), "config file must not store API key in plaintext (encrypted at rest)");
+assert(raw.includes("enc:v1:"), "config file should store API key encrypted with secret-store");
 
 const fileMode = (await stat(providerConfigPath(dataDir))).mode & 0o777;
 assert(fileMode === 0o600, `provider config should be owner-only, got ${fileMode.toString(8)}`);

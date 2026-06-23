@@ -1,6 +1,7 @@
 import { chmod, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { getDataDir, initDataDir } from "./data-store.js";
+import { encryptSecret, decryptSecret } from "./secret-store.js";
 
 export async function listProviderConfigs(dataDir = getDataDir()) {
   const configs = await readProviderConfigs(dataDir);
@@ -9,7 +10,10 @@ export async function listProviderConfigs(dataDir = getDataDir()) {
 
 export async function getProviderConfig(providerId, dataDir = getDataDir()) {
   const configs = await readProviderConfigs(dataDir);
-  return configs.find((item) => item.provider_id === providerId) || null;
+  const found = configs.find((item) => item.provider_id === providerId);
+  if (!found) return null;
+  // 落盘的是密文,供模型调用时解密为明文。
+  return { ...found, api_key: await decryptSecret(found.api_key, dataDir) };
 }
 
 export async function saveProviderConfig(input, dataDir = getDataDir()) {
@@ -22,7 +26,8 @@ export async function saveProviderConfig(input, dataDir = getDataDir()) {
     base_url: input.base_url || existing?.base_url || "",
     model: input.model || existing?.model || "",
     embedding_model: input.embedding_model || existing?.embedding_model || "",
-    api_key: input.api_key === undefined ? existing?.api_key || "" : input.api_key,
+    // 新传入的明文 key 加密后落盘;未传则保留已有(已是密文)。
+    api_key: input.api_key === undefined ? existing?.api_key || "" : await encryptSecret(input.api_key, dataDir),
     enabled: input.enabled !== false,
     updated_at: now,
     created_at: existing?.created_at || now
