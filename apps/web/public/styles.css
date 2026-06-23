@@ -2925,7 +2925,6 @@ body.theme-light .info-dot span::after {
 .provider-grid,
 .embedding-cards,
 .govern-list,
-.settings-list,
 .audit-log-list,
 .external-audit-list {
   max-height: 520px;
