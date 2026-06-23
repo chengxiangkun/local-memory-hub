@@ -398,7 +398,12 @@ V1 路线图的全部主项已完成:P0.1/P0.2/P0.3/P1.1/P1.3/P2.1/P2.2/P2.3/P3.
 
 - **腾讯文档 / 有道云真实同步**：需各自开发者应用凭证(腾讯文档 docs.qq.com/open 的 client_id/secret + OAuth;每应用免费累计 2 万次 API)。当前为链接兜底 + 配置引导提示;飞书已真实打通(含增量)。
 - **Tauri 打包安装器**:开发态脚手架已编译通过(`npm run desktop` 可在有显示器的机器启动);分发 `.dmg/.app` 需 Apple Developer 证书做签名与公证。
-- **API Key 钥匙串存储**:目前云端 Key 存本地明文配置/.env.local,正式桌面产品建议迁移到系统钥匙串(后续项)。
+- **API Key 加密存储**:✅ 已完成——数据目录里的 Key 用 AES-256-GCM 加密(secret-store,本地密钥文件 0600),现有 key 已迁移。.env.local 的飞书凭证仍为明文(已 gitignore,本地开发用)。
+- **图谱快照导出**:✅ 已完成(force-graph canvas → PNG)。
+
+## 真正剩余(均需用户提供外部输入,无法自主完成)
+- 腾讯文档真实同步:需 docs.qq.com/open 应用 client_id/secret + OAuth(有道云无公开 API)。
+- Tauri 打包成可分发 .dmg:需 Apple Developer 证书做签名与公证(脚手架已可 `npm run desktop` 本地运行)。
 
 ## 6. 已知风险
 
