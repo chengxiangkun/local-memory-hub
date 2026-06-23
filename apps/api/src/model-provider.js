@@ -46,7 +46,8 @@ export function listProviderTemplates() {
     providerTemplate("deepseek", "DeepSeek", "openai_compatible", true, {
       defaultBaseUrl: "https://api.deepseek.com/v1",
       defaultModel: "deepseek-chat",
-      modelOptions: ["deepseek-chat", "deepseek-reasoner"]
+      // V4(2026-04 起)+ 旧名(deepseek-chat/reasoner 将于 2026-07-24 弃用,届时映射到 v4-flash)
+      modelOptions: ["deepseek-v4-pro", "deepseek-v4-flash", "deepseek-chat", "deepseek-reasoner"]
     }),
     providerTemplate("dashscope", "通义千问 / DashScope", "openai_compatible", true, {
       defaultBaseUrl: "https://dashscope.aliyuncs.com/compatible-mode/v1",
