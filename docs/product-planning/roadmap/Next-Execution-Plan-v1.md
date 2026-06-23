@@ -401,8 +401,9 @@ V1 路线图的全部主项已完成:P0.1/P0.2/P0.3/P1.1/P1.3/P2.1/P2.2/P2.3/P3.
 - **API Key 加密存储**:✅ 已完成——数据目录里的 Key 用 AES-256-GCM 加密(secret-store,本地密钥文件 0600),现有 key 已迁移。.env.local 的飞书凭证仍为明文(已 gitignore,本地开发用)。
 - **图谱快照导出**:✅ 已完成(force-graph canvas → PNG)。
 
-## 真正剩余(均需用户提供外部输入,无法自主完成)
-- 腾讯文档真实同步:需 docs.qq.com/open 应用 client_id/secret + OAuth(有道云无公开 API)。
+## 真正剩余
+- ✅ 腾讯文档真实同步:已完成(凭证存 .env.local,列目录+导出正文+增量;注意 access_token 约 30 天有效,过期需在控制台重置后更新 .env.local)。
+- 有道云:无公开文档 API,无法做真实同步(保留链接兜底)。
 - Tauri 打包成可分发 .dmg:需 Apple Developer 证书做签名与公证(脚手架已可 `npm run desktop` 本地运行)。
 
 ## 6. 已知风险
