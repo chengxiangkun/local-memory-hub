@@ -3,9 +3,18 @@ import { normalizeCitation } from "./retrieval-service.js";
 
 const providers = new Map();
 
+// 统一的系统提示词:让回答有温度、像了解你的私人助手,而不是冷冰冰的检索工具。
+const SYSTEM_PROMPT = [
+  "你是 Local Memory Hub 的私人记忆助手,在帮用户回顾和利用他自己的本地资料(日记、笔记、文档、聊天记录等)。",
+  "语气要像一个了解他、真诚、温暖的朋友:自然口语化的中文,适度共情与鼓励,但不浮夸、不油腻。",
+  "严格基于「本地上下文」作答,用到的资料用 [n] 标注来源;上下文不足时坦诚说明,可给力所能及的建议,但绝不编造事实。",
+  "先给结论或重点,再按需展开;简洁、有条理,避免空话套话。"
+].join("\n");
+
 export function initModelProviders() {
   registerProvider(new MockProviderAdapter());
   registerProvider(new OpenAICompatibleProviderAdapter());
+  registerProvider(new AnthropicProviderAdapter());
   registerProvider(new OllamaProviderAdapter());
 }
 
@@ -20,6 +29,19 @@ export function listProviderTemplates() {
       defaultModel: "local-weak-bigram-v1",
       embedding: true,
       embeddingDimension: 32
+    }),
+    providerTemplate("claude_official", "Claude 官方 / Anthropic", "anthropic_compatible", true, {
+      defaultBaseUrl: "https://api.anthropic.com",
+      defaultModel: "claude-sonnet-4-20250514",
+      modelOptions: ["claude-opus-4-20250514", "claude-sonnet-4-20250514", "claude-3-7-sonnet-latest", "claude-3-5-haiku-latest"]
+    }),
+    providerTemplate("openai", "OpenAI 官方", "openai_compatible", true, {
+      defaultBaseUrl: "https://api.openai.com/v1",
+      defaultModel: "gpt-4o",
+      modelOptions: ["gpt-4o", "gpt-4o-mini", "gpt-4.1", "gpt-4.1-mini", "o3", "o3-mini", "o1"],
+      embedding: true,
+      defaultEmbeddingModel: "text-embedding-3-small",
+      embeddingModelOptions: ["text-embedding-3-small", "text-embedding-3-large"]
     }),
     providerTemplate("deepseek", "DeepSeek", "openai_compatible", true, {
       defaultBaseUrl: "https://api.deepseek.com/v1",
@@ -65,6 +87,42 @@ export function listProviderTemplates() {
     }),
     providerTemplate("spark", "讯飞星火", "custom_or_compatible", true, {
       modelOptions: ["generalv3.5", "max-32k"]
+    }),
+    providerTemplate("openrouter", "OpenRouter", "openai_compatible", true, {
+      defaultBaseUrl: "https://openrouter.ai/api/v1",
+      defaultModel: "anthropic/claude-sonnet-4",
+      modelOptions: ["anthropic/claude-sonnet-4", "anthropic/claude-opus-4", "openai/gpt-4o", "google/gemini-2.5-pro", "deepseek/deepseek-chat", "meta-llama/llama-3.3-70b-instruct"]
+    }),
+    providerTemplate("gemini", "Google Gemini", "openai_compatible", true, {
+      defaultBaseUrl: "https://generativelanguage.googleapis.com/v1beta/openai",
+      defaultModel: "gemini-2.5-flash",
+      modelOptions: ["gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.0-flash"],
+      embedding: true,
+      defaultEmbeddingModel: "text-embedding-004",
+      embeddingModelOptions: ["text-embedding-004"]
+    }),
+    providerTemplate("siliconflow", "硅基流动 / SiliconFlow", "openai_compatible", true, {
+      defaultBaseUrl: "https://api.siliconflow.cn/v1",
+      defaultModel: "deepseek-ai/DeepSeek-V3",
+      modelOptions: ["deepseek-ai/DeepSeek-V3", "deepseek-ai/DeepSeek-R1", "Qwen/Qwen2.5-72B-Instruct", "moonshotai/Kimi-K2-Instruct"],
+      embedding: true,
+      defaultEmbeddingModel: "BAAI/bge-m3",
+      embeddingModelOptions: ["BAAI/bge-m3", "BAAI/bge-large-zh-v1.5"]
+    }),
+    providerTemplate("yi", "零一万物 / Yi", "openai_compatible", true, {
+      defaultBaseUrl: "https://api.lingyiwanwu.com/v1",
+      defaultModel: "yi-lightning",
+      modelOptions: ["yi-lightning", "yi-large", "yi-medium"]
+    }),
+    providerTemplate("grok", "xAI Grok", "openai_compatible", true, {
+      defaultBaseUrl: "https://api.x.ai/v1",
+      defaultModel: "grok-4",
+      modelOptions: ["grok-4", "grok-3", "grok-3-mini"]
+    }),
+    providerTemplate("groq", "Groq", "openai_compatible", true, {
+      defaultBaseUrl: "https://api.groq.com/openai/v1",
+      defaultModel: "llama-3.3-70b-versatile",
+      modelOptions: ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "deepseek-r1-distill-llama-70b"]
     }),
     providerTemplate("openai_compatible", "自定义 OpenAI-Compatible", "openai_compatible", true),
     providerTemplate("anthropic_compatible", "自定义 Anthropic-Compatible", "anthropic_compatible", true),
@@ -149,7 +207,7 @@ class OpenAICompatibleProviderAdapter {
       body: JSON.stringify({
         model,
         messages: [
-          { role: "system", content: "你是 Local Memory Hub 的问答模型。回答必须基于提供的上下文。" },
+          { role: "system", content: SYSTEM_PROMPT },
           { role: "user", content: buildPrompt(request) }
         ]
       })
@@ -160,6 +218,46 @@ class OpenAICompatibleProviderAdapter {
       provider_id: this.providerId,
       model,
       answer: data.choices?.[0]?.message?.content || "",
+      citations: normalizeCitations(request.context || [])
+    };
+  }
+}
+
+// Anthropic 官方/兼容(/v1/messages):system 为顶层字段,鉴权用 x-api-key。
+class AnthropicProviderAdapter {
+  constructor(options = {}) {
+    this.providerId = options.providerId || "anthropic_compatible";
+    this.displayName = options.displayName || "Anthropic-Compatible";
+    this.defaultBaseUrl = options.defaultBaseUrl || "https://api.anthropic.com";
+    this.defaultModel = options.defaultModel || null;
+  }
+
+  async chat(request, config) {
+    const baseUrl = config.base_url || this.defaultBaseUrl;
+    const model = config.model || this.defaultModel;
+    if (!baseUrl || !config.api_key || !model) {
+      throw new Error(`${this.displayName} 需要 base_url、api_key 和 model`);
+    }
+    const res = await fetch(`${baseUrl.replace(/\/$/, "")}/v1/messages`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-api-key": config.api_key,
+        "anthropic-version": "2023-06-01"
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: 2048,
+        system: SYSTEM_PROMPT,
+        messages: [{ role: "user", content: buildPrompt(request) }]
+      })
+    });
+    if (!res.ok) throw new Error(`模型调用失败：${res.status}`);
+    const data = await res.json();
+    return {
+      provider_id: this.providerId,
+      model,
+      answer: (data.content || []).map((block) => block.text || "").join("") || "",
       citations: normalizeCitations(request.context || [])
     };
   }
@@ -216,13 +314,16 @@ function normalizeCitations(items) {
 
 function createTemplateProvider(providerId) {
   const template = listProviderTemplates().find((item) => item.provider_id === providerId);
-  if (template?.api_format !== "openai_compatible") return null;
-  return new OpenAICompatibleProviderAdapter({
+  if (!template) return null;
+  const common = {
     providerId: template.provider_id,
     displayName: template.display_name,
     defaultBaseUrl: template.default_base_url || null,
     defaultModel: template.default_model || null
-  });
+  };
+  if (template.api_format === "openai_compatible") return new OpenAICompatibleProviderAdapter(common);
+  if (template.api_format === "anthropic_compatible") return new AnthropicProviderAdapter(common);
+  return null;
 }
 
 function buildLogEntry(options) {

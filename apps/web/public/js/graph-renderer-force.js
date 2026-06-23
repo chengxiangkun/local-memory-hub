@@ -88,21 +88,15 @@ export function renderGraph(controls = {}, graph = {}, options = {}) {
   wireZoom(controls);
 }
 
-// 导出当前图谱视图为 PNG 快照(force-graph 的 canvas → 下载)。
-export function exportGraphSnapshot(filename = "memory-graph.png") {
+// 返回当前图谱视图 canvas 的 PNG dataURL(无 canvas 返回 null)。
+// 实际落盘由宿主走 API(/api/graph/export),浏览器/桌面一致,绕开 WebKit 下载限制。
+export function getGraphSnapshotDataUrl() {
   const canvas = container?.querySelector("canvas");
-  if (!canvas) return false;
+  if (!canvas) return null;
   try {
-    const url = canvas.toDataURL("image/png");
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    return true;
+    return canvas.toDataURL("image/png");
   } catch {
-    return false;
+    return null;
   }
 }
 

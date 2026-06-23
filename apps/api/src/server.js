@@ -1,6 +1,8 @@
 import http from "node:http";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
 import { loadLocalEnv } from "./local-env.js";
 import { persistConversationTurn } from "./conversation-memory-service.js";
 import { initDataDir, moveToTrash } from "./data-store.js";
@@ -354,6 +356,21 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method === "POST" && req.url === "/api/vector/rebuild") {
       return json(res, 200, await rebuildVectorIndex(dataInfo.data_dir));
+    }
+
+    // 图谱快照导出:前端把 canvas 的 dataURL/base64 发来,落盘到数据目录的 exports/
+    // 并打开。跨浏览器/桌面一致,绕开 WebKit 下载与系统下载夹授权。
+    if (req.method === "POST" && req.url === "/api/graph/export") {
+      const body = await readJson(req);
+      const raw = String(body.data || "").replace(/^data:image\/png;base64,/, "");
+      if (!raw) return json(res, 400, { error: "bad_request", message: "缺少图片数据" });
+      const safeName = String(body.name || "memory-graph.png").replace(/[^\w.-]/g, "_");
+      const dir = path.join(dataInfo.data_dir, "exports");
+      await mkdir(dir, { recursive: true });
+      const filePath = path.join(dir, safeName);
+      await writeFile(filePath, Buffer.from(raw, "base64"));
+      if (body.open !== false) await openLocalPath(filePath).catch(() => {});
+      return json(res, 200, { status: "exported", path: filePath });
     }
 
     if (req.method === "GET" && req.url === "/api/embedding/catalog") {

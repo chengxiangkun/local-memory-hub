@@ -6,7 +6,7 @@ import {
   renderQaGovernanceResult
 } from "./js/governance-view.js";
 import { renderEmptyNodeDetail, renderSelectedNode } from "./js/graph-detail-view.js";
-import { renderGraph as renderGraphSvg, updateGraphSelection, exportGraphSnapshot } from "./js/graph-renderer-force.js";
+import { renderGraph as renderGraphSvg, updateGraphSelection, getGraphSnapshotDataUrl } from "./js/graph-renderer-force.js";
 import { importExampleText as runExampleImport, importFile as runFileImport, importText as runTextImport, importUrl as runUrlImport } from "./js/import-flow.js";
 import { renderMetrics as renderMetricCounters } from "./js/metrics-view.js";
 import {
@@ -24,6 +24,7 @@ import {
 import { renderSettings } from "./js/settings-view.js";
 import { renderEmbeddingSettings } from "./js/embedding-settings-view.js";
 import { renderExternalAi } from "./js/external-ai-view.js";
+import { confirmDialog, promptDialog } from "./js/modal.js";
 import { renderSources as renderSourcesViewModule } from "./js/sources-view.js";
 import { renderSourceDetail } from "./js/source-detail-view.js";
 import { state } from "./js/state.js";
@@ -51,8 +52,31 @@ const els = {
   graphZoomValue: document.querySelector("#graphZoomValue")
 };
 
+initTheme();
 bindEvents();
 boot();
+
+// 主题:深色(默认)/ 亮色,持久化到 localStorage。
+function initTheme() {
+  const saved = window.localStorage.getItem("lmh-theme") || "dark";
+  applyTheme(saved);
+}
+
+function applyTheme(theme) {
+  const light = theme === "light";
+  document.body.classList.toggle("theme-light", light);
+  const btn = document.querySelector("#themeToggle");
+  if (btn) {
+    btn.textContent = light ? "☀️" : "🌙";
+    btn.title = light ? "切换到深色主题" : "切换到亮色主题";
+  }
+  window.localStorage.setItem("lmh-theme", light ? "light" : "dark");
+}
+
+function toggleTheme() {
+  const isLight = document.body.classList.contains("theme-light");
+  applyTheme(isLight ? "dark" : "light");
+}
 
 function bindEvents() {
   document.querySelectorAll("[data-view]").forEach((button) => {
@@ -72,11 +96,9 @@ function bindEvents() {
   });
 
   document.querySelector("#refreshButton")?.addEventListener("click", refreshAll);
+  document.querySelector("#themeToggle")?.addEventListener("click", toggleTheme);
   document.querySelector("#resetGraphView")?.addEventListener("click", resetGraphView);
-  document.querySelector("#exportGraphSnapshot")?.addEventListener("click", () => {
-    const ok = exportGraphSnapshot(`memory-graph-${state.graphMode || "relation"}.png`);
-    setStatus(ok ? "已导出图谱快照 PNG" : "导出失败:当前没有可导出的图谱");
-  });
+  document.querySelector("#exportGraphSnapshot")?.addEventListener("click", exportGraphSnapshot);
   document.querySelectorAll("[data-graph-mode]").forEach((button) => {
     button.addEventListener("click", () => setGraphMode(button.dataset.graphMode));
   });
@@ -277,6 +299,25 @@ async function resetGraphView() {
   state.matchedNodeIds = null;
   setGraphZoom(1);
   await loadGraph();
+}
+
+// 导出图谱快照:取 canvas dataURL → 经 API 落盘到数据目录 exports/ 并打开。
+// 走 API 而非浏览器下载,浏览器/桌面(WKWebView)一致,且免系统下载夹授权。
+async function exportGraphSnapshot() {
+  const dataUrl = getGraphSnapshotDataUrl();
+  if (!dataUrl) {
+    setStatus("导出失败:当前没有可导出的图谱");
+    return;
+  }
+  try {
+    const result = await post("/api/graph/export", {
+      data: dataUrl,
+      name: `memory-graph-${state.graphMode || "relation"}.png`
+    });
+    setStatus(`已导出图谱快照:${result.path}`);
+  } catch (error) {
+    setStatus(`导出失败:${error.message}`);
+  }
 }
 
 async function loadGraphCommunities() {
@@ -481,7 +522,7 @@ async function moveSourceToFolder(sourceId, folderId) {
 }
 
 async function createFolder() {
-  const name = window.prompt("新建文件夹名称");
+  const name = await promptDialog("新建文件夹", "", { placeholder: "文件夹名称" });
   if (!name?.trim()) return;
   await post("/api/source-folders", { name: name.trim() });
   await refreshAll();
@@ -556,7 +597,7 @@ async function refreshSourceDetail() {
       onQuarantine: async (id) => { await post("/api/sources/quarantine", { source_id: id }); await afterDetailMutation("已隔离该资料"); },
       onRestore: async (id) => { await post("/api/sources/restore", { source_id: id }); await afterDetailMutation("已恢复该资料"); },
       onDelete: async (id) => {
-        if (!window.confirm("确认删除该源资料？")) return;
+        if (!(await confirmDialog("确认删除该源资料?", { danger: true, confirmText: "删除" }))) return;
         await deleteSource(id);
         closeSourceDetail();
       },
@@ -757,7 +798,7 @@ async function scanQaDuplicates() {
         setStatus("已恢复该 QA 记忆");
       },
       onDelete: async (sourceId) => {
-        if (!window.confirm("确认删除该 QA 记忆？")) return;
+        if (!(await confirmDialog("确认删除该 QA 记忆?", { danger: true, confirmText: "删除" }))) return;
         await deleteSource(sourceId);
       }
     });
@@ -891,9 +932,7 @@ async function switchToQaSession(sessionId) {
 }
 
 async function renameQaSessionPrompt(sessionId) {
-  const nextTitle = window.prompt("重命名会话");
-  if (nextTitle === null) return;
-  const trimmed = nextTitle.trim();
+  const trimmed = await promptDialog("重命名会话", "", { placeholder: "新的会话名称" });
   if (!trimmed) return;
   await renameQaSession(sessionId, trimmed);
   await renderQaSessions().catch(() => null);
@@ -901,7 +940,7 @@ async function renameQaSessionPrompt(sessionId) {
 }
 
 async function deleteQaSessionConfirm(sessionId) {
-  if (!window.confirm("确认删除该会话？此操作会一并删除其问答消息。")) return;
+  if (!(await confirmDialog("确认删除该会话?此操作会一并删除其问答消息。", { danger: true, confirmText: "删除" }))) return;
   const wasActive = sessionId === getCurrentSessionId();
   await deleteQaSession(sessionId);
   if (wasActive) {

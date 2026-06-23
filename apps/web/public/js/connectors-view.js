@@ -7,6 +7,7 @@
 
 import { post } from "./api.js";
 import { escapeHtml, formatDate } from "./utils.js";
+import { promptDialog } from "./modal.js";
 
 const CONNECTOR_TEMPLATES = [
   {
@@ -56,7 +57,7 @@ export function renderConnectorCards(container, connectors, { onChanged } = {}) 
     button.addEventListener("click", async () => {
       const template = CONNECTOR_TEMPLATES.find((item) => item.platform === button.dataset.connectPlatform);
       const rootUrl = ["feishu", "tencent_docs"].includes(template.platform)
-        ? window.prompt(`请输入${template.display_name}链接`)
+        ? await promptDialog(`连接${template.display_name}`, "", { placeholder: `粘贴${template.display_name}文件夹/文档链接` })
         : "";
       if (["feishu", "tencent_docs"].includes(template.platform) && !rootUrl?.trim()) return;
       await post("/api/connectors", {

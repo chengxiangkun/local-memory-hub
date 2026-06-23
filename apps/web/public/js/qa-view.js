@@ -9,6 +9,7 @@ import { escapeHtml } from "./utils.js";
 
 const conversation = [];
 const SESSION_STORAGE_KEY = "local-memory-hub.qa-session-id";
+const QA_MODEL_STORAGE_KEY = "local-memory-hub.qa-model";
 let currentSessionId = window.localStorage.getItem(SESSION_STORAGE_KEY) || "";
 
 // 当前问答视图右侧引用面板的容器，供答案中可点击 [n] 引用回填使用。
@@ -80,8 +81,17 @@ export async function deleteQaSession(sessionId) {
 
 export function renderQaModelOptions(providerPicker, providers) {
   if (!providerPicker) return;
-  const previousValue = providerPicker.dataset.value || "mock";
-  const selectedProvider = providers.find((provider) => provider.provider_id === previousValue) || providers.find((provider) => provider.provider_id === "mock") || providers[0];
+  // 选择优先级:本会话已选 → 上次手动选择(持久化)→ 已配置的真实模型 → mock → 第一个。
+  const stored = window.localStorage.getItem(QA_MODEL_STORAGE_KEY) || "";
+  const previousValue = providerPicker.dataset.value || stored || "";
+  const firstConfigured =
+    providers.find((provider) => provider.provider_id !== "mock" && provider.requires_key && provider.configured) ||
+    providers.find((provider) => provider.provider_id !== "mock" && provider.configured);
+  const selectedProvider =
+    providers.find((provider) => provider.provider_id === previousValue) ||
+    firstConfigured ||
+    providers.find((provider) => provider.provider_id === "mock") ||
+    providers[0];
   if (!selectedProvider) return;
 
   providerPicker.dataset.value = selectedProvider.provider_id;
@@ -117,6 +127,8 @@ export function renderQaModelOptions(providerPicker, providers) {
       const provider = providers.find((item) => item.provider_id === button.dataset.providerId);
       if (!provider) return;
       providerPicker.dataset.value = provider.provider_id;
+      // 记住用户手动选择,下次默认沿用。
+      window.localStorage.setItem(QA_MODEL_STORAGE_KEY, provider.provider_id);
       trigger.querySelector("span").textContent = formatProviderLabel(provider);
       menu.querySelectorAll("[data-provider-id]").forEach((item) => {
         const isActive = item.dataset.providerId === provider.provider_id;

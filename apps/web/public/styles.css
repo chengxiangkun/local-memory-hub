@@ -15,6 +15,10 @@
   --bad: #ef6b73;
   --ok: #7ddf9b;
   --shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
+  /* 可主题化的底色/叠加(深色默认值=原值,亮色在 body.theme-light 覆盖) */
+  --input-bg: #0d1117;
+  --canvas: #080b10;
+  --raise: rgba(255, 255, 255, 0.03);
 }
 
 * {
@@ -145,7 +149,7 @@ button {
 
 .nav-item:hover {
   color: var(--text);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--raise);
 }
 
 .nav-item.active {
@@ -187,7 +191,7 @@ button {
   border: 1px solid var(--line-soft);
   border-radius: 10px;
   padding: 10px;
-  background: rgba(255, 255, 255, 0.025);
+  background: var(--raise);
   color: inherit;
   font: inherit;
   text-align: left;
@@ -243,7 +247,7 @@ button {
   width: min(760px, 100%);
   border: 1px solid var(--line);
   border-radius: 11px;
-  background: #0d1117;
+  background: var(--input-bg);
   overflow: hidden;
 }
 
@@ -260,7 +264,7 @@ textarea {
   border: 1px solid var(--line);
   border-radius: 9px;
   outline: none;
-  background: #0d1117;
+  background: var(--input-bg);
   color: var(--text);
 }
 
@@ -288,7 +292,7 @@ select {
   background:
     linear-gradient(45deg, transparent 50%, var(--muted) 50%) calc(100% - 18px) 50% / 6px 6px no-repeat,
     linear-gradient(135deg, var(--muted) 50%, transparent 50%) calc(100% - 13px) 50% / 6px 6px no-repeat,
-    #0d1117;
+    var(--input-bg);
 }
 
 textarea {
@@ -462,7 +466,7 @@ p {
   padding: 4px;
   border: 1px solid var(--line);
   border-radius: 11px;
-  background: #0d1117;
+  background: var(--input-bg);
 }
 
 .segmented-control button,
@@ -487,7 +491,7 @@ p {
   overflow: hidden;
   background:
     radial-gradient(circle at 50% 48%, rgba(105, 132, 165, 0.08), transparent 34%),
-    #080b10;
+    var(--canvas);
   isolation: isolate;
 }
 
@@ -855,7 +859,7 @@ svg.is-dragging {
   border-radius: 999px;
   padding: 2px 9px;
   color: var(--muted);
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--raise);
   font-size: 12px;
 }
 
@@ -912,7 +916,7 @@ svg.is-dragging {
   padding: 5px;
   border: 1px solid var(--line);
   border-radius: 12px;
-  background: #0d1117;
+  background: var(--input-bg);
 }
 
 .import-box {
@@ -980,7 +984,7 @@ svg.is-dragging {
   border-radius: 12px;
   min-height: 74px;
   padding: 12px;
-  background: rgba(255, 255, 255, 0.025);
+  background: var(--raise);
   text-align: left;
 }
 
@@ -1105,7 +1109,7 @@ svg.is-dragging {
 .folder-node:hover {
   transform: none;
   color: var(--text);
-  background: rgba(255, 255, 255, 0.035);
+  background: var(--raise);
 }
 
 .folder-node.active {
@@ -1192,7 +1196,7 @@ svg.is-dragging {
 .source-head {
   min-height: 42px;
   color: var(--faint);
-  background: rgba(255, 255, 255, 0.025);
+  background: var(--raise);
   font-size: 12px;
 }
 
@@ -1281,7 +1285,7 @@ svg.is-dragging {
   min-width: 1080px;
   min-height: 52px;
   padding: 10px 14px;
-  background: rgba(255, 255, 255, 0.018);
+  background: var(--raise);
 }
 
 .source-page-summary,
@@ -1324,7 +1328,7 @@ svg.is-dragging {
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 14px 16px;
-  background: rgba(255, 255, 255, 0.025);
+  background: var(--raise);
 }
 
 .source-preview p {
@@ -1350,7 +1354,7 @@ svg.is-dragging {
   border-radius: 999px;
   padding: 3px 8px;
   color: var(--muted);
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--raise);
   font-size: 12px;
 }
 
@@ -1466,7 +1470,7 @@ svg.is-dragging {
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 12px;
-  background: rgba(255, 255, 255, 0.025);
+  background: var(--raise);
 }
 
 .govern-item {
@@ -1500,7 +1504,7 @@ svg.is-dragging {
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 14px;
-  background: #0d1117;
+  background: var(--input-bg);
   color: inherit;
   font: inherit;
   text-align: left;
@@ -1651,7 +1655,7 @@ svg.is-dragging {
   padding: 10px 12px;
   border: 1px solid var(--line);
   border-radius: 11px;
-  background: #0d1117;
+  background: var(--input-bg);
   cursor: pointer;
   transition: border-color 0.15s ease, background 0.15s ease;
 }
@@ -1743,7 +1747,7 @@ svg.is-dragging {
   padding: 12px;
   background:
     linear-gradient(180deg, rgba(13, 17, 23, 0.94), rgba(13, 17, 23, 0.98)),
-    #0d1117;
+    var(--input-bg);
   box-shadow: 0 -18px 38px rgba(0, 0, 0, 0.22);
 }
 
@@ -1762,7 +1766,7 @@ svg.is-dragging {
   border: 1px solid var(--line);
   border-radius: 13px;
   padding: 16px;
-  background: #0d1117;
+  background: var(--input-bg);
 }
 
 .chat-empty {
@@ -1787,7 +1791,7 @@ svg.is-dragging {
   border: 1px solid var(--line);
   border-radius: 13px;
   padding: 14px;
-  background: rgba(255, 255, 255, 0.035);
+  background: var(--raise);
 }
 
 .chat-message.user {
@@ -1855,7 +1859,7 @@ svg.is-dragging {
   border-radius: 10px;
   padding: 9px 11px;
   color: var(--text);
-  background: #0d1117;
+  background: var(--input-bg);
   text-align: left;
 }
 
@@ -1916,7 +1920,7 @@ svg.is-dragging {
   transform: none;
   color: var(--text);
   border-color: var(--line-soft);
-  background: rgba(255, 255, 255, 0.045);
+  background: var(--raise);
 }
 
 .model-picker-menu button.active {
@@ -2055,7 +2059,7 @@ svg.is-dragging {
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 12px;
-  background: rgba(255, 255, 255, 0.025);
+  background: var(--raise);
 }
 
 .provider-card strong {
@@ -2138,7 +2142,7 @@ svg.is-dragging {
   border: 1px solid var(--line);
   border-radius: 13px;
   padding: 14px;
-  background: #0d1117;
+  background: var(--input-bg);
 }
 
 .settings-version strong,
@@ -2174,7 +2178,7 @@ svg.is-dragging {
   border: 1px solid var(--line-soft);
   border-radius: 10px;
   padding: 10px 12px;
-  background: rgba(255, 255, 255, 0.025);
+  background: var(--raise);
 }
 
 .settings-list span {
@@ -2205,7 +2209,7 @@ svg.is-dragging {
   border: 1px solid var(--line-soft);
   border-radius: 10px;
   padding: 10px 12px;
-  background: rgba(255, 255, 255, 0.025);
+  background: var(--raise);
 }
 
 .doctor-empty {
@@ -2247,7 +2251,7 @@ svg.is-dragging {
   border-radius: 9px;
   padding: 11px;
   color: var(--text);
-  background: #0d1117;
+  background: var(--input-bg);
   font-family:
     ui-monospace,
     SFMono-Regular,
@@ -2308,7 +2312,7 @@ svg.is-dragging {
   border-radius: 999px;
   padding: 0;
   color: var(--muted);
-  background: rgba(255, 255, 255, 0.025);
+  background: var(--raise);
   font-size: 11px;
   font-weight: 760;
 }
@@ -2364,7 +2368,7 @@ svg.is-dragging {
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 13px;
-  background: rgba(255, 255, 255, 0.025);
+  background: var(--raise);
 }
 
 .setting-card.active {
@@ -2738,7 +2742,7 @@ svg.is-dragging {
 .embedding-path-row { display: flex; gap: 8px; }
 .embedding-path-row input {
   flex: 1; min-width: 0; padding: 8px 10px;
-  border: 1px solid var(--line); border-radius: 9px; background: #0d1117; color: inherit;
+  border: 1px solid var(--line); border-radius: 9px; background: var(--input-bg); color: inherit;
   font-family: ui-monospace, monospace; font-size: 12px;
 }
 .embedding-cards {
@@ -2747,7 +2751,7 @@ svg.is-dragging {
 }
 .embedding-card {
   border: 1px solid var(--line); border-radius: 13px; padding: 14px;
-  background: #0d1117; display: grid; gap: 10px; align-content: start;
+  background: var(--input-bg); display: grid; gap: 10px; align-content: start;
 }
 .embedding-card.active { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 .embedding-card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
@@ -2762,7 +2766,7 @@ svg.is-dragging {
 .embedding-name-form { grid-template-columns: 1fr auto; align-items: center; }
 .embedding-name-form input, .embedding-cloud-form input {
   padding: 6px 9px; border: 1px solid var(--line); border-radius: 8px;
-  background: #0b0f14; color: inherit; font-size: 12px; min-width: 0;
+  background: var(--input-bg); color: inherit; font-size: 12px; min-width: 0;
 }
 .embedding-rebuild-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .embedding-rebuild-hint { color: var(--muted); font-size: 11px; }
@@ -2787,7 +2791,7 @@ svg.is-dragging {
 .external-tool-row span strong { font-weight: 600; }
 .external-config-code {
   margin: 0; padding: 12px; border: 1px solid var(--line); border-radius: 10px;
-  background: #0b0f14; color: var(--muted); font-size: 11px; line-height: 1.5; overflow: auto;
+  background: var(--input-bg); color: var(--muted); font-size: 11px; line-height: 1.5; overflow: auto;
   white-space: pre; font-family: ui-monospace, monospace;
 }
 .external-audit-list { display: grid; gap: 6px; max-height: 280px; overflow: auto; }
@@ -2796,3 +2800,152 @@ svg.is-dragging {
   padding: 6px 8px; border: 1px solid var(--line-soft); border-radius: 8px; font-size: 12px;
 }
 .external-empty { color: var(--muted); font-size: 12px; padding: 8px; }
+
+/* ===================== 亮色主题 ===================== */
+/* 深色保持原黑+绿不变;亮色为干净暖白 + 同色系绿(浅底上加深以保证对比)。 */
+body.theme-light {
+  color-scheme: light;
+  --bg: #f4f2ee;
+  --surface: #ffffff;
+  --surface-2: #f4f2ec;
+  --surface-3: #ece8e0;
+  --line: #e2ddd3;
+  --line-soft: rgba(0, 0, 0, 0.08);
+  --text: #23211d;
+  --muted: #6b675e;
+  --faint: #9a958a;
+  --accent: #15a06b;
+  --accent-2: #0e8f9c;
+  --warn: #b5811f;
+  --bad: #c25a40;
+  --ok: #3f9a55;
+  --input-bg: #ffffff;
+  --canvas: #f1efe9;
+  --raise: rgba(0, 0, 0, 0.04);
+  --shadow: 0 16px 44px rgba(40, 35, 25, 0.12);
+}
+/* 覆盖写死的深色渐变底 → 干净浅色面 */
+body.theme-light { background: var(--bg); }
+body.theme-light .rail { background: var(--surface); }
+body.theme-light .command-bar { background: rgba(255, 255, 255, 0.85); }
+body.theme-light .graph-stage,
+body.theme-light .inspector,
+body.theme-light .panel { background: var(--surface); }
+body.theme-light .nav-item.active {
+  border-color: rgba(21, 160, 107, 0.35);
+  background: rgba(21, 160, 107, 0.10);
+}
+/* 主按钮在浅底用实心深绿,文字白色,保证对比 */
+body.theme-light .primary-button {
+  background: linear-gradient(180deg, #1aa873, #138a5d);
+  border-color: #138a5d;
+  color: #ffffff;
+}
+/* 主题切换按钮 */
+.theme-toggle { font-size: 15px; }
+
+/* ===== 亮色主题:修正写死的深色组件底 + 危险/警告按钮浅色字 ===== */
+body.theme-light .qa-input {
+  background: var(--surface);
+  box-shadow: 0 -10px 24px rgba(60, 50, 30, 0.06);
+}
+body.theme-light .graph-stage {
+  background:
+    radial-gradient(circle at 52% 45%, rgba(21, 160, 107, 0.06), transparent 46%),
+    var(--surface);
+}
+/* 危险/警告按钮:浅底用深红字,保证可读 */
+body.theme-light .danger-button,
+body.theme-light .row-action-button.warning-button {
+  color: #b23b27;
+  background: rgba(194, 90, 64, 0.10);
+  border-color: rgba(194, 90, 64, 0.42);
+}
+body.theme-light .danger-button:hover,
+body.theme-light .row-action-button.warning-button:hover {
+  background: rgba(194, 90, 64, 0.16);
+}
+
+/* ===== 统一的次级按钮(此前缺失,导致 配置/打开源资料/标记污染 等显示为原生灰按钮)===== */
+.secondary-button {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  min-height: 30px;
+  padding: 6px 12px;
+  color: var(--text);
+  background: var(--surface-3);
+  font-size: 13px;
+  transition: border-color 140ms ease, color 140ms ease, background 140ms ease;
+}
+.secondary-button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft, rgba(52, 211, 153, 0.08));
+}
+
+/* ===== 应用内弹窗(替代原生 confirm/prompt) ===== */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 60;
+  display: grid; place-items: center; padding: 20px;
+  background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(6px);
+}
+.modal-card {
+  width: min(420px, 100%);
+  border: 1px solid var(--line); border-radius: 14px;
+  padding: 20px; background: var(--surface); box-shadow: var(--shadow);
+  display: grid; gap: 12px;
+}
+.modal-title { margin: 0; font-size: 15px; }
+.modal-message { margin: 0; color: var(--text); font-size: 14px; line-height: 1.6; }
+.modal-input {
+  padding: 9px 11px; border: 1px solid var(--line); border-radius: 9px;
+  background: var(--input-bg); color: var(--text); font-size: 14px;
+}
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 4px; }
+
+/* 亮色:模型下拉菜单(此前写死深色渐变,亮色下应为浅色面) */
+body.theme-light .model-picker-menu {
+  background: var(--surface);
+  border-color: var(--line);
+  box-shadow: var(--shadow);
+}
+
+/* ===== 亮色:info 提示气泡(此前写死深底,亮色下字看不清)→ 统一深底浅字 ===== */
+body.theme-light .info-dot span {
+  background: #2c2c33;
+  color: #f5f4f2;
+  border-color: #45454d;
+}
+body.theme-light .info-dot span::after {
+  background: #2c2c33;
+  border-color: #45454d;
+}
+
+/* ===== 长列表限高 + 内部滚动(避免页面被一长条撑爆) ===== */
+.provider-grid,
+.embedding-cards,
+.govern-list,
+.settings-list,
+.audit-log-list,
+.external-audit-list {
+  max-height: 520px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.source-table-scroll {
+  max-height: 560px;
+  overflow-y: auto;
+}
+/* 细滚动条,贴合主题 */
+.provider-grid::-webkit-scrollbar,
+.embedding-cards::-webkit-scrollbar,
+.govern-list::-webkit-scrollbar,
+.settings-list::-webkit-scrollbar,
+.source-table-scroll::-webkit-scrollbar { width: 8px; }
+.provider-grid::-webkit-scrollbar-thumb,
+.embedding-cards::-webkit-scrollbar-thumb,
+.govern-list::-webkit-scrollbar-thumb,
+.settings-list::-webkit-scrollbar-thumb,
+.source-table-scroll::-webkit-scrollbar-thumb {
+  background: var(--line); border-radius: 8px;
+}
