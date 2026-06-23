@@ -2998,3 +2998,25 @@ body.theme-light .info-dot span::after {
   background: var(--raise); border: 1px solid var(--line-soft);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.9em;
 }
+
+/* ===== 多字段表单弹窗 ===== */
+.modal-form { display: grid; gap: 12px; }
+.modal-field { display: grid; gap: 5px; margin: 0; }
+.modal-field span { color: var(--muted); font-size: 12px; }
+
+/* ===== B. 图谱标题精简(原 H1 偏大偏重)===== */
+.graph-stage .stage-head h1 {
+  font-size: clamp(17px, 1.5vw, 22px);
+  font-weight: 700;
+  line-height: 1.2;
+}
+.graph-stage .stage-head .section-kicker { margin-bottom: 3px; }
+
+/* ===== C. 连接器卡片操作区:换行 + 间距统一 ===== */
+.connector-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}

@@ -184,22 +184,52 @@ function formatProviderStatus(provider) {
 }
 
 function renderPolicySelect(selector, task, providers, policies, onSaved) {
-  const select = document.querySelector(selector);
-  if (!select) return;
-  const selected = policies?.find((item) => item.task === task)?.provider_id || providers[0]?.provider_id || "mock";
-  select.innerHTML = providers.map((provider) => `
-    <option value="${escapeHtml(provider.provider_id)}" ${provider.provider_id === selected ? "selected" : ""}>
-      ${escapeHtml(provider.display_name)}
-    </option>
-  `).join("");
-  select.onchange = async () => {
-    await post("/api/models/policies", {
-      task,
-      provider_id: select.value,
-      mode: task === "embedding" ? "fallback" : "balanced"
+  const picker = document.querySelector(selector);
+  if (!picker) return;
+  const selectedId = policies?.find((item) => item.task === task)?.provider_id || providers[0]?.provider_id || "mock";
+  const current = providers.find((p) => p.provider_id === selectedId) || providers[0];
+  if (!current) return;
+  picker.dataset.value = current.provider_id;
+  picker.innerHTML = `
+    <button class="model-picker-trigger" type="button" aria-haspopup="listbox">
+      <span>${escapeHtml(current.display_name)}</span><i aria-hidden="true"></i>
+    </button>
+    <div class="model-picker-menu" role="listbox">
+      ${providers.map((provider) => `
+        <button class="${provider.provider_id === current.provider_id ? "active" : ""}" type="button" role="option" data-provider-id="${escapeHtml(provider.provider_id)}">
+          <strong>${escapeHtml(provider.display_name)}</strong>
+          <span>${escapeHtml(formatProviderStatus(provider))}</span>
+        </button>
+      `).join("")}
+    </div>`;
+  const trigger = picker.querySelector(".model-picker-trigger");
+  trigger.addEventListener("click", () => {
+    document.querySelectorAll(".model-picker.open").forEach((el) => { if (el !== picker) el.classList.remove("open"); });
+    picker.classList.toggle("open");
+  });
+  picker.querySelectorAll("[data-provider-id]").forEach((option) => {
+    option.addEventListener("click", async () => {
+      const providerId = option.dataset.providerId;
+      picker.dataset.value = providerId;
+      trigger.querySelector("span").textContent = providers.find((p) => p.provider_id === providerId)?.display_name || providerId;
+      picker.querySelectorAll("[data-provider-id]").forEach((item) => item.classList.toggle("active", item.dataset.providerId === providerId));
+      picker.classList.remove("open");
+      await post("/api/models/policies", {
+        task,
+        provider_id: providerId,
+        mode: task === "embedding" ? "fallback" : "balanced"
+      });
+      await onSaved?.();
     });
-    await onSaved?.();
-  };
+  });
+  if (!document.body.dataset.policyPickerOutsideWired) {
+    document.body.dataset.policyPickerOutsideWired = "1";
+    document.addEventListener("click", (event) => {
+      if (!event.target.closest(".policy-picker")) {
+        document.querySelectorAll(".policy-picker.open").forEach((el) => el.classList.remove("open"));
+      }
+    });
+  }
 }
 
 function renderHabitProfile(container, habits) {

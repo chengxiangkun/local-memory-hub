@@ -4,6 +4,7 @@ import { promisify } from "node:util";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { loadLocalEnv } from "./local-env.js";
+import { loadConnectorCredentials, saveConnectorCredentials, connectorCredentialStatus } from "./connector-credentials.js";
 import { persistConversationTurn } from "./conversation-memory-service.js";
 import { initDataDir, moveToTrash } from "./data-store.js";
 import { testEmbeddingProvider } from "./embedding-service.js";
@@ -68,6 +69,7 @@ const port = Number(process.env.LMH_PORT || 4317);
 const execFileAsync = promisify(execFile);
 await loadLocalEnv();
 const dataInfo = await initDataDir();
+await loadConnectorCredentials(dataInfo.data_dir);
 await initSqlite(dataInfo.data_dir);
 initModelProviders();
 runQaMemoryAutoGovernance(dataInfo.data_dir).catch((error) => {
@@ -305,6 +307,16 @@ const server = http.createServer(async (req, res) => {
       return json(res, 200, {
         connectors: await listExternalConnectors(dataInfo.data_dir)
       });
+    }
+
+    if (req.method === "GET" && req.url === "/api/connectors/credentials") {
+      return json(res, 200, { credentials: connectorCredentialStatus() });
+    }
+
+    if (req.method === "POST" && req.url === "/api/connectors/credentials") {
+      const body = await readJson(req);
+      const credentials = await saveConnectorCredentials(body || {}, dataInfo.data_dir);
+      return json(res, 200, { status: "saved", credentials });
     }
 
     if (req.method === "GET" && req.url === "/api/source-folders") {

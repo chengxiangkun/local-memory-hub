@@ -5,9 +5,22 @@
  * adapters can later reuse the same API actions.
  */
 
-import { post } from "./api.js";
+import { get, post } from "./api.js";
 import { escapeHtml, formatDate } from "./utils.js";
-import { promptDialog } from "./modal.js";
+import { promptDialog, formDialog } from "./modal.js";
+
+// 各平台凭证字段(对应后端 connector-credentials 的 key)。
+const CREDENTIAL_FIELDS = {
+  feishu: [
+    { name: "FEISHU_APP_ID", label: "App ID" },
+    { name: "FEISHU_APP_SECRET", label: "App Secret", type: "password" }
+  ],
+  tencent_docs: [
+    { name: "TENCENT_CLIENT_ID", label: "Client ID" },
+    { name: "TENCENT_ACCESS_TOKEN", label: "Access Token(约30天有效)", type: "password" },
+    { name: "TENCENT_OPEN_ID", label: "Open ID" }
+  ]
+};
 
 const CONNECTOR_TEMPLATES = [
   {
@@ -41,6 +54,7 @@ export function renderConnectorCards(container, connectors, { onChanged } = {}) 
         ${template.hint ? `<small class="connector-hint">${escapeHtml(template.hint)}</small>` : ""}
         <div class="connector-actions">
           <button class="ghost-button" type="button" data-connect-platform="${template.platform}">${connectorButtonText(connector)}</button>
+          <button class="secondary-button" type="button" data-credentials-platform="${template.platform}">凭证配置</button>
           <button class="ghost-button" type="button" data-sync-platform="${template.platform}" ${connector ? "" : "disabled"}>立即同步</button>
           <label class="connector-autosync">自动同步
             <select data-autosync-platform="${template.platform}" ${connector ? "" : "disabled"}>
@@ -52,6 +66,25 @@ export function renderConnectorCards(container, connectors, { onChanged } = {}) 
       </div>
     `;
   }).join("");
+
+  container.querySelectorAll("[data-credentials-platform]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const platform = button.dataset.credentialsPlatform;
+      const fields = CREDENTIAL_FIELDS[platform] || [];
+      let status = {};
+      try { status = (await get("/api/connectors/credentials")).credentials || {}; } catch { /* ignore */ }
+      const formFields = fields.map((field) => ({
+        ...field,
+        placeholder: status[field.name] ? "已配置 · 留空则不修改" : "未配置"
+      }));
+      const values = await formDialog(`${CONNECTOR_TEMPLATES.find((t) => t.platform === platform)?.display_name} 凭证配置`, formFields, {
+        message: "凭证仅加密保存在本地,保存后立即生效,无需重启。"
+      });
+      if (!values) return;
+      await post("/api/connectors/credentials", values);
+      await onChanged?.();
+    });
+  });
 
   container.querySelectorAll("[data-connect-platform]").forEach((button) => {
     button.addEventListener("click", async () => {
