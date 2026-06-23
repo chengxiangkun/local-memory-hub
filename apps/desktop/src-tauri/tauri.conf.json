@@ -4,20 +4,11 @@
   "version": "0.0.1",
   "identifier": "com.localmemoryhub.desktop",
   "build": {
-    "beforeDevCommand": "npm start",
     "devUrl": "http://127.0.0.1:3100",
     "frontendDist": "http://127.0.0.1:3100"
   },
   "app": {
-    "windows": [
-      {
-        "label": "main",
-        "title": "Local Memory Hub",
-        "width": 1280,
-        "height": 860,
-        "resizable": true
-      }
-    ],
+    "windows": [],
     "security": {
       "csp": null
     }
