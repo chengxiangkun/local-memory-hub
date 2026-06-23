@@ -26,6 +26,7 @@ import { renderEmbeddingSettings } from "./js/embedding-settings-view.js";
 import { renderExternalAi } from "./js/external-ai-view.js";
 import { confirmDialog, promptDialog } from "./js/modal.js";
 import { generateMemoryCard } from "./js/share-card.js";
+import { showOnboardingIfFirstRun } from "./js/onboarding.js";
 import { renderSources as renderSourcesViewModule } from "./js/sources-view.js";
 import { renderSourceDetail } from "./js/source-detail-view.js";
 import { state } from "./js/state.js";
@@ -194,6 +195,8 @@ async function boot() {
   if (state.graph.nodes.length === 0 && state.sources.length === 0) {
     els.status.textContent = "等待首次导入";
   }
+  // 新用户首启向导(仅首次显示)。
+  showOnboardingIfFirstRun({ onImportSample: importExampleText });
 }
 
 async function refreshAll() {

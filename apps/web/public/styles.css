@@ -3044,3 +3044,17 @@ input[type="radio"] {
   padding: 0;
   flex: none;
 }
+
+/* ===== 首启向导 ===== */
+.onboarding-card { width: min(520px, 100%); gap: 14px; }
+.onboarding-eyebrow { margin: 0; color: var(--accent); font-size: 12px; font-weight: 700; letter-spacing: 1px; }
+.onboarding-steps { margin: 4px 0 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.onboarding-steps li {
+  display: grid; grid-template-columns: 26px 1fr; align-items: center; gap: 10px;
+  color: var(--text); font-size: 14px;
+}
+.onboarding-steps li span {
+  display: grid; place-items: center; width: 26px; height: 26px;
+  border-radius: 999px; background: var(--accent-soft, rgba(52,211,153,0.14));
+  color: var(--accent); font-weight: 700; font-size: 13px;
+}
