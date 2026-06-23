@@ -6,7 +6,7 @@ import {
   renderQaGovernanceResult
 } from "./js/governance-view.js";
 import { renderEmptyNodeDetail, renderSelectedNode } from "./js/graph-detail-view.js";
-import { renderGraph as renderGraphSvg, updateGraphSelection } from "./js/graph-renderer-force.js";
+import { renderGraph as renderGraphSvg, updateGraphSelection, exportGraphSnapshot } from "./js/graph-renderer-force.js";
 import { importExampleText as runExampleImport, importFile as runFileImport, importText as runTextImport, importUrl as runUrlImport } from "./js/import-flow.js";
 import { renderMetrics as renderMetricCounters } from "./js/metrics-view.js";
 import {
@@ -73,6 +73,10 @@ function bindEvents() {
 
   document.querySelector("#refreshButton")?.addEventListener("click", refreshAll);
   document.querySelector("#resetGraphView")?.addEventListener("click", resetGraphView);
+  document.querySelector("#exportGraphSnapshot")?.addEventListener("click", () => {
+    const ok = exportGraphSnapshot(`memory-graph-${state.graphMode || "relation"}.png`);
+    setStatus(ok ? "已导出图谱快照 PNG" : "导出失败:当前没有可导出的图谱");
+  });
   document.querySelectorAll("[data-graph-mode]").forEach((button) => {
     button.addEventListener("click", () => setGraphMode(button.dataset.graphMode));
   });

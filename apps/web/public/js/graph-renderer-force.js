@@ -88,6 +88,24 @@ export function renderGraph(controls = {}, graph = {}, options = {}) {
   wireZoom(controls);
 }
 
+// 导出当前图谱视图为 PNG 快照(force-graph 的 canvas → 下载)。
+export function exportGraphSnapshot(filename = "memory-graph.png") {
+  const canvas = container?.querySelector("canvas");
+  if (!canvas) return false;
+  try {
+    const url = canvas.toDataURL("image/png");
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function updateGraphSelection(_graphEl, nextSelectedId) {
   selectedId = nextSelectedId || null;
   if (fg) fg.nodeColor(nodeColor); // 重新应用配色以反映选中态
