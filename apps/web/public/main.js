@@ -25,6 +25,7 @@ import { renderSettings } from "./js/settings-view.js";
 import { renderEmbeddingSettings } from "./js/embedding-settings-view.js";
 import { renderExternalAi } from "./js/external-ai-view.js";
 import { confirmDialog, promptDialog } from "./js/modal.js";
+import { generateMemoryCard } from "./js/share-card.js";
 import { renderSources as renderSourcesViewModule } from "./js/sources-view.js";
 import { renderSourceDetail } from "./js/source-detail-view.js";
 import { state } from "./js/state.js";
@@ -97,6 +98,13 @@ function bindEvents() {
 
   document.querySelector("#refreshButton")?.addEventListener("click", refreshAll);
   document.querySelector("#themeToggle")?.addEventListener("click", toggleTheme);
+  document.querySelector("#generateMemoryCard")?.addEventListener("click", async () => {
+    try {
+      await generateMemoryCard(new Date().toLocaleDateString("zh-CN"), { setStatus });
+    } catch (error) {
+      setStatus(`生成记忆卡片失败:${error.message}`);
+    }
+  });
   document.querySelector("#resetGraphView")?.addEventListener("click", resetGraphView);
   document.querySelector("#exportGraphSnapshot")?.addEventListener("click", exportGraphSnapshot);
   document.querySelectorAll("[data-graph-mode]").forEach((button) => {
