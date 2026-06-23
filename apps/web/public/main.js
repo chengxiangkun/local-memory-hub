@@ -27,6 +27,7 @@ import { renderExternalAi } from "./js/external-ai-view.js";
 import { confirmDialog, promptDialog } from "./js/modal.js";
 import { generateMemoryCard } from "./js/share-card.js";
 import { showOnboardingIfFirstRun } from "./js/onboarding.js";
+import { openHelp } from "./js/help-view.js";
 import { renderSources as renderSourcesViewModule } from "./js/sources-view.js";
 import { renderSourceDetail } from "./js/source-detail-view.js";
 import { state } from "./js/state.js";
@@ -99,6 +100,7 @@ function bindEvents() {
 
   document.querySelector("#refreshButton")?.addEventListener("click", refreshAll);
   document.querySelector("#themeToggle")?.addEventListener("click", toggleTheme);
+  document.querySelector("#helpButton")?.addEventListener("click", openHelp);
   document.querySelector("#generateMemoryCard")?.addEventListener("click", async () => {
     try {
       await generateMemoryCard(new Date().toLocaleDateString("zh-CN"), { setStatus });
