@@ -44,3 +44,6 @@ apps/desktop/src-tauri/gen/
 
 # WIP 营销/视频素材(含大字体),不进仓库
 marketing/
+
+# 归档的旧测试数据
+.archive/
