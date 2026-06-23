@@ -143,7 +143,8 @@ function bindEvents() {
     if (event.target === els.sourceDetailDrawer) closeSourceDetail();
   });
   document.querySelector("#questionInput")?.addEventListener("keydown", (event) => {
-    if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+    // 回车发送;Shift+Enter(或输入法组合中)换行。
+    if (event.key === "Enter" && !event.shiftKey && !event.isComposing) {
       event.preventDefault();
       askQuestion();
     }

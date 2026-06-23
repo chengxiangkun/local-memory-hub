@@ -2982,3 +2982,19 @@ body.theme-light .info-dot span::after {
   border-color: var(--line-soft);
   background: var(--raise);
 }
+
+/* ===== 聊天回答 markdown 渲染样式 ===== */
+.chat-body { line-height: 1.65; }
+.chat-body p { margin: 0 0 10px; }
+.chat-body p:last-child { margin-bottom: 0; }
+.chat-body strong { font-weight: 700; color: var(--text); }
+.chat-body em { font-style: italic; }
+.chat-body h4 { margin: 12px 0 6px; font-size: 15px; }
+.chat-body h5 { margin: 10px 0 6px; font-size: 14px; color: var(--muted); }
+.chat-body ul, .chat-body ol { margin: 6px 0 10px; padding-left: 20px; }
+.chat-body li { margin: 3px 0; }
+.chat-body code {
+  padding: 1px 5px; border-radius: 5px;
+  background: var(--raise); border: 1px solid var(--line-soft);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.9em;
+}

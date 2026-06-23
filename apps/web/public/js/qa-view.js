@@ -81,14 +81,14 @@ export async function deleteQaSession(sessionId) {
 
 export function renderQaModelOptions(providerPicker, providers) {
   if (!providerPicker) return;
-  // 选择优先级:本会话已选 → 上次手动选择(持久化)→ 已配置的真实模型 → mock → 第一个。
+  // 选择优先级:上次手动选择(持久化)→ 已配置的真实模型 → mock → 第一个。
+  // 注意:不用 dataset.value 作为来源——HTML 初值写死 "mock" 会盖掉持久化与"默认选已配置"。
   const stored = window.localStorage.getItem(QA_MODEL_STORAGE_KEY) || "";
-  const previousValue = providerPicker.dataset.value || stored || "";
   const firstConfigured =
     providers.find((provider) => provider.provider_id !== "mock" && provider.requires_key && provider.configured) ||
     providers.find((provider) => provider.provider_id !== "mock" && provider.configured);
   const selectedProvider =
-    providers.find((provider) => provider.provider_id === previousValue) ||
+    providers.find((provider) => provider.provider_id === stored) ||
     firstConfigured ||
     providers.find((provider) => provider.provider_id === "mock") ||
     providers[0];
@@ -249,7 +249,7 @@ function renderConversation(answerBox) {
         <strong>${escapeHtml(message.role === "user" ? "你" : message.model || "AI")}</strong>
         ${message.citation_count !== undefined ? `<span>${message.citation_count} 条引用</span>` : ""}
       </div>
-      <p>${renderMessageContent(message, messageIndex)}</p>
+      <div class="chat-body">${renderMessageContent(message, messageIndex)}</div>
       ${message.memory_status ? `<span class="status-badge ok">${escapeHtml(message.memory_status)}</span>` : ""}
     </article>
   `).join("");
@@ -267,20 +267,62 @@ function renderConversation(answerBox) {
 }
 
 function renderMessageContent(message, messageIndex) {
-  const safe = escapeHtml(message.content || "");
+  // 用户消息保持纯文本;助手回答按 markdown 渲染(加粗/斜体/列表/标题/代码),并保留可点 [n] 引用。
+  if (message.role !== "assistant") {
+    return escapeHtml(message.content || "").replaceAll("\n", "<br />");
+  }
+  let html = renderMarkdown(message.content || "");
   const citations = message.citations || [];
-  let withRefs = safe;
-  if (message.role === "assistant" && citations.length > 0) {
+  if (citations.length > 0) {
     const validIndexes = new Set(
       citations.map((item, index) => (Number.isFinite(Number(item.index)) ? Number(item.index) : index + 1))
     );
-    withRefs = safe.replace(/\[(\d+)\]/g, (match, num) => {
+    html = html.replace(/\[(\d+)\]/g, (match, num) => {
       const citationIndex = Number(num);
       if (!validIndexes.has(citationIndex)) return match;
       return `<button class="citation-ref" type="button" data-msg="${messageIndex}" data-cite="${citationIndex}">[${citationIndex}]</button>`;
     });
   }
-  return withRefs.replaceAll("\n", "<br />");
+  return html;
+}
+
+// 轻量 markdown -> HTML(先转义防注入,再套自有标签)。够覆盖聊天回答常见语法。
+function renderMarkdown(raw) {
+  const lines = escapeHtml(raw || "").split("\n");
+  const out = [];
+  let listType = null;
+  const closeList = () => { if (listType) { out.push(`</${listType}>`); listType = null; } };
+  for (const line of lines) {
+    const heading = line.match(/^(#{1,6})\s+(.*)$/);
+    const ulItem = line.match(/^\s*[-*]\s+(.*)$/);
+    const olItem = line.match(/^\s*\d+\.\s+(.*)$/);
+    if (heading) {
+      closeList();
+      const level = heading[1].length <= 2 ? 4 : 5;
+      out.push(`<h${level}>${renderInline(heading[2])}</h${level}>`);
+    } else if (ulItem) {
+      if (listType !== "ul") { closeList(); out.push("<ul>"); listType = "ul"; }
+      out.push(`<li>${renderInline(ulItem[1])}</li>`);
+    } else if (olItem) {
+      if (listType !== "ol") { closeList(); out.push("<ol>"); listType = "ol"; }
+      out.push(`<li>${renderInline(olItem[1])}</li>`);
+    } else if (line.trim() === "") {
+      closeList();
+    } else {
+      closeList();
+      out.push(`<p>${renderInline(line)}</p>`);
+    }
+  }
+  closeList();
+  return out.join("");
+}
+
+function renderInline(text) {
+  return text
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, "$1<em>$2</em>")
+    .replace(/(^|[\s(])_([^_\n]+)_(?=[\s).,!?]|$)/g, "$1<em>$2</em>");
 }
 
 function highlightCitation(citationIndex) {
