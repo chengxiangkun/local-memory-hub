@@ -154,6 +154,19 @@ function wireZoom(controls) {
       if (valueEl) valueEl.textContent = `${slider.value}%`;
     });
   }
+  // 手动缩放(滚轮/触控板)时同步滑条与百分比,避免与底部滑条脱节。
+  if (fg && slider && !fg.__zoomSynced) {
+    fg.__zoomSynced = true;
+    fg.onZoom((transform) => {
+      const pct = Math.round((transform?.k || 1) * 100);
+      const min = Number(slider.min) || 1;
+      const max = Number(slider.max) || 400;
+      const clamped = Math.max(min, Math.min(max, pct));
+      slider.value = String(clamped);
+      // 用钳位后的值,保证滑条与百分比一致。
+      if (valueEl) valueEl.textContent = `${clamped}%`;
+    });
+  }
   const reset = document.querySelector("#resetGraphView");
   if (reset && !reset.dataset.forceWired) {
     reset.dataset.forceWired = "1";
