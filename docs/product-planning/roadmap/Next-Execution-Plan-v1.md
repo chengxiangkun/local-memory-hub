@@ -403,8 +403,9 @@ V1 路线图的全部主项已完成:P0.1/P0.2/P0.3/P1.1/P1.3/P2.1/P2.2/P2.3/P3.
 
 ## 真正剩余
 - ✅ 腾讯文档真实同步:已完成(凭证存 .env.local,列目录+导出正文+增量;注意 access_token 约 30 天有效,过期需在控制台重置后更新 .env.local)。
-- 有道云:无公开文档 API,无法做真实同步(保留链接兜底)。
-- Tauri 打包成可分发 .dmg:需 Apple Developer 证书做签名与公证(脚手架已可 `npm run desktop` 本地运行)。
+- ✅ Tauri 桌面应用:已完成生产态 sidecar + 未签名 `.app` 打包(`npm run desktop:build`),开源/本机使用无需 Apple 证书;实测双击即用(自动起停后端)。
+- 有道云:无公开文档 API,无法做真实同步(保留链接兜底)——客观限制,非待办。
+- (可选)分发给他人免 Gatekeeper 警告:需 Apple Developer ID 签名 + 公证;完整跨机 `.app`(内嵌 node 运行时与工程)是更大的后续工程。
 
 ## 6. 已知风险
 
