@@ -85,7 +85,7 @@ function renderProviderGrid(providerGrid, providers, onProviderSaved) {
         ${provider.supports_embedding
           ? comboField("embedding_model", provider.configured_embedding_model || provider.default_embedding_model || "", provider.default_embedding_model || "", "Embedding 模型", provider.embedding_model_options || [])
           : ""}
-        ${provider.requires_key ? `<input name="api_key" type="password" placeholder="${provider.configured ? "留空则不修改 API Key" : "API Key"}" />` : ""}
+        ${provider.requires_key ? `<input name="api_key" type="password" autocomplete="new-password" placeholder="${provider.configured ? "留空则不修改 API Key" : "API Key"}" />` : ""}
         <div class="provider-action-row">
           <button type="submit">保存</button>
           <button class="ghost-button" type="button" data-test-provider="${escapeHtml(provider.provider_id)}">测试</button>

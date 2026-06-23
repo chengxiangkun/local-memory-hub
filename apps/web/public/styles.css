@@ -3020,3 +3020,28 @@ body.theme-light .info-dot span::after {
   gap: 8px;
   margin-top: 10px;
 }
+
+/* ===== 下拉菜单项强制左对齐 + 紧凑(修复策略下拉菜单项居中/过疏)===== */
+.model-picker-menu button {
+  justify-items: start;
+  text-align: left;
+  min-height: 0;
+  gap: 2px;
+}
+.model-picker-menu button strong,
+.model-picker-menu button span {
+  justify-self: start;
+  text-align: left;
+}
+/* ===== MCP 工具开关:复选框 + 文案紧贴左对齐,不被拉伸 ===== */
+.external-tools { display: grid; gap: 4px; }
+.external-tool-row { justify-content: flex-start; }
+.external-tool-row > span { flex: 0 1 auto; }
+
+/* ===== 复选框/单选框不应被全局 input{width:100%} 撑宽 ===== */
+input[type="checkbox"],
+input[type="radio"] {
+  width: auto;
+  padding: 0;
+  flex: none;
+}
