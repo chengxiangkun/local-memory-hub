@@ -48,7 +48,8 @@
     "desktop": "tauri dev --config apps/desktop/src-tauri/tauri.conf.json",
     "desktop:build": "node apps/desktop/stage-runtime.mjs && tauri build --config apps/desktop/src-tauri/tauri.conf.json",
     "desktop:stage": "node apps/desktop/stage-runtime.mjs",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "feishu-bot": "node apps/feishu-bot/src/index.js"
   },
   "workspaces": [
     "apps/*",
@@ -56,6 +57,7 @@
   ],
   "dependencies": {
     "@huggingface/transformers": "^4.2.0",
+    "@larksuiteoapi/node-sdk": "^1.67.0",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "better-sqlite3": "^12.11.1",
     "force-graph": "^1.51.4"
