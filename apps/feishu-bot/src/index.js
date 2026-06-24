@@ -14,8 +14,10 @@ import { loadLocalEnv } from "../../api/src/local-env.js";
 
 await loadLocalEnv();
 
-const appId = process.env.FEISHU_APP_ID;
-const appSecret = process.env.FEISHU_APP_SECRET;
+// IM 机器人用独立应用(避免和 openclaw 文档同步共用一个 app 抢长连接);
+// 回退到 FEISHU_APP_ID/SECRET 兼容单应用场景。
+const appId = process.env.FEISHU_BOT_APP_ID || process.env.FEISHU_APP_ID;
+const appSecret = process.env.FEISHU_BOT_APP_SECRET || process.env.FEISHU_APP_SECRET;
 const apiBase = process.env.LMH_API_BASE || `http://127.0.0.1:${process.env.LMH_PORT || 4317}`;
 const provider = process.env.FEISHU_BOT_PROVIDER || "";
 
