@@ -1,5 +1,6 @@
 import { spawn } from "node:child_process";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { openSync, mkdirSync } from "node:fs";
 import { createServer } from "node:net";
 import path from "node:path";
 
@@ -112,10 +113,33 @@ function killChild(child) {
 }
 
 function spawnService(script, options, env) {
+  // 子服务输出写到数据目录日志文件:
+  //  1) 避免 Windows GUI 应用(无控制台句柄)用 stdio:"inherit" 时 spawn 失败;
+  //  2) 留下 api.log / web.log 便于排查(尤其打包后无终端时)。
+  let stdio = options.stdio;
+  if (!stdio) {
+    if (process.stdout && process.stdout.isTTY) {
+      // 开发态(有终端):继承,实时看日志。
+      stdio = "inherit";
+    } else {
+      // 桌面 GUI / 无控制台(尤其 Windows):写日志文件,避免 inherit 无句柄崩溃,
+      // 同时留 api.log / web.log 便于排查。
+      try {
+        const logDir = path.join(options.dataDir, "logs");
+        mkdirSync(logDir, { recursive: true });
+        const name = script.includes("web/") ? "web" : "api";
+        const fd = openSync(path.join(logDir, `${name}.log`), "a");
+        stdio = ["ignore", fd, fd];
+      } catch {
+        stdio = "ignore";
+      }
+    }
+  }
   return spawn(process.execPath, [script], {
     cwd: options.projectRoot,
     env,
-    stdio: options.stdio || "inherit"
+    stdio,
+    windowsHide: true
   });
 }
 

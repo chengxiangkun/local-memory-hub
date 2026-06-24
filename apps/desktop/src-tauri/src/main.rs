@@ -100,13 +100,14 @@ fn local_cli(arg: &str, wait: bool) {
     }
 }
 
-fn wait_web_ready(timeout_secs: u64) {
+fn wait_web_ready(timeout_secs: u64) -> bool {
     for _ in 0..(timeout_secs * 2) {
         if TcpStream::connect(WEB_ADDR).is_ok() {
-            return;
+            return true;
         }
         std::thread::sleep(Duration::from_millis(500));
     }
+    false
 }
 
 fn main() {
@@ -115,12 +116,26 @@ fn main() {
         .setup(|app| {
             let _ = RUNTIME.set(resolve_runtime(app));
             local_cli("start", false); // 后台拉起 API + Web
-            wait_web_ready(20);
-            WebviewWindowBuilder::new(app, "main", WebviewUrl::External(WEB_URL.parse().unwrap()))
+            let ready = wait_web_ready(40);
+            let window = WebviewWindowBuilder::new(app, "main", WebviewUrl::External(WEB_URL.parse().unwrap()))
                 .title("Local Memory Hub")
                 .inner_size(1280.0, 860.0)
                 .resizable(true)
                 .build()?;
+            // 服务启动较慢时(首次/慢机器),窗口可能先显示"拒绝连接";
+            // 后台继续等待,服务就绪后自动重载窗口,避免用户看到错误页。
+            if !ready {
+                let win = window.clone();
+                tauri::async_runtime::spawn(async move {
+                    for _ in 0..120 {
+                        std::thread::sleep(Duration::from_millis(500));
+                        if TcpStream::connect(WEB_ADDR).is_ok() {
+                            let _ = win.eval("location.reload()");
+                            break;
+                        }
+                    }
+                });
+            }
             // 后台检查更新(不阻塞启动)
             tauri::async_runtime::spawn(check_for_updates(app.handle().clone()));
             Ok(())

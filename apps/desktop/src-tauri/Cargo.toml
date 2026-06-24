@@ -1,6 +1,6 @@
 [package]
 name = "local-memory-hub-desktop"
-version = "0.0.2"
+version = "0.0.3"
 description = "Local Memory Hub 桌面运行时(sidecar 启动本地服务,webview 加载本地 Web)"
 edition = "2021"
 rust-version = "1.77"
