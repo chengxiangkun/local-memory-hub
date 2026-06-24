@@ -53,3 +53,4 @@ apps/desktop/src-tauri/runtime/
 
 # 更新签名私钥(勿提交)
 .tauri-keys/
+.gstack/
