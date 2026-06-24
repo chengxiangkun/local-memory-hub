@@ -3080,3 +3080,10 @@ input[type="radio"] {
   border: 1px solid var(--line); border-radius: 10px;
 }
 .help-foot { margin: 0; color: var(--muted); font-size: 13px; }
+
+/* 亮色:图谱缩放控件(原写死深色块)→ 浅色 */
+body.theme-light .graph-zoom-control {
+  background: rgba(255, 255, 255, 0.92);
+  border-color: var(--line);
+  box-shadow: 0 10px 24px rgba(60, 50, 30, 0.1);
+}

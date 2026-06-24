@@ -1,9 +1,22 @@
 import { copyFile, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { getDataDir, initDataDir } from "./data-store.js";
 import { dbPath, initSqlite, listSourcesSqlite } from "./sqlite-store.js";
 
 const LATEST_SCHEMA_VERSION = 4;
+
+// 运行时真实版本:读工程/包内 package.json(随每次发版自动正确),
+// 取不到再回退数据目录里存的旧值。
+async function runtimeAppVersion() {
+  try {
+    const pkgPath = path.join(path.dirname(fileURLToPath(import.meta.url)), "../../../package.json");
+    const pkg = JSON.parse(await readFile(pkgPath, "utf8"));
+    return pkg.version || null;
+  } catch {
+    return null;
+  }
+}
 
 export async function getVersionInfo(dataDir = getDataDir()) {
   await initDataDir(dataDir);
@@ -11,7 +24,7 @@ export async function getVersionInfo(dataDir = getDataDir()) {
   const schemaVersion = await readJson(path.join(dataDir, "app-meta", "schema-version.json"));
   return {
     data_dir: dataDir,
-    app_version: appVersion.app_version,
+    app_version: (await runtimeAppVersion()) || appVersion.app_version,
     schema_version: schemaVersion.schema_version,
     latest_schema_version: LATEST_SCHEMA_VERSION,
     needs_migration: schemaVersion.schema_version < LATEST_SCHEMA_VERSION
