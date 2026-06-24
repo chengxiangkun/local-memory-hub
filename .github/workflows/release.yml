@@ -42,6 +42,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Stage self-contained runtime
+        # 在各平台各自组装(node 二进制 + 工程 + 原生依赖均与该平台匹配),
+        # 打进包后即可脱离仓库/系统 node 运行。
+        run: node apps/desktop/stage-runtime.mjs
+
       - name: Build & publish (Tauri, unsigned)
         uses: tauri-apps/tauri-action@v0
         env:

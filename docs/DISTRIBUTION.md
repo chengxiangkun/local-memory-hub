@@ -7,11 +7,13 @@
 | 形态 | 状态 | 说明 |
 | --- | --- | --- |
 | 源码自构建(开发者) | ✅ 可用 | `git clone` → `npm install` → `npm start` |
-| macOS 未签名 `.app`(本机) | ✅ 已验证 | `npm run desktop:build`,双击即用;首次右键→打开绕过 Gatekeeper |
-| macOS 签名 + 公证(分发给他人免警告) | ⏳ 未做 | 需 Apple Developer ID;开源/本机不需要 |
-| macOS 自包含 `.app`(免依赖仓库/node) | ⏳ 未做 | 需把 node 运行时 + 工程 + node_modules 打进 bundle |
-| Windows 安装包 | ⛔ 本机无法构建 | 需 Windows + Rust windows target;见下 |
+| macOS **自包含** `.app`(免依赖仓库/node) | ✅ **已实现并验证** | `npm run desktop:build`(672MB);内置 node + 工程 + 依赖,**脱离仓库/系统 node 也能跑**;已实测双击启动→自动起服务→窗口加载。未签名,首次右键→打开 |
+| Windows 自包含安装包 | ⏳ CI 可出,**未实测** | GitHub Actions 在 windows runner 上同样组装运行时打包;**本机是 Mac,无法验证 Windows 实跑**,需在 Windows 上测一次 |
+| macOS 签名 + 公证(分发给他人免警告) | ⏳ 未做(可选) | 需 Apple Developer ID;开源不强制 |
 | npm 全局命令(`lmh start`) | ⏳ 未做 | 可发布为 npm 包,面向开发者 |
+
+> **自包含原理**:`apps/desktop/stage-runtime.mjs` 在构建前把"当前平台的 node 二进制 + apps/ + node_modules"组装到 `src-tauri/runtime/`,经 `tauri.conf.json` 的 `bundle.resources` 打进包;`main.rs` 优先用包内 `resources/runtime/`(回退开发态)。子进程用 `process.execPath`(即包内 node),所以无 node 的机器也能跑。
+> **体积与模型**:包约 672MB(含 onnxruntime 等本地向量依赖);e5 向量模型(~470MB)首次按需下载,离线时自动回退轻量向量。若要显著瘦身,可后续把"本地向量"做成可选项。
 
 ## macOS 未签名 .app(已验证)
 

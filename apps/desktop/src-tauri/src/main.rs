@@ -1,49 +1,80 @@
 // Local Memory Hub 桌面运行时。
 //
-// 生产态 sidecar:应用启动时拉起本地 API/Web 服务(node local-cli start),等待 Web
-// 就绪后再创建窗口加载 http://127.0.0.1:3100;退出时停掉服务。这样打包出的 .app 可
-// "双击即用",无需先手动起服务。
+// 生产态 sidecar:启动时拉起本地 API/Web(node local-cli start),等 Web 就绪后建窗口
+// 加载 http://127.0.0.1:3100;退出时停服务。打包出的 .app/.exe 可"双击即用"。
 //
-// 路径解析(GUI 启动时 PATH 精简,需显式定位):
-//   - node:LMH_NODE 环境变量 → 常见绝对路径 → "node"
-//   - 仓库根:LMH_HOME 环境变量 → 编译期 CARGO_MANIFEST_DIR 上溯三级
+// 运行时解析(优先自包含,回退开发态):
+//   - 自包含:打进包内的 resources/runtime/(含 node 二进制 + 工程 + node_modules),
+//     由 apps/desktop/stage-runtime.mjs 在构建前组装。脱离仓库也能跑。
+//   - 开发态:LMH_NODE / 系统 node + LMH_HOME / 编译期仓库根。
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::net::TcpStream;
+use std::path::Path;
 use std::process::Command;
+use std::sync::OnceLock;
 use std::time::Duration;
-use tauri::{RunEvent, WebviewUrl, WebviewWindowBuilder};
+use tauri::{Manager, RunEvent, WebviewUrl, WebviewWindowBuilder};
 
 const WEB_ADDR: &str = "127.0.0.1:3100";
 const WEB_URL: &str = "http://127.0.0.1:3100";
 
-fn repo_root() -> String {
+// 解析后的 (node 可执行路径, 工程根目录),启动时确定一次,供 start/stop 共用。
+static RUNTIME: OnceLock<(String, String)> = OnceLock::new();
+
+fn node_name() -> &'static str {
+    if cfg!(windows) {
+        "node.exe"
+    } else {
+        "node"
+    }
+}
+
+fn dev_repo_root() -> String {
     if let Ok(home) = std::env::var("LMH_HOME") {
         return home;
     }
     let manifest = env!("CARGO_MANIFEST_DIR"); // <repo>/apps/desktop/src-tauri
-    std::path::Path::new(manifest)
+    Path::new(manifest)
         .join("../../..")
         .canonicalize()
         .map(|p| p.to_string_lossy().to_string())
         .unwrap_or_else(|_| manifest.to_string())
 }
 
-fn node_bin() -> String {
+fn dev_node_bin() -> String {
     if let Ok(node) = std::env::var("LMH_NODE") {
         return node;
     }
     for candidate in ["/usr/local/bin/node", "/opt/homebrew/bin/node", "/usr/bin/node"] {
-        if std::path::Path::new(candidate).exists() {
+        if Path::new(candidate).exists() {
             return candidate.to_string();
         }
     }
     "node".to_string()
 }
 
+// 优先用打进包内的自包含运行时;否则回退到开发态。
+fn resolve_runtime(app: &tauri::App) -> (String, String) {
+    if let Ok(res) = app.path().resource_dir() {
+        let rt = res.join("runtime");
+        let node = rt.join(node_name());
+        if node.exists() {
+            return (
+                node.to_string_lossy().to_string(),
+                rt.to_string_lossy().to_string(),
+            );
+        }
+    }
+    (dev_node_bin(), dev_repo_root())
+}
+
 fn local_cli(arg: &str, wait: bool) {
-    let root = repo_root();
-    let mut cmd = Command::new(node_bin());
+    let (node, root) = RUNTIME
+        .get()
+        .cloned()
+        .unwrap_or_else(|| (dev_node_bin(), dev_repo_root()));
+    let mut cmd = Command::new(&node);
     cmd.arg(format!("{}/apps/api/src/local-cli.js", root))
         .arg(arg)
         .current_dir(&root);
@@ -66,6 +97,7 @@ fn wait_web_ready(timeout_secs: u64) {
 fn main() {
     tauri::Builder::default()
         .setup(|app| {
+            let _ = RUNTIME.set(resolve_runtime(app));
             local_cli("start", false); // 后台拉起 API + Web
             wait_web_ready(20);
             WebviewWindowBuilder::new(app, "main", WebviewUrl::External(WEB_URL.parse().unwrap()))

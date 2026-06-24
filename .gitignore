@@ -47,3 +47,6 @@ marketing/
 
 # 归档的旧测试数据
 .archive/
+
+# 自包含运行时(构建时组装,勿提交)
+apps/desktop/src-tauri/runtime/
