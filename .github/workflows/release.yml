@@ -17,7 +17,7 @@ jobs:
       matrix:
         include:
           - platform: macos-latest   # 产出 .app / .dmg(未签名)
-          - platform: windows-latest # 产出 .msi / .exe(未签名)
+          - platform: windows-2022   # 产出 .msi / .exe(未签名)
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
