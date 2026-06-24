@@ -50,3 +50,6 @@ marketing/
 
 # 自包含运行时(构建时组装,勿提交)
 apps/desktop/src-tauri/runtime/
+
+# 更新签名私钥(勿提交)
+.tauri-keys/

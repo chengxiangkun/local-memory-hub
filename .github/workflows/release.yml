@@ -51,7 +51,10 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # 不签名:开源项目不提供证书。用户首次打开:
+          # 更新签名(免费,非 Apple 证书):产出签名更新包 + latest.json,支持软件内一键升级。
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          # 安装包不做平台签名:开源不提供证书。用户首次打开:
           #   macOS  → 右键「打开」,或 xattr -dr com.apple.quarantine <App>
           #   Windows → SmartScreen「更多信息」→「仍要运行」
         with:
@@ -59,4 +62,5 @@ jobs:
           releaseName: "Local Memory Hub ${{ github.ref_name }}"
           releaseDraft: true
           prerelease: false
+          includeUpdaterJson: true
           args: --config apps/desktop/src-tauri/tauri.conf.json

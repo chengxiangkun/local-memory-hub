@@ -15,6 +15,21 @@ use std::process::Command;
 use std::sync::OnceLock;
 use std::time::Duration;
 use tauri::{Manager, RunEvent, WebviewUrl, WebviewWindowBuilder};
+use tauri_plugin_updater::UpdaterExt;
+
+// 启动后后台检查更新:发现新版自动下载安装,完成后重启应用。
+// 失败(离线/无更新/未配置)静默忽略,绝不影响启动。数据目录独立,升级不丢数据。
+async fn check_for_updates(app: tauri::AppHandle) {
+    let Ok(updater) = app.updater() else { return };
+    match updater.check().await {
+        Ok(Some(update)) => {
+            if update.download_and_install(|_, _| {}, || {}).await.is_ok() {
+                app.restart();
+            }
+        }
+        _ => {}
+    }
+}
 
 const WEB_ADDR: &str = "127.0.0.1:3100";
 const WEB_URL: &str = "http://127.0.0.1:3100";
@@ -96,6 +111,7 @@ fn wait_web_ready(timeout_secs: u64) {
 
 fn main() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .setup(|app| {
             let _ = RUNTIME.set(resolve_runtime(app));
             local_cli("start", false); // 后台拉起 API + Web
@@ -105,6 +121,8 @@ fn main() {
                 .inner_size(1280.0, 860.0)
                 .resizable(true)
                 .build()?;
+            // 后台检查更新(不阻塞启动)
+            tauri::async_runtime::spawn(check_for_updates(app.handle().clone()));
             Ok(())
         })
         .build(tauri::generate_context!())

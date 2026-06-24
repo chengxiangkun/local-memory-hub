@@ -16,6 +16,7 @@
   "bundle": {
     "active": true,
     "targets": "app",
+    "createUpdaterArtifacts": true,
     "resources": [
       "runtime/**/*"
     ],
@@ -26,5 +27,13 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
+  },
+  "plugins": {
+    "updater": {
+      "endpoints": [
+        "https://github.com/chengxiangkun/local-memory-hub/releases/latest/download/latest.json"
+      ],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEMzQUQyNUZDNUE1NkYyRDMKUldUVDhsWmEvQ1d0dzB4R0lLQjVsK1JCaWVrN3pkSzdoeDdIdkZ5QjlUek9LYWo2cHpTNnBXUVEK"
+    }
   }
 }
