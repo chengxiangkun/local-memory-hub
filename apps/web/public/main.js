@@ -870,8 +870,8 @@ function renderMetrics() {
   const folderAllCount = document.querySelector("#folderAllCount");
   if (folderAllCount) folderAllCount.textContent = state.sources.length;
   // 外部 AI 调用是否发生过(有调用记录即点亮),异步刷新一次。
-  fetch("/api/external/calls?limit=1")
-    .then((res) => res.json())
+  // 用 get() 走 API_BASE(4317);此前用相对 fetch 会打到静态 web(3100)→ 404。
+  get("/api/external/calls?limit=1")
     .then((data) => {
       const active = (data.calls || []).length > 0;
       if (active !== state.externalActive) {
