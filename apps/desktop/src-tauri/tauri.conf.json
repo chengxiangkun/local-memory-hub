@@ -15,7 +15,7 @@
   },
   "bundle": {
     "active": true,
-    "targets": "app",
+    "targets": "all",
     "createUpdaterArtifacts": true,
     "resources": [
       "runtime/**/*"
