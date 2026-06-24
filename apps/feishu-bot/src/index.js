@@ -70,10 +70,13 @@ const eventDispatcher = new lark.EventDispatcher({}).register({
     try { text = JSON.parse(msg.content || "{}").text || ""; } catch { text = ""; }
     text = text.replace(/@_user_\d+/g, "").trim(); // 去掉 @机器人
     if (!text) return;
+    console.log(`[收到] chat=${msg.chat_id} 文本=${JSON.stringify(text)}`);
     try {
       const answer = await askLocalMemory(text, msg.chat_id);
       await replyText(msg.chat_id, answer);
+      console.log(`[已回复] ${JSON.stringify(answer.slice(0, 80))}`);
     } catch (error) {
+      console.log(`[回复出错] ${error.message}`);
       await replyText(msg.chat_id, `出错了:${error.message}`).catch(() => {});
     }
   }
