@@ -47,7 +47,8 @@
     "import:feishu-real": "node apps/api/src/feishu-import-real.js",
     "desktop": "tauri dev --config apps/desktop/src-tauri/tauri.conf.json",
     "desktop:build": "node apps/desktop/stage-runtime.mjs && tauri build --config apps/desktop/src-tauri/tauri.conf.json",
-    "desktop:stage": "node apps/desktop/stage-runtime.mjs"
+    "desktop:stage": "node apps/desktop/stage-runtime.mjs",
+    "tauri": "tauri"
   },
   "workspaces": [
     "apps/*",
