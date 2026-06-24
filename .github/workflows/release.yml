@@ -60,7 +60,7 @@ jobs:
         with:
           tagName: ${{ github.ref_name }}
           releaseName: "Local Memory Hub ${{ github.ref_name }}"
-          releaseDraft: true
+          releaseDraft: false
           prerelease: false
           includeUpdaterJson: true
           args: --config apps/desktop/src-tauri/tauri.conf.json
