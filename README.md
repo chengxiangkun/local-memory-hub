@@ -1,102 +1,205 @@
 # Local Memory Hub
 
-**本地优先的个人 AI 记忆层。** 把你散落各处的资料(文本、文件、网页、飞书/腾讯文档…)统一导入,本地解析成可搜索、可追溯、可治理的「记忆」,再通过图谱、问答,以及 MCP 让 Codex / Claude / Cursor 等外部 AI 调用——数据全程留在本机。
+**本地优先的个人 AI 记忆层。** 把你散落各处的资料(文本、文件、网页、飞书 / 腾讯文档…)统一导入,在**本机**解析成可搜索、可追溯、可治理的「记忆」,再通过知识图谱、带引用的问答,以及 MCP 让 Codex / Claude / Cursor 等外部 AI 调用——**数据全程不出本机**。
 
-> 核心理念:**源资料是你存的,记忆是 AI 能用的**。一条资料只有"进入记忆"(生成文本片段 + 向量索引 + 图谱节点)后,才会被搜索命中、被问答引用、在图谱中出现。
+> 核心理念:**源资料是你存的,记忆是 AI 能用的**。一条资料只有「进入记忆」(生成文本片段 + 向量索引 + 图谱节点)后,才会被搜索命中、被问答引用、在图谱里出现。
 
-## 特性
+许可:[MIT](LICENSE) · 平台:macOS / Windows · 桌面壳:Tauri 2 · 运行时:Node + SQLite
 
-- 🗂️ **统一导入管线**:文本 / 文件 / 链接 / 外部文档走同一条流水线,先存源资料再解析。
-- 🧠 **本地优先解析 + 大模型兜底**:省 token / 平衡 / 深度三档,本地失败再调模型。
-- 🔎 **向量 + 图谱联合检索**:语义召回 + 一跳扩展,问答**带可点击 `[n]` 引用**,可追溯回源文件。
-- 🕸️ **力导向知识图谱**:关系 / 社区 / 向量 / 时间四种视图,支持导出快照。
-- 🧹 **污染治理**:标记 / 隔离 / 恢复 / 删除,治理审计日志,被隔离内容不进检索与问答。
-- 🔌 **可拔插 embedding**:默认本地 `multilingual-e5-small`(免费离线),也可换 e5-base/large、BGE、或云端接口。
-- 🤝 **外部文档接入**:飞书、腾讯文档(增量 / 修改 / 删除轮询同步),凭证可在界面加密配置。
-- 🛰️ **外部 AI 调用(MCP)**:标准 stdio MCP 暴露 `memory.search / get_context / ask / graph.search`,逐工具开关 + 调用审计。
-- 🎨 **深色 / 亮色双主题**,问答回答 Markdown 渲染。
-- 🔒 **本地与隐私**:数据存本机,API Key / 连接器凭证 AES-256-GCM 加密落盘,绝不进 Git。
+---
 
-## 快速开始(npm)
+## ⬇️ 下载(普通用户)
 
-需要 Node.js(建议 18+)。
+到 **[Releases 页](https://github.com/chengxiangkun/local-memory-hub/releases/latest)** 下载对应安装包,**双击即用**(内置运行时,无需安装 Node):
+
+| 平台 | 安装包 | 首次打开 |
+| --- | --- | --- |
+| **macOS**(Apple 芯片) | `LocalMemoryHub_*_aarch64.dmg` | 右键 →「打开」(未签名,仅首次需要) |
+| **Windows**(x64) | `*_x64-setup.exe` 或 `*_x64_en-US.msi` | SmartScreen →「更多信息」→「仍要运行」 |
+
+> 安装包未做平台签名(开源项目,不强制证书),所以首次打开要手动放行一次,之后正常。
+> 内含一键自动升级:发布新版后,App 启动会自动检测并升级(见[下文](#-自动升级))。
+
+开发者也可从源码运行 / 自行打包,见 [从源码运行](#-从源码运行开发者) 与 [自行打包桌面应用](#-自行打包桌面应用)。
+
+---
+
+## 📸 截图
+
+| 知识图谱 | 带引用问答 | 设置 / 模型 |
+| --- | --- | --- |
+| ![图谱](apps/web/public/help/graph.png) | ![问答](apps/web/public/help/qa.png) | ![设置](apps/web/public/help/settings.png) |
+
+---
+
+## ✨ 特性
+
+- 🗂️ **统一导入管线**:文本 / 文件 / 链接 / 外部文档走同一条流水线,先存源资料,再解析入记忆。
+- 🧠 **本地优先解析 + 大模型兜底**:省 token / 平衡 / 深度三档;本地解析失败或置信度低时再调模型。
+- 🔎 **向量 + 关键词 + 图谱联合检索**:语义召回 + 精确命中 + 一跳扩展;问答**带可点击 `[n]` 引用**,可追溯回源文件。
+- 🕸️ **力导向知识图谱**:关系 / 社区 / 向量 / 时间四视图,缩放平移、节点详情、导出快照。
+- 🧹 **污染治理**:标记污染 → 隔离(退出检索与问答)→ 恢复 / 彻底删除;全程治理审计。
+- 🔌 **可拔插 embedding**:默认本地 `multilingual-e5-small`(免费离线),可换 e5-base/large、BGE-zh、或云端接口;离线自动回退轻量向量。
+- 🤝 **外部文档接入**:飞书、腾讯文档,支持增量 / 修改 / 删除轮询同步;凭证可在界面**加密**配置。
+- 🛰️ **外部 AI 调用(MCP)**:标准 stdio MCP 暴露 `memory.search / get_context / ask / graph.search`;逐工具开关 + 调用审计;隔离 / 删除内容不外泄。
+- 🔄 **软件内一键自动升级**(Tauri updater,签名校验)。
+- 🎨 **深色 / 亮色双主题**,问答回答 **Markdown 渲染**,回车发送。
+- 🔒 **本地与隐私**:数据存本机数据目录;API Key 与连接器凭证 **AES‑256‑GCM 加密**落盘,绝不进 Git。
+
+---
+
+## 🧭 核心闭环
+
+```
+导入(文本/文件/链接/飞书·腾讯)
+      │
+      ▼
+源资料(原始文件 + 状态 + 可追溯)
+      │  本地解析(失败→大模型兜底)
+      ▼
+记忆(文本片段 + 向量索引 + 图谱节点/关系 + 摘要)
+      │
+      ├── 图谱:探索关系
+      ├── 搜索/问答:带 [n] 引用,可回溯源文件
+      ├── 污染治理:隔离/删除不可信内容
+      └── MCP:外部 AI(Codex/Claude/Cursor)调用本地记忆
+```
+
+---
+
+## 🔄 自动升级
+
+App 每次启动会后台检查更新源(GitHub Releases 的 `latest.json`):
+- 若已发布**更高版本** → 自动下载该平台的**已签名**安装包 → 校验签名 → 安装 → 重启完成升级;
+- 离线 / 同版本 / 失败 → 静默跳过,不影响使用。
+- **升级不丢数据**:数据存在独立数据目录,升级只替换程序;涉及数据结构升级时**迁移前自动备份**。
+
+---
+
+## 🚀 从源码运行(开发者)
+
+需要 Node.js 18+。
 
 ```bash
+git clone https://github.com/chengxiangkun/local-memory-hub.git
+cd local-memory-hub
 npm install
-npm start
+npm start          # 启动 API(4317)+ Web(3100),浏览器开 http://127.0.0.1:3100
+npm run stop       # 停止
 ```
 
-默认地址:
+> 首次是空库:进「图谱」点 **导入示例文本**,或在「导入中心」粘贴一段文本,即可看到它进入记忆、出现在图谱、被问答检索。
 
-```text
-Web: http://127.0.0.1:3100
-API: http://127.0.0.1:4317
-```
+常用脚本:
 
-停止:`npm run stop`。
+| 命令 | 作用 |
+| --- | --- |
+| `npm start` / `npm run stop` | 启停本地服务 |
+| `npm test` | 全量测试 |
+| `npm run dev:mcp` | 启动 stdio MCP server |
+| `npm run desktop` | 桌面应用开发态 |
+| `npm run desktop:build` | 打包自包含桌面应用 |
 
-> 首次打开是空的:进「图谱」点 **导入示例文本**,或在「导入中心」粘贴一段文本,即可看到它进入记忆、出现在图谱并可被问答检索。
+---
 
-## 桌面应用(macOS,未签名)
+## 📦 自行打包桌面应用
 
-开源 / 本机使用**无需 Apple 开发者证书**:
+桌面应用是**自包含**的:`apps/desktop/stage-runtime.mjs` 在构建前把「当前平台的 node 二进制 + 工程 + 依赖」组装进 Tauri 资源,打出的安装包**脱离仓库 / 系统 Node 也能运行**。
 
 ```bash
-npm run desktop        # 开发态
-npm run desktop:build  # 打包未签名 .app(双击即用,首次右键→打开绕过 Gatekeeper)
+npm run desktop:build
+# 产物:apps/desktop/src-tauri/target/release/bundle/
+#   macOS:  *.dmg / *.app
+#   Windows: *.msi / *.exe(在 Windows 上构建)
 ```
 
-产物:`apps/desktop/src-tauri/target/release/bundle/macos/`。详见 `apps/desktop/README.md`。
+需要 Rust 工具链(rustc/cargo)。跨平台发布由 GitHub Actions(`.github/workflows/release.yml`)在 macOS / Windows runner 上各自构建并发布到 Releases,详见 [`docs/DISTRIBUTION.md`](docs/DISTRIBUTION.md)。
 
-> 说明:当前 `.app` 仍依赖本机的本仓库与 node;跨机器分发(自包含安装器、Windows 包)是后续工程。
+> 体积约数百 MB(含本地向量依赖);e5 向量模型(~470MB)首次按需下载,离线回退轻量向量。
 
-## 数据与隐私
+---
 
-- 默认数据目录:
+## 🔒 数据与隐私
+
+- 数据目录:
   - macOS:`~/Library/Application Support/LocalMemoryHub`
   - 其它:`./.local-memory-data`
-- 可用 `LMH_DATA_DIR=/path npm start` 覆盖。
-- 源资料、记忆、向量、图谱、配置、加密凭证都存在该目录,升级保留。
-- `.env.local`、`.secret-key`、`.local-memory-data/`、加密凭证均已 `.gitignore`,**不会进入 Git**。
+  - 可用 `LMH_DATA_DIR=/path` 覆盖。
+- 源资料、记忆、向量、图谱、配置、加密凭证都存在该目录,**升级保留**。
+- `.env.local`、`.secret-key`、加密凭证、本地数据均已 `.gitignore`,**不会进入 Git**。
 
-## 模型配置
+---
 
-设置中心 →「模型 Provider」内置 ~20 家供应商(DeepSeek、Claude 官方、OpenAI、通义千问、智谱、Kimi、豆包、OpenRouter、Gemini、硅基流动、Grok、Groq 等)。填 Base URL / 模型 / API Key 即可;模型名是可输入下拉,列出常见模型也支持自定义。问答默认选**已配置的模型**并记住你上次的选择。
+## 🤖 模型配置
 
-也可在 `.env.local` 配置(示例见 `.env.example`)。
+设置中心 →「模型 Provider」内置约 20 家供应商:**DeepSeek、Claude 官方 / Anthropic、OpenAI、通义千问 / DashScope、智谱 GLM、Moonshot / Kimi、豆包 / Volcano、百度文心、MiniMax、腾讯混元、讯飞星火、OpenRouter、Google Gemini、硅基流动、零一万物、xAI Grok、Groq、Ollama** 等。
 
-## 外部文档接入
+- 填 Base URL / 模型 / API Key 即可;模型名是**可输入下拉**(列常见模型,也支持自定义)。
+- API Key **仅加密保存在本地**。
+- 问答默认选**已配置的模型**,并记住你上次的选择。
+- 也可在 `.env.local` 配置,示例见 [`.env.example`](.env.example)。
 
-「导入中心 → 外部文档」连接飞书 / 腾讯文档。App 凭证可在卡片的 **「凭证配置」** 里加密填写(无需手改 `.env.local`、保存即生效),也可仍用 `.env.local`。支持增量 / 修改 / 删除轮询同步,已做节流 + 未变跳过以省调用额度。
+---
 
-## 外部 AI 调用(MCP)
+## 🤝 外部文档接入(飞书 / 腾讯文档)
+
+「导入中心 → 外部文档」连接。App 凭证可在卡片的 **「凭证配置」** 里**加密填写**(无需手改 `.env.local`、保存即生效),也可继续用 `.env.local`。支持增量 / 修改 / 删除轮询同步,已做节流 + 未变跳过以省调用额度。
+
+---
+
+## 🛰️ 外部 AI 调用(MCP)
 
 ```bash
-npm run dev:mcp   # stdio MCP server: apps/mcp/src/mcp-stdio.js
+npm run dev:mcp   # apps/mcp/src/mcp-stdio.js
 ```
 
-在 Claude Desktop / Cursor 的 MCP 配置里指向 `apps/mcp/src/mcp-stdio.js`(设置页有可复制的接入示例)。隔离 / 删除的内容不会外泄;每次调用有审计记录。
+在 Claude Desktop / Cursor / Codex 的 MCP 配置中指向 `apps/mcp/src/mcp-stdio.js`(设置页有可复制的接入示例)。可逐工具开关,每次调用有审计;**隔离 / 删除的内容不会外泄**。
 
-## 目录结构
+---
+
+## 🗂️ 目录结构
 
 ```text
-apps/api/    本地 API:导入、解析、记忆、图谱、向量、模型 Provider、连接器
-apps/web/    Web UI(图谱首页、源资料库、问答、治理、导入、设置)
-apps/mcp/    MCP(stdio + 兼容 HTTP)
-apps/desktop/ Tauri 桌面壳(生产态 sidecar)
-docs/        PRD、架构、路线图、集成与验证记录
+apps/api/      本地 API:导入、解析、记忆、图谱、向量、模型 Provider、连接器
+apps/web/      Web UI(图谱首页、源资料库、搜索问答、污染治理、导入中心、设置中心)
+apps/mcp/      MCP(stdio + 兼容 HTTP)
+apps/desktop/  Tauri 桌面壳(自包含运行时 + 自动升级)
+docs/          PRD、架构、路线图、分发说明、使用帮助
+.github/       发布流水线(GitHub Actions)
 ```
 
-## 测试
+---
+
+## 🧪 测试
 
 ```bash
-npm test    # 全量测试组
+npm test    # 全量测试组(导入/解析/检索/向量/治理/迁移/会话/连接器/MCP 等)
 ```
 
-## 路线图
+---
 
-V1 主项(导入 / 解析 / 记忆 / 图谱 / 问答 / 治理 / 飞书+腾讯接入 / MCP / 桌面 .app)已完成。后续:完整首启向导、跨机分发(Windows / 自包含安装器)、社交分享产物。详见 `docs/product-planning/`。
+## 🗺️ 路线图
+
+- ✅ 已完成:统一导入、本地解析 + 兜底、向量 + 图谱检索、带引用问答、污染治理、可拔插 embedding、飞书 / 腾讯接入、MCP、自包含桌面应用(Mac/Windows)、一键自动升级。
+- ⏳ 进行中 / 后续:Intel Mac 构建、完整首启向导深化、表格 / 结构化数据专用检索、社交分享产物、有道云(无公开 API,客观受限)。
+
+详见 [`docs/`](docs/)。
+
+---
+
+## 🙋 FAQ
+
+- **首次打开提示「已损坏 / 无法验证开发者」?** 未签名所致。macOS 右键→「打开」或 `xattr -dr com.apple.quarantine <App>`;Windows SmartScreen「仍要运行」。
+- **升级会丢数据吗?** 不会。数据在独立目录,升级只换程序;结构升级前自动备份。
+- **必须联网吗?** 否。本地解析 / 检索 / 问答(本地/兜底)可离线;仅云端模型、外部文档同步、首次下载向量模型需要网络。
+- **数据会上传吗?** 否。除非你主动调用云端模型或同步外部文档,数据不出本机。
+
+---
+
+## 🤝 贡献
+
+欢迎 Issue / PR。改动请确保 `npm test` 通过;UI 改动请附前后说明或截图。
 
 ## 许可
 
-本项目采用 [MIT License](LICENSE) 开源,可自由使用、修改、分发,需保留版权与许可声明。
+[MIT License](LICENSE) — 可自由使用、修改、分发,需保留版权与许可声明。
