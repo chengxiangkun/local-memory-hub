@@ -633,7 +633,7 @@ const server = http.createServer(async (req, res) => {
             answer: answer.answer || "",
             citations: answer.citations || []
           }, dataInfo.data_dir);
-      await appendQaMessage({
+      const assistantMessage = await appendQaMessage({
         session_id: session.session_id,
         role: "assistant",
         content: answer.answer || "",
@@ -645,9 +645,37 @@ const server = http.createServer(async (req, res) => {
       }, dataInfo.data_dir);
       return json(res, 200, {
         ...answer,
+        message_id: assistantMessage.message_id,
         session,
         conversation_memory: conversationMemory
       });
+    }
+
+    if (req.method === "POST" && req.url === "/api/qa/feedback") {
+      const body = await readJson(req);
+      const rating = body.rating === "up" || body.rating === "thumbs_up" ? "thumbs_up" : "thumbs_down";
+      await appendGovernanceEvents({
+        scope: "qa_feedback",
+        message_id: String(body.message_id || ""),
+        title: String(body.question || "").slice(0, 40),
+        action: rating,
+        reason: String(body.reason_text || ""),
+        detail: {
+          session_id: String(body.session_id || ""),
+          question: String(body.question || ""),
+          answer_snippet: String(body.answer || "").slice(0, 120)
+        }
+      }, dataInfo.data_dir);
+      return json(res, 200, { status: "recorded", rating });
+    }
+
+    if (req.method === "GET" && req.url?.startsWith("/api/qa/feedback")) {
+      const url = new URL(req.url, "http://127.0.0.1");
+      const limit = Number(url.searchParams.get("limit") || 50);
+      const events = (await listGovernanceEvents(dataInfo.data_dir, { limit: 500 }))
+        .filter((event) => event.scope === "qa_feedback")
+        .slice(0, limit);
+      return json(res, 200, { feedback: events });
     }
 
     if (req.method === "POST" && req.url === "/api/sources/quarantine") {

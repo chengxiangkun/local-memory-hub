@@ -727,9 +727,9 @@ export async function appendGovernanceEvents(events, dataDir = getDataDir()) {
     await runSql(
       `
       INSERT INTO governance_events (
-        event_id, scope, source_id, segment_id, title, action, reason, detail_json, created_at
+        event_id, scope, source_id, segment_id, message_id, title, action, reason, detail_json, created_at
       ) VALUES (
-        $event_id, $scope, $source_id, $segment_id, $title, $action, $reason, $detail_json, $created_at
+        $event_id, $scope, $source_id, $segment_id, $message_id, $title, $action, $reason, $detail_json, $created_at
       );
       `,
       dataDir,
@@ -738,6 +738,7 @@ export async function appendGovernanceEvents(events, dataDir = getDataDir()) {
         scope: event.scope || "qa_memory",
         source_id: event.source_id || "",
         segment_id: event.segment_id || "",
+        message_id: event.message_id || "",
         title: event.title || "",
         action: event.action || "",
         reason: event.reason || "",

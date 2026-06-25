@@ -184,6 +184,8 @@ export async function askQuestion({ questionInput, answerBox, contextList, provi
       memory_status: memoryStatus,
       citation_count: (data.citations || []).length,
       citations: data.citations || [],
+      message_id: data.message_id || "",
+      question,
       pending: false
     });
     renderConversation(answerBox);
@@ -251,6 +253,7 @@ function renderConversation(answerBox) {
       </div>
       <div class="chat-body">${renderMessageContent(message, messageIndex)}</div>
       ${message.memory_status ? `<span class="status-badge ok">${escapeHtml(message.memory_status)}</span>` : ""}
+      ${message.role === "assistant" && message.message_id && !message.pending && !message.error ? renderFeedbackBar(message, messageIndex) : ""}
     </article>
   `).join("");
 
@@ -263,7 +266,54 @@ function renderConversation(answerBox) {
       highlightCitation(Number(button.dataset.cite));
     });
   });
+
+  // 反馈闭环:👍/👎 + 点踩理由 → POST /api/qa/feedback(积累 Bad Case)。
+  answerBox.querySelectorAll(".qa-feedback").forEach((bar) => {
+    const message = conversation[Number(bar.dataset.fbMsg)];
+    if (!message) return;
+    const reasonBox = bar.querySelector("[data-fb-reason]");
+    const submitFeedback = async (rating, reasonText) => {
+      try {
+        await post("/api/qa/feedback", {
+          message_id: message.message_id,
+          session_id: currentSessionId,
+          rating,
+          reason_text: reasonText || "",
+          question: message.question || "",
+          answer: message.content || ""
+        });
+        message.feedback = rating === "up" ? "thumbs_up" : "thumbs_down";
+        renderConversation(answerBox);
+      } catch {
+        /* 反馈失败静默,不打断对话 */
+      }
+    };
+    bar.querySelector('[data-fb="up"]')?.addEventListener("click", () => submitFeedback("up", ""));
+    bar.querySelector('[data-fb="down"]')?.addEventListener("click", () => reasonBox?.classList.remove("hidden"));
+    bar.querySelector("[data-fb-submit]")?.addEventListener("click", () => {
+      const value = bar.querySelector("[data-fb-reason-input]")?.value || "";
+      submitFeedback("down", value);
+    });
+  });
+
   answerBox.scrollTop = answerBox.scrollHeight;
+}
+
+function renderFeedbackBar(message, messageIndex) {
+  const rated = message.feedback;
+  if (rated) {
+    return `<div class="qa-feedback"><span class="qa-fb-done">${rated === "thumbs_down" ? "已反馈 👎 谢谢,会用于改进" : "已反馈 👍"}</span></div>`;
+  }
+  return `
+    <div class="qa-feedback" data-fb-msg="${messageIndex}">
+      <span class="qa-fb-label">这条有用吗?</span>
+      <button class="qa-fb-btn" type="button" data-fb="up">👍</button>
+      <button class="qa-fb-btn" type="button" data-fb="down">👎</button>
+      <span class="qa-fb-reason hidden" data-fb-reason>
+        <input type="text" class="qa-fb-input" placeholder="哪里不对?(可选)" data-fb-reason-input />
+        <button class="ghost-button" type="button" data-fb-submit>提交</button>
+      </span>
+    </div>`;
 }
 
 function renderMessageContent(message, messageIndex) {

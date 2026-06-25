@@ -121,12 +121,12 @@ function formatGovernanceReason(reason) {
 }
 
 function formatAction(action) {
-  const labels = { quarantined: "隔离", restored: "恢复", deleted: "删除", kept: "保留", skipped: "跳过", reparsed: "重新解析" };
+  const labels = { quarantined: "隔离", restored: "恢复", deleted: "删除", kept: "保留", skipped: "跳过", reparsed: "重新解析", thumbs_up: "👍 赞", thumbs_down: "👎 踩" };
   return labels[action] || action || "";
 }
 
 function formatScope(scope) {
-  const labels = { qa_memory: "QA记忆", segment: "片段", source: "源资料" };
+  const labels = { qa_memory: "QA记忆", segment: "片段", source: "源资料", qa_feedback: "问答反馈" };
   return labels[scope] || scope || "";
 }
 

@@ -2992,6 +2992,19 @@ body.theme-light .info-dot span::after {
 .chat-body { line-height: 1.65; }
 .chat-body p { margin: 0 0 10px; }
 .chat-body p:last-child { margin-bottom: 0; }
+
+/* 问答反馈条(👍/👎 + 点踩理由) */
+.qa-feedback { display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+.qa-fb-label { color: var(--muted); font-size: 12px; }
+.qa-fb-btn {
+  width: auto; padding: 2px 8px; font-size: 14px; line-height: 1.4;
+  background: var(--raise); border: 1px solid var(--border); border-radius: 8px; cursor: pointer;
+}
+.qa-fb-btn:hover { background: var(--hover); }
+.qa-fb-reason { display: inline-flex; align-items: center; gap: 6px; }
+.qa-fb-reason.hidden { display: none; }
+.qa-fb-input { width: 200px; padding: 3px 8px; font-size: 12px; }
+.qa-fb-done { color: var(--muted); font-size: 12px; }
 .chat-body strong { font-weight: 700; color: var(--text); }
 .chat-body em { font-style: italic; }
 .chat-body h4 { margin: 12px 0 6px; font-size: 15px; }
