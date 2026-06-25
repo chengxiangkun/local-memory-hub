@@ -1,5 +1,5 @@
 import { getDataDir } from "./data-store.js";
-import { listSourcesSqlite, searchAllSqlite } from "./sqlite-store.js";
+import { listMemorySegments, listSourcesSqlite, searchAllSqlite } from "./sqlite-store.js";
 import { vectorSearch } from "./vector-service.js";
 
 const DEFAULT_LIMIT = 5;
@@ -22,6 +22,49 @@ export async function retrieveQuestionContext(question, dataDir = getDataDir(), 
       hit_reason: item.lexical_score > 0 ? "vector_keyword" : "vector"
     }))
   ]).slice(0, limit);
+}
+
+// 父文档召回(连坐召回):命中任一片段后,把该源的全部片段按 segment_index 顺序补齐,
+// 作为 parent_text 附在条目上(供模型读全文,治"召回了对的文档但答错/碎片化")。
+// parent_text 仅用于喂模型(buildPrompt),不改展示用的 snippet,避免引用卡片过长。
+// 隔离过滤天然保留:listMemorySegments 已排除 quarantined。
+export async function expandToParentDocs(results, dataDir = getDataDir(), options = {}) {
+  const maxSources = options.maxSources || 3;
+  const maxCharsPerSource = options.maxCharsPerSource || 4000;
+  const seen = new Set();
+  const expanded = [];
+  for (const item of results || []) {
+    if (!item.source_id || seen.has(item.source_id)) continue;
+    seen.add(item.source_id);
+    let parentText = "";
+    let segmentCount = 0;
+    try {
+      const segments = await listMemorySegments(item.source_id, dataDir);
+      segmentCount = segments.length;
+      parentText = assembleSegments(segments, maxCharsPerSource);
+    } catch {
+      parentText = "";
+    }
+    if (!parentText) parentText = stringOrEmpty(item.segment_text || item.snippet);
+    expanded.push({ ...item, index: expanded.length + 1, parent_text: parentText, parent_segment_count: segmentCount });
+    if (expanded.length >= maxSources) break;
+  }
+  return expanded;
+}
+
+function assembleSegments(segments, maxChars) {
+  let text = "";
+  for (const segment of segments) {
+    const piece = String(segment.text || "");
+    if (!piece) continue;
+    if (text.length + piece.length + 1 > maxChars) {
+      const remaining = maxChars - text.length;
+      if (remaining > 40) text += `${text ? "\n" : ""}${piece.slice(0, remaining)} …(后续片段略)`;
+      break;
+    }
+    text += `${text ? "\n" : ""}${piece}`;
+  }
+  return text;
 }
 
 export async function listFallbackQuestionContext(dataDir = getDataDir(), options = {}) {

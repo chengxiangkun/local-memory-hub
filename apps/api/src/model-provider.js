@@ -295,7 +295,9 @@ function buildPrompt(request) {
   const context = (request.context || [])
     .map((item, index) => {
       const citation = normalizeCitation(item, index);
-      return `[${citation.index}] ${citation.title}\n${citation.snippet}`;
+      // 父文档召回:有 parent_text(该源全文)就喂全文,否则退回命中片段。
+      const body = (item.parent_text && String(item.parent_text).trim()) || citation.snippet;
+      return `[${citation.index}] ${citation.title}\n${body}`;
     })
     .join("\n\n");
   const history = (request.history || [])

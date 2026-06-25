@@ -23,7 +23,7 @@ import { initModelProviders, listProviderTemplates, routeChat } from "./model-pr
 import { parseSource, rebuildGraphIndex } from "./parser-service.js";
 import { enrichSourceMetadata } from "./metadata-enricher.js";
 import { runQaMemoryAutoGovernance } from "./qa-memory-governance-service.js";
-import { listFallbackQuestionContext, retrieveQuestionContext } from "./retrieval-service.js";
+import { expandToParentDocs, listFallbackQuestionContext, retrieveQuestionContext } from "./retrieval-service.js";
 import { createSourceFolder, listSourceFolders, moveSourceToFolder } from "./source-folder-store.js";
 import { runSystemDoctor } from "./system-doctor.js";
 import { getMcpPermissions, saveMcpPermissions, listExternalCalls } from "./mcp-permission-store.js";
@@ -613,6 +613,8 @@ const server = http.createServer(async (req, res) => {
       if (results.length === 0 && body.fallback_recent_memory === true) {
         results = await listFallbackQuestionContext(dataInfo.data_dir);
       }
+      // 父文档召回:命中后按源补齐全文(前 3 源),喂给模型治碎片化;引用展示仍用短片段。
+      const context = await expandToParentDocs(results, dataInfo.data_dir);
       const policy = await getModelPolicy("chat", dataInfo.data_dir);
       // provider_id 与 config 必须基于同一个生效 provider 解析，否则会出现
       // routeChat 选中策略 provider、但 config 仍按默认 mock 解析为空的情况。
@@ -620,7 +622,7 @@ const server = http.createServer(async (req, res) => {
       const answer = await routeChat({
         provider_id: chatProviderId,
         question: body.question || "",
-        context: results.slice(0, 5),
+        context,
         history,
         config: await resolveModelConfig(body, dataInfo.data_dir, chatProviderId)
       }, dataInfo.data_dir);
