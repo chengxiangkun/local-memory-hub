@@ -23,6 +23,7 @@ import { routeChat } from "./model-provider.js";
 import { getProviderConfig } from "./model-config-store.js";
 import { getModelPolicy } from "./model-policy-store.js";
 import { indexSegments } from "./vector-service.js";
+import { enrichSourceMetadata } from "./metadata-enricher.js";
 import { extractMultilingualTokens } from "./text-tokenizer.js";
 import { assessSourceTextQuality, formatSourceQualityReasons } from "./source-quality-service.js";
 import {
@@ -140,6 +141,14 @@ export async function parseSource(sourceId, options = {}, dataDir = getDataDir()
       },
       dataDir
     );
+
+    // 元数据增强(摘要/关键词/能回答的问题):best-effort,失败不影响解析成功;
+    // 未配真实问答模型(mock)时内部直接跳过,不拖慢解析。
+    try {
+      await enrichSourceMetadata(sourceId, dataDir);
+    } catch {
+      /* 忽略,可后续手动 /api/sources/enrich-metadata 重跑 */
+    }
 
     return {
       status: "success",

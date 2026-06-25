@@ -176,6 +176,7 @@ async function initSqliteOnce(dataDir) {
   await ensureMemorySegmentColumns(dataDir);
   await ensureVectorIndexColumns(dataDir);
   await ensureSourceColumns(dataDir);
+  await ensureGovernanceEventColumns(dataDir);
 }
 
 // 外部来源(如飞书)的远端追踪列,用于增量同步:对比 remote_edit_time 判断是否变化,
@@ -185,12 +186,27 @@ async function ensureSourceColumns(dataDir) {
   const existing = new Set(columns.map((column) => column.name));
   const additions = [
     ["remote_node_token", "TEXT NOT NULL DEFAULT ''"],
-    ["remote_edit_time", "TEXT NOT NULL DEFAULT ''"]
+    ["remote_edit_time", "TEXT NOT NULL DEFAULT ''"],
+    // 元数据增强(schema v5):LLM 逐份生成,用于提升问答召回(措辞不一致也能命中)。
+    ["summary", "TEXT NOT NULL DEFAULT ''"],
+    ["keywords_json", "TEXT NOT NULL DEFAULT '[]'"],
+    ["answerable_questions_json", "TEXT NOT NULL DEFAULT '[]'"],
+    ["metadata_status", "TEXT NOT NULL DEFAULT ''"],
+    ["metadata_generated_at", "TEXT NOT NULL DEFAULT ''"]
   ];
   for (const [name, definition] of additions) {
     if (!existing.has(name)) {
       await runSql(`ALTER TABLE sources ADD COLUMN ${name} ${definition};`, dataDir);
     }
+  }
+}
+
+// 治理事件加 message_id 列(schema v5):问答反馈(scope=qa_feedback)关联到具体回答消息。
+async function ensureGovernanceEventColumns(dataDir) {
+  const columns = await queryJson("PRAGMA table_info(governance_events);", dataDir);
+  const existing = new Set(columns.map((column) => column.name));
+  if (!existing.has("message_id")) {
+    await runSql("ALTER TABLE governance_events ADD COLUMN message_id TEXT NOT NULL DEFAULT '';", dataDir);
   }
 }
 
@@ -208,6 +224,33 @@ export async function setSourceRemoteMeta(sourceId, meta, dataDir = getDataDir()
       source_id: sourceId,
       remote_node_token: String(meta.remote_node_token || ""),
       remote_edit_time: String(meta.remote_edit_time || "")
+    }
+  );
+}
+
+// 写入元数据增强结果(摘要/关键词/能回答的问题 + 状态)。keywords/questions 存 JSON 数组。
+export async function updateSourceMetadata(sourceId, metadata, dataDir = getDataDir()) {
+  await initSqlite(dataDir);
+  await runSql(
+    `
+    UPDATE sources
+    SET summary = $summary,
+        keywords_json = $keywords_json,
+        answerable_questions_json = $answerable_questions_json,
+        metadata_status = $metadata_status,
+        metadata_generated_at = $metadata_generated_at,
+        updated_at = $updated_at
+    WHERE source_id = $source_id;
+    `,
+    dataDir,
+    {
+      source_id: sourceId,
+      summary: String(metadata.summary || ""),
+      keywords_json: JSON.stringify(Array.isArray(metadata.keywords) ? metadata.keywords : []),
+      answerable_questions_json: JSON.stringify(Array.isArray(metadata.questions) ? metadata.questions : []),
+      metadata_status: String(metadata.status || "ready"),
+      metadata_generated_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     }
   );
 }
@@ -469,6 +512,9 @@ export async function searchAllSqlite(query, dataDir = getDataDir(), options = {
         OR s.source_platform LIKE $like
         OR s.original_url LIKE $like
         OR s.local_file_path LIKE $like
+        OR s.summary LIKE $like
+        OR s.keywords_json LIKE $like
+        OR s.answerable_questions_json LIKE $like
         OR e.text_preview LIKE $like
         OR m.text LIKE $like
       )
@@ -833,7 +879,10 @@ export async function listVectors(dataDir = getDataDir()) {
       s.title,
       s.source_type,
       s.source_platform,
-      s.entrypoint
+      s.entrypoint,
+      s.summary,
+      s.keywords_json,
+      s.answerable_questions_json
     FROM vector_index v
     JOIN memory_segments m ON m.segment_id = v.segment_id
     JOIN sources s ON s.source_id = v.source_id

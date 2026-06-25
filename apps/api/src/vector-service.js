@@ -4,6 +4,16 @@ import { getDataDir } from "./data-store.js";
 import { embedTexts } from "./embedding-service.js";
 import { extractMultilingualTokens } from "./text-tokenizer.js";
 
+// 把 JSON 数组字段(keywords_json / answerable_questions_json)拼成空格分隔文本,供词法匹配。
+function parseJsonText(json) {
+  try {
+    const arr = JSON.parse(json || "[]");
+    return Array.isArray(arr) ? arr.join(" ") : "";
+  } catch {
+    return "";
+  }
+}
+
 export async function indexSegments(segments, dataDir = getDataDir()) {
   const now = new Date().toISOString();
   const embedded = await embedTexts(segments.map((segment) => segment.text), dataDir);
@@ -37,7 +47,9 @@ export async function vectorSearch(query, dataDir = getDataDir(), options = {}) 
     )
     .map((item) => {
       const vectorScore = cosine(queryVector, JSON.parse(item.vector_json));
-      const lexicalScore = tokenOverlap(queryTokens, extractMultilingualTokens(`${item.title} ${item.text}`));
+      // 词法匹配并入源级元数据(摘要/关键词/能回答的问题):用户措辞与原文不一致时也能命中。
+      const metaText = `${item.summary || ""} ${parseJsonText(item.keywords_json)} ${parseJsonText(item.answerable_questions_json)}`;
+      const lexicalScore = tokenOverlap(queryTokens, extractMultilingualTokens(`${item.title} ${item.text} ${metaText}`));
       return {
         source_id: item.source_id,
         segment_id: item.segment_id,

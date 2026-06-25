@@ -21,6 +21,7 @@ import { getModelPolicy, listModelPolicies, saveModelPolicy } from "./model-poli
 import { getVersionInfo, migrateIfNeeded } from "./migration-service.js";
 import { initModelProviders, listProviderTemplates, routeChat } from "./model-provider.js";
 import { parseSource, rebuildGraphIndex } from "./parser-service.js";
+import { enrichSourceMetadata } from "./metadata-enricher.js";
 import { runQaMemoryAutoGovernance } from "./qa-memory-governance-service.js";
 import { listFallbackQuestionContext, retrieveQuestionContext } from "./retrieval-service.js";
 import { createSourceFolder, listSourceFolders, moveSourceToFolder } from "./source-folder-store.js";
@@ -592,6 +593,11 @@ const server = http.createServer(async (req, res) => {
     if (req.method === "POST" && req.url === "/api/parse") {
       const body = await readJson(req);
       return json(res, 200, await parseSource(body.source_id, { llm_fallback: Boolean(body.llm_fallback) }));
+    }
+
+    if (req.method === "POST" && req.url === "/api/sources/enrich-metadata") {
+      const body = await readJson(req);
+      return json(res, 200, await enrichSourceMetadata(body.source_id, dataInfo.data_dir));
     }
 
     if (req.method === "POST" && req.url === "/api/ask") {
