@@ -54,3 +54,6 @@ apps/desktop/src-tauri/runtime/
 # 更新签名私钥(勿提交)
 .tauri-keys/
 .gstack/
+
+# AI 接手手册(本地,含机器路径/运营细节,勿入库)
+AI-README.md
