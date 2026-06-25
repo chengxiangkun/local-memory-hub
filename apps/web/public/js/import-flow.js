@@ -7,6 +7,7 @@
  */
 
 import { post } from "./api.js";
+import { alertDialog } from "./modal.js";
 
 export async function importExampleText(deps) {
   await importText(
@@ -80,10 +81,18 @@ export async function importFile({ file }, { setStatus, refreshAll, setView }) {
     });
 
     await refreshAll();
-    setView(["success", "llm_fallback_success", "already_parsed"].includes(parsed.status) ? "graph" : "sources");
-    setStatus(["success", "llm_fallback_success", "already_parsed"].includes(parsed.status)
+    const ok = ["success", "llm_fallback_success", "already_parsed"].includes(parsed.status);
+    setView(ok ? "graph" : "sources");
+    setStatus(ok
       ? `文件导入成功：${parsed.segment_count || 0} 个文本片段`
       : `文件已保存，解析失败：${parsed.error || parsed.status}`);
+    // 图片/音视频缺少本地 OCR/转写器时,导入即弹提示让用户知情(而非静默失败)。
+    if (parsed.needs_ocr) {
+      await alertDialog(
+        parsed.error || "这张图片需要本地 OCR(tesseract)才能识别文字。安装后(mac:brew install tesseract)重新解析即可;在此之前图片不会进入记忆。",
+        { title: "图片需要本地 OCR 才能解析" }
+      );
+    }
   } catch (error) {
     setStatus(`文件导入失败：${error.message}`);
   }

@@ -34,6 +34,25 @@ export function confirmDialog(message, opts = {}) {
   });
 }
 
+// 单按钮信息提示弹窗(纯告知,无取消)。
+export function alertDialog(message, opts = {}) {
+  const { title = "", confirmText = "知道了" } = opts;
+  return new Promise((resolve) => {
+    const overlay = openModal(`
+      ${title ? `<h3 class="modal-title">${escapeHtml(title)}</h3>` : ""}
+      <p class="modal-message">${escapeHtml(message)}</p>
+      <div class="modal-actions">
+        <button class="primary-button" data-act="ok">${escapeHtml(confirmText)}</button>
+      </div>
+    `);
+    const done = () => { overlay.remove(); document.removeEventListener("keydown", onKey); resolve(true); };
+    const onKey = (e) => { if (e.key === "Escape" || e.key === "Enter") done(); };
+    overlay.querySelector('[data-act="ok"]').addEventListener("click", done);
+    overlay.addEventListener("click", (e) => { if (e.target === overlay) done(); });
+    document.addEventListener("keydown", onKey);
+  });
+}
+
 // 多字段表单弹窗。fields: [{name, label, value, placeholder, type}]。返回 {name: value} 或 null。
 export function formDialog(title, fields, opts = {}) {
   const { message = "", confirmText = "保存", cancelText = "取消" } = opts;
