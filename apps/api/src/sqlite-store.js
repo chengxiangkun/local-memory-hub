@@ -177,6 +177,31 @@ async function initSqliteOnce(dataDir) {
   await ensureVectorIndexColumns(dataDir);
   await ensureSourceColumns(dataDir);
   await ensureGovernanceEventColumns(dataDir);
+  await ensureGraphNodeColumns(dataDir);
+}
+
+// 图谱节点加 AI 概念卡字段(schema v6):description=AI 写的概念描述,concept_status=生成状态。
+async function ensureGraphNodeColumns(dataDir) {
+  const columns = await queryJson("PRAGMA table_info(graph_nodes);", dataDir);
+  const existing = new Set(columns.map((column) => column.name));
+  const additions = [
+    ["description", "TEXT NOT NULL DEFAULT ''"],
+    ["concept_status", "TEXT NOT NULL DEFAULT ''"]
+  ];
+  for (const [name, definition] of additions) {
+    if (!existing.has(name)) {
+      await runSql(`ALTER TABLE graph_nodes ADD COLUMN ${name} ${definition};`, dataDir);
+    }
+  }
+}
+
+export async function updateGraphNodeDescription(nodeId, description, status, dataDir = getDataDir()) {
+  await initSqlite(dataDir);
+  await runSql(
+    "UPDATE graph_nodes SET description = $description, concept_status = $concept_status WHERE node_id = $node_id;",
+    dataDir,
+    { node_id: nodeId, description: String(description || ""), concept_status: String(status || "ready") }
+  );
 }
 
 // 外部来源(如飞书)的远端追踪列,用于增量同步:对比 remote_edit_time 判断是否变化,

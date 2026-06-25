@@ -459,8 +459,28 @@ function renderNodeDetail(node) {
     neighbors,
     onImpactScope: loadImpactScope,
     onQuarantine: (sourceId) => mutateSource("/api/sources/quarantine", sourceId),
-    onRestore: (sourceId) => mutateSource("/api/sources/restore", sourceId)
+    onRestore: (sourceId) => mutateSource("/api/sources/restore", sourceId),
+    onEnrichConcept: enrichConcept
   });
+}
+
+async function enrichConcept(nodeId) {
+  setStatus("正在生成概念卡…");
+  try {
+    const result = await post("/api/graph/enrich-concept", { node_id: nodeId });
+    if (result.status === "skipped") {
+      setStatus(result.reason === "no_real_provider" ? "未配置问答模型,无法生成概念卡" : "已跳过概念卡生成");
+    } else if (result.status === "ready") {
+      await loadGraph();
+      const node = state.graph.nodes.find((item) => item.node_id === nodeId);
+      if (node) renderNodeDetail(node);
+      setStatus("概念卡已生成");
+    } else {
+      setStatus(`概念卡生成失败:${result.reason || ""}`);
+    }
+  } catch (error) {
+    setStatus(`概念卡生成失败:${error.message}`);
+  }
 }
 
 async function expandGraphNeighbors(nodeId) {

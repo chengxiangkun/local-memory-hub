@@ -23,6 +23,7 @@ import { initModelProviders, listProviderTemplates, routeChat } from "./model-pr
 import { parseSource, rebuildGraphIndex } from "./parser-service.js";
 import { enrichSourceMetadata } from "./metadata-enricher.js";
 import { runMemoryHealthCheck, getLastHealthReport } from "./memory-health-service.js";
+import { enrichConceptNode } from "./concept-enricher.js";
 import { runQaMemoryAutoGovernance } from "./qa-memory-governance-service.js";
 import { expandToParentDocs, listFallbackQuestionContext, retrieveQuestionContext } from "./retrieval-service.js";
 import { createSourceFolder, listSourceFolders, moveSourceToFolder } from "./source-folder-store.js";
@@ -559,6 +560,11 @@ const server = http.createServer(async (req, res) => {
       return json(res, 200, await getGraphNeighbors(url.searchParams.get("node_id"), dataInfo.data_dir, {
         limit: Number(url.searchParams.get("limit") || 120)
       }));
+    }
+
+    if (req.method === "POST" && req.url === "/api/graph/enrich-concept") {
+      const body = await readJson(req);
+      return json(res, 200, await enrichConceptNode(body.node_id, dataInfo.data_dir));
     }
 
     if (req.method === "GET" && req.url === "/api/graph/communities") {

@@ -57,7 +57,7 @@ async function main() {
 
   const after = await getVersionInfo(dataDir);
   assert(!after.needs_migration, "version should be up to date");
-  assert(after.schema_version === 5, "migration should update to schema version 5");
+  assert(after.schema_version === 6, "migration should update to schema version 6");
   const segments = await listMemorySegments(imported.source.source_id, dataDir);
   assert(segments[0].content_hash, "migration should expose segment content hash");
   assert(segments[0].parser_version, "migration should expose segment parser version");

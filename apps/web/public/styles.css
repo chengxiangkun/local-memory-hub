@@ -3005,6 +3005,14 @@ body.theme-light .info-dot span::after {
 .qa-fb-reason.hidden { display: none; }
 .qa-fb-input { width: 200px; padding: 3px 8px; font-size: 12px; }
 .qa-fb-done { color: var(--muted); font-size: 12px; }
+
+/* AI 概念卡 + 健康检查 */
+.concept-card { margin: 10px 0; padding: 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--raise); }
+.concept-card > p { margin: 0 0 6px; color: var(--muted); font-size: 13px; }
+.concept-desc { font-size: 13px; line-height: 1.6; margin-bottom: 8px; }
+.concept-card .ghost-button { width: auto; }
+.muted { color: var(--muted); }
+.health-summary { margin: 0 0 8px; font-size: 13px; color: var(--muted); }
 .chat-body strong { font-weight: 700; color: var(--text); }
 .chat-body em { font-style: italic; }
 .chat-body h4 { margin: 12px 0 6px; font-size: 15px; }

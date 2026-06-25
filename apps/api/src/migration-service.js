@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { getDataDir, initDataDir } from "./data-store.js";
 import { dbPath, initSqlite, listSourcesSqlite } from "./sqlite-store.js";
 
-const LATEST_SCHEMA_VERSION = 5;
+const LATEST_SCHEMA_VERSION = 6;
 
 // 运行时真实版本:读工程/包内 package.json(随每次发版自动正确),
 // 取不到再回退数据目录里存的旧值。

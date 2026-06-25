@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "npm run test:api && npm run test:model && npm run test:retrieval && npm run test:retrieval-parent && npm run test:model-provider && npm run test:model-config && npm run test:secret-store && npm run test:model-config-resolver && npm run test:embedding && npm run test:embedding-pluggable && npm run test:model-config-api && npm run test:connectors && npm run test:source-folders && npm run test:model-policy && npm run test:model-policy-api && npm run test:qa-governance && npm run test:qa-feedback && npm run test:governance-audit && npm run test:memory-health && npm run test:source-detail && npm run test:delete-scope && npm run test:fallback && npm run test:mcp && npm run test:mcp-stdio && npm run test:migration && npm run test:metadata && npm run test:vector && npm run test:data-dir && npm run test:parser && npm run test:media && npm run test:doctor && npm run test:feishu-client && npm run test:feishu-sync",
+    "test": "npm run test:api && npm run test:model && npm run test:retrieval && npm run test:retrieval-parent && npm run test:model-provider && npm run test:model-config && npm run test:secret-store && npm run test:model-config-resolver && npm run test:embedding && npm run test:embedding-pluggable && npm run test:model-config-api && npm run test:connectors && npm run test:source-folders && npm run test:model-policy && npm run test:model-policy-api && npm run test:qa-governance && npm run test:qa-feedback && npm run test:governance-audit && npm run test:memory-health && npm run test:concept && npm run test:source-detail && npm run test:delete-scope && npm run test:fallback && npm run test:mcp && npm run test:mcp-stdio && npm run test:migration && npm run test:metadata && npm run test:vector && npm run test:data-dir && npm run test:parser && npm run test:media && npm run test:doctor && npm run test:feishu-client && npm run test:feishu-sync",
     "start": "node apps/api/src/local-cli.js start",
     "stop": "node apps/api/src/local-cli.js stop",
     "restart": "node apps/api/src/local-cli.js restart",
@@ -53,7 +53,8 @@
     "test:metadata": "node apps/api/src/metadata-enricher.test.js",
     "test:retrieval-parent": "node apps/api/src/retrieval-parent.test.js",
     "test:qa-feedback": "node apps/api/src/qa-feedback.test.js",
-    "test:memory-health": "node apps/api/src/memory-health.test.js"
+    "test:memory-health": "node apps/api/src/memory-health.test.js",
+    "test:concept": "node apps/api/src/concept-enricher.test.js"
   },
   "workspaces": [
     "apps/*",
