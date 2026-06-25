@@ -2544,6 +2544,27 @@ svg.is-dragging {
   font-size: inherit;
 }
 .health-source-link:hover { text-decoration: underline; }
+.health-meta {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line-soft);
+  display: grid;
+  gap: 10px;
+}
+.health-schedule {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.health-runs {
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.health-runs strong { color: var(--text); }
 
 .detail-drawer-head {
   display: flex;

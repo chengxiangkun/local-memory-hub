@@ -8,7 +8,7 @@
 
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
-import { listSourcesSqlite, appendGovernanceEvents } from "./sqlite-store.js";
+import { listSourcesSqlite, appendGovernanceEvents, listGovernanceEvents } from "./sqlite-store.js";
 import { getModelPolicy } from "./model-policy-store.js";
 import { resolveModelConfig } from "./model-config-resolver.js";
 import { routeChat } from "./model-provider.js";
@@ -146,5 +146,60 @@ export async function getLastHealthReport(dataDir) {
     return JSON.parse(await readFile(reportPath(dataDir), "utf8"));
   } catch {
     return { status: "none", issues: [] };
+  }
+}
+
+const SCHEDULE_FILE = "health-schedule.json";
+function schedulePath(dataDir) {
+  return path.join(dataDir, "app-meta", SCHEDULE_FILE);
+}
+
+// 定时配置:enabled + interval_hours(0=关闭)。桌面端不常驻,采用"启动/定时补跑"模型:
+// 距上次检查超过间隔就跑一次。
+export async function getHealthSchedule(dataDir) {
+  try {
+    const cfg = JSON.parse(await readFile(schedulePath(dataDir), "utf8"));
+    return { enabled: Boolean(cfg.enabled), interval_hours: Number(cfg.interval_hours) || 24 };
+  } catch {
+    return { enabled: false, interval_hours: 24 };
+  }
+}
+
+export async function saveHealthSchedule(input = {}, dataDir) {
+  const next = {
+    enabled: Boolean(input.enabled),
+    interval_hours: Math.max(1, Math.min(Number(input.interval_hours) || 24, 24 * 30))
+  };
+  await mkdir(path.join(dataDir, "app-meta"), { recursive: true });
+  await writeFile(schedulePath(dataDir), JSON.stringify(next, null, 2));
+  return next;
+}
+
+// 执行记录:取治理事件里 scope=health_check 的历次运行。
+export async function listHealthCheckRuns(dataDir, limit = 10) {
+  const events = await listGovernanceEvents(dataDir, { scope: "health_check", limit });
+  return events.map((event) => ({
+    created_at: event.created_at,
+    checked_count: event.detail?.checked_count ?? null,
+    issue_count: event.detail?.issue_count ?? null,
+    reason: event.reason
+  }));
+}
+
+// 启动/定时补跑:开启且距上次运行超过间隔 → 后台跑一次(best-effort,不阻塞、不抛)。
+export async function maybeRunScheduledHealthCheck(dataDir) {
+  try {
+    const schedule = await getHealthSchedule(dataDir);
+    if (!schedule.enabled) return { ran: false, reason: "disabled" };
+    const runs = await listHealthCheckRuns(dataDir, 1);
+    const lastAt = runs[0]?.created_at ? Date.parse(runs[0].created_at) : 0;
+    const elapsedHours = (Date.now() - lastAt) / 3_600_000;
+    if (lastAt && elapsedHours < schedule.interval_hours) {
+      return { ran: false, reason: "not_due", next_in_hours: Math.ceil(schedule.interval_hours - elapsedHours) };
+    }
+    const report = await runMemoryHealthCheck(dataDir, { scheduled: true });
+    return { ran: true, status: report.status, issue_count: report.issue_count ?? 0 };
+  } catch (error) {
+    return { ran: false, reason: error.message };
   }
 }

@@ -778,14 +778,16 @@ export async function appendGovernanceEvents(events, dataDir = getDataDir()) {
 export async function listGovernanceEvents(dataDir = getDataDir(), options = {}) {
   await initSqlite(dataDir);
   const limit = Math.max(1, Math.min(Number(options.limit || 50), 500));
+  const params = options.scope ? { limit, scope: options.scope } : { limit };
   const rows = await queryJson(
     `
     SELECT * FROM governance_events
+    ${options.scope ? "WHERE scope = $scope" : ""}
     ORDER BY created_at DESC
     LIMIT $limit;
     `,
     dataDir,
-    { limit }
+    params
   );
   return rows.map((row) => ({ ...row, detail: parseJsonObject(row.detail_json) }));
 }

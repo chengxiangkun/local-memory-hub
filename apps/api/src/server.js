@@ -22,7 +22,14 @@ import { getVersionInfo, migrateIfNeeded } from "./migration-service.js";
 import { initModelProviders, listProviderTemplates, routeChat } from "./model-provider.js";
 import { parseSource, rebuildGraphIndex } from "./parser-service.js";
 import { enrichSourceMetadata } from "./metadata-enricher.js";
-import { runMemoryHealthCheck, getLastHealthReport } from "./memory-health-service.js";
+import {
+  runMemoryHealthCheck,
+  getLastHealthReport,
+  listHealthCheckRuns,
+  getHealthSchedule,
+  saveHealthSchedule,
+  maybeRunScheduledHealthCheck
+} from "./memory-health-service.js";
 import { enrichConceptNode } from "./concept-enricher.js";
 import { runQaMemoryAutoGovernance } from "./qa-memory-governance-service.js";
 import { expandToParentDocs, listFallbackQuestionContext, retrieveQuestionContext } from "./retrieval-service.js";
@@ -498,7 +505,17 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (req.method === "GET" && req.url === "/api/memory/health-check") {
-      return json(res, 200, await getLastHealthReport(dataInfo.data_dir));
+      const [report, runs, schedule] = await Promise.all([
+        getLastHealthReport(dataInfo.data_dir),
+        listHealthCheckRuns(dataInfo.data_dir, 10),
+        getHealthSchedule(dataInfo.data_dir)
+      ]);
+      return json(res, 200, { ...report, runs, schedule });
+    }
+
+    if (req.method === "POST" && req.url === "/api/memory/health-check/schedule") {
+      const body = await readJson(req);
+      return json(res, 200, { schedule: await saveHealthSchedule(body, dataInfo.data_dir) });
     }
 
     if (req.method === "GET" && req.url?.startsWith("/api/sources/impact")) {
@@ -839,6 +856,11 @@ const server = http.createServer(async (req, res) => {
 server.listen(port, "127.0.0.1", () => {
   console.log(`Local Memory Hub API listening on http://127.0.0.1:${port}`);
   console.log(`Data directory: ${dataInfo.data_dir}`);
+  // 定时健康检查:启动补跑一次 + 每 6 小时检查是否到期(best-effort,失败不影响服务)。
+  maybeRunScheduledHealthCheck(dataInfo.data_dir).catch(() => {});
+  setInterval(() => {
+    maybeRunScheduledHealthCheck(dataInfo.data_dir).catch(() => {});
+  }, 6 * 60 * 60 * 1000).unref?.();
 });
 
 function json(res, status, body) {

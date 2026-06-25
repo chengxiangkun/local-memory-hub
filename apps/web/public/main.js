@@ -875,8 +875,9 @@ async function renderHealthCheckPanel() {
       const prev = button.textContent;
       button.textContent = "检查中…";
       try {
-        const report = await post("/api/memory/health-check", {});
-        renderHealthReport(container, report);
+        await post("/api/memory/health-check", {});
+        // 重新拉 GET 以带上执行记录 + 定时配置
+        renderHealthReport(container, await get("/api/memory/health-check"));
         await loadGovernanceEvents();
         renderGovernanceEvents(document.querySelector("#auditLog"), state.governanceEvents);
       } catch (error) {
@@ -896,29 +897,24 @@ async function renderHealthCheckPanel() {
 
 function renderHealthReport(container, report) {
   if (!container) return;
+  let issuesHtml;
   if (!report || report.status === "none") {
-    container.innerHTML = `<span>尚未检查。点「运行检查」开始。</span>`;
-    return;
-  }
-  if (report.status === "skipped") {
+    issuesHtml = `<span>尚未检查。点「运行检查」开始。</span>`;
+  } else if (report.status === "skipped") {
     const why = report.reason === "no_real_provider" ? "未配置问答模型" : report.reason === "not_enough_sources" ? "资料太少" : report.reason;
-    container.innerHTML = `<span>已跳过:${escapeHtmlLocal(why || "")}。</span>`;
-    return;
-  }
-  if (report.status === "failed") {
-    container.innerHTML = `<span>检查失败:${escapeHtmlLocal(report.reason || "")}。</span>`;
-    return;
-  }
-  const issues = report.issues || [];
-  if (issues.length === 0) {
-    container.innerHTML = `<span>✅ 检查了 ${report.checked_count} 份资料,未发现问题。</span>`;
-    return;
-  }
-  container.innerHTML =
-    `<div class="health-summary">检查 ${report.checked_count} 份,发现 ${issues.length} 个问题:</div>` +
-    issues
-      .map(
-        (it) => `
+    issuesHtml = `<span>已跳过:${escapeHtmlLocal(why || "")}。</span>`;
+  } else if (report.status === "failed") {
+    issuesHtml = `<span>检查失败:${escapeHtmlLocal(report.reason || "")}。</span>`;
+  } else {
+    const issues = report.issues || [];
+    if (issues.length === 0) {
+      issuesHtml = `<span>✅ 检查了 ${report.checked_count} 份资料,未发现问题。</span>`;
+    } else {
+      issuesHtml =
+        `<div class="health-summary">检查 ${report.checked_count} 份,发现 ${issues.length} 个问题:</div>` +
+        issues
+          .map(
+            (it) => `
       <div class="health-issue">
         <div class="health-issue-head">
           <span class="audit-action audit-deleted">${escapeHtmlLocal(it.type)}</span>
@@ -926,8 +922,58 @@ function renderHealthReport(container, report) {
         </div>
         ${(it.sources || []).length ? `<div class="health-issue-sources">涉及:${it.sources.map((s) => `<button type="button" class="health-source-link" data-health-source="${escapeHtmlLocal(s)}">《${escapeHtmlLocal(s)}》</button>`).join("")}</div>` : ""}
       </div>`
-      )
-      .join("");
+          )
+          .join("");
+    }
+  }
+  container.innerHTML = issuesHtml + renderHealthMeta(report);
+  wireHealthSchedule(container);
+}
+
+// 定时配置 + 执行记录(仅 GET 返回里带 schedule/runs 时渲染)。
+function renderHealthMeta(report) {
+  if (!report || !report.schedule) return "";
+  const current = report.schedule.enabled ? report.schedule.interval_hours : 0;
+  const options = [[0, "关闭"], [24, "每天"], [72, "每 3 天"], [168, "每周"]];
+  const runs = report.runs || [];
+  const runsHtml = runs.length
+    ? `<div class="health-runs"><strong>执行记录</strong>${runs
+        .map((r) => `<div class="health-run">${escapeHtmlLocal(formatRunTime(r.created_at))} · 检查 ${r.checked_count ?? "?"} 份 · ${r.issue_count ?? 0} 个问题</div>`)
+        .join("")}</div>`
+    : "";
+  return `
+    <div class="health-meta">
+      <label class="health-schedule">定时自动检查
+        <select id="healthScheduleSelect">
+          ${options.map(([v, l]) => `<option value="${v}" ${v === current ? "selected" : ""}>${l}</option>`).join("")}
+        </select>
+      </label>
+      ${runsHtml}
+    </div>
+  `;
+}
+
+function formatRunTime(iso) {
+  if (!iso) return "";
+  try {
+    return new Date(iso).toLocaleString("zh-CN", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+  } catch {
+    return iso;
+  }
+}
+
+function wireHealthSchedule(container) {
+  const select = container.querySelector("#healthScheduleSelect");
+  if (!select) return;
+  select.addEventListener("change", async () => {
+    const hours = Number(select.value);
+    try {
+      await post("/api/memory/health-check/schedule", { enabled: hours > 0, interval_hours: hours || 24 });
+      setStatus(hours > 0 ? `已开启定时检查:每 ${hours} 小时(启动时若到期自动跑)` : "已关闭定时检查");
+    } catch (error) {
+      setStatus(`保存定时设置失败:${error.message}`);
+    }
+  });
 }
 
 async function loadGovernanceEvents() {
