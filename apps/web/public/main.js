@@ -194,6 +194,23 @@ function bindEvents() {
       renderSources();
     });
   });
+  // 健康检查报告里"涉及《标题》"可点击 → 跳到源资料库并按标题筛选。
+  document.querySelector("#healthReport")?.addEventListener("click", (event) => {
+    const btn = event.target.closest("[data-health-source]");
+    if (btn) focusSourceByTitle(btn.dataset.healthSource);
+  });
+}
+
+function focusSourceByTitle(title) {
+  const query = String(title || "").trim();
+  const input = document.querySelector("#sourceSearch");
+  if (input) input.value = query;
+  state.sourceQuery = query.toLowerCase();
+  state.sourceFilter = "";
+  state.selectedFolderId = "";
+  state.sourcePage = 1;
+  setView("sources");
+  renderSources();
 }
 
 async function boot() {
@@ -907,7 +924,7 @@ function renderHealthReport(container, report) {
           <span class="audit-action audit-deleted">${escapeHtmlLocal(it.type)}</span>
           <span class="health-issue-detail">${escapeHtmlLocal(it.detail)}</span>
         </div>
-        ${(it.sources || []).length ? `<div class="health-issue-sources">涉及:${escapeHtmlLocal(it.sources.join("、"))}</div>` : ""}
+        ${(it.sources || []).length ? `<div class="health-issue-sources">涉及:${it.sources.map((s) => `<button type="button" class="health-source-link" data-health-source="${escapeHtmlLocal(s)}">《${escapeHtmlLocal(s)}》</button>`).join("")}</div>` : ""}
       </div>`
       )
       .join("");

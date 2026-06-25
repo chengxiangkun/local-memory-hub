@@ -2535,6 +2535,15 @@ svg.is-dragging {
   align-items: center;
   flex-wrap: wrap;
 }
+.health-source-link {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  color: var(--accent);
+  font-size: inherit;
+}
+.health-source-link:hover { text-decoration: underline; }
 
 .detail-drawer-head {
   display: flex;
