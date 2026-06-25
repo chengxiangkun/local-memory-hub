@@ -7,8 +7,9 @@
 本地优先的个人 AI 记忆层:资料导入 → 本地解析(失败大模型兜底)→ 变成"记忆"(文本片段+向量+图谱)→ 图谱/带引用问答/污染治理 → MCP 供外部 AI 调用。数据全程留本机。
 
 - 仓库:`https://github.com/chengxiangkun/local-memory-hub`(公开,MIT;remote=origin,main 跟踪 origin/main)
-- 技术栈:Node(原生 http,几乎零框架)+ SQLite(better-sqlite3,schema v4);桌面 = Tauri 2(Rust sidecar)
-- 三应用:`apps/api`(4317)、`apps/web`(3100)、`apps/mcp`(stdio + 兼容 HTTP)
+- 技术栈:Node(原生 http,几乎零框架)+ SQLite(better-sqlite3,**schema v6**);桌面 = Tauri 2(Rust sidecar)
+- 应用:`apps/api`(4317)、`apps/web`(3100)、`apps/mcp`(stdio + 兼容 HTTP,含写入工具)、`apps/feishu-bot`(飞书 IM 长连接)
+- 关键模块(2026-06-25 新增):`metadata-enricher`(源摘要/关键词/能回答的问题)、`concept-enricher`(图谱概念卡)、`memory-health-service`(健康检查)、`feishu-bot-runner`(起停 IM bot)、model-provider 的 `LocalCliProviderAdapter`(本地 codex/claude/openclaw 当模型)、`/api/import/batch` + MCP 写工具(默认关)
 
 ## 2. 仓库地图
 ```
@@ -79,7 +80,8 @@ npm run desktop:build# 自包含桌面包(先 stage-runtime 再 tauri build)
 - Mac 包目前只出 **aarch64(Apple 芯片)**;Intel 需另加构建。
 - 无法在 macOS 验证 Windows 实跑——Windows 相关改动需在真 Windows 上测一次。
 
-## 8. 当前状态(2026-06-24)
-- 已发布 v0.0.1 / v0.0.2;Mac+Windows 安装包 + 自动升级链路就绪(latest.json 覆盖双平台)。
-- 待办:Windows 首启"拒绝连接"+ 黑图标已修(本次:supervisor 日志化 + 启动重载 + 真图标),需发新版在 Windows 复验;
-  Intel Mac 构建;本地向量可选化(瘦身);表格/结构化数据检索增强。
+## 8. 当前状态(2026-06-25)
+- 已发布 v0.0.1~v0.0.7;**正在发 v0.0.8**(Mac+Windows 安装包 + 自动升级,latest.json 覆盖双平台)。
+- Windows 修复历程:首启"拒绝连接"根因 = `\\?\` verbatim 路径拼正斜杠致 node 崩(v0.0.7 修);v0.0.8 修了 node 控制台黑窗(CREATE_NO_WINDOW)+ 节点详情横向溢出 + 启动动画。
+- 本轮新增(均已测试、在 main):元数据增强 / 父文档召回 / 问答反馈 / 健康检查 / AI概念卡 / 飞书IM机器人 / 本地Agent桥接 / 外部写入。测试 36 组全绿。
+- 待办:Intel Mac 构建;文档内嵌图片 + 飞书文档图片提取(当前只 OCR 独立图片文件);表格/结构化数据检索;本地向量可选化(瘦身)。
