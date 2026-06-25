@@ -345,8 +345,13 @@
         </section>
 
         <section class="view" id="view-governance">
-          <div class="page-grid two-col">
-            <section class="panel">
+          <div class="view-tabs" data-tabs="governance">
+            <button class="tab-btn active" type="button" data-tab="govern">污染治理</button>
+            <button class="tab-btn" type="button" data-tab="health">健康检查</button>
+            <button class="tab-btn" type="button" data-tab="impact">影响范围</button>
+          </div>
+          <div class="page-grid two-col tabbed">
+            <section class="panel" data-tab-group="govern">
               <h2>污染治理</h2>
               <div class="risk-card">
                 <div>
@@ -372,7 +377,7 @@
                 <div class="govern-list" id="qaGovernResult"></div>
               </div>
             </section>
-            <section class="panel">
+            <section class="panel" data-tab-group="health">
               <div class="panel-title-row">
                 <div>
                   <h2>知识库健康检查</h2>
@@ -382,7 +387,7 @@
               </div>
               <div id="healthReport" class="audit-log-list"><span>尚未检查。</span></div>
             </section>
-            <section class="panel">
+            <section class="panel" data-tab-group="impact">
               <h2>影响范围预览</h2>
               <div class="impact-preview">
                 <div><strong id="impactSegments">0</strong><span>文本片段</span></div>
@@ -455,7 +460,15 @@
               </div>
             </section>
 
-            <section class="panel settings-section">
+            <div class="view-tabs" data-tabs="settings">
+              <button class="tab-btn active" type="button" data-tab="model">模型</button>
+              <button class="tab-btn" type="button" data-tab="parse">解析</button>
+              <button class="tab-btn" type="button" data-tab="external">外部接入</button>
+              <button class="tab-btn" type="button" data-tab="data">数据</button>
+              <button class="tab-btn" type="button" data-tab="system">系统</button>
+            </div>
+
+            <section class="panel settings-section" data-tab-group="data">
               <div class="panel-title-row">
                 <div>
                   <h2>本地存储</h2>
@@ -476,7 +489,7 @@
               </div>
             </section>
 
-            <section class="panel settings-section">
+            <section class="panel settings-section" data-tab-group="model">
               <div class="panel-title-row">
                 <div>
                   <h2>模型 Provider</h2>
@@ -486,7 +499,7 @@
               <div class="provider-grid" id="providerGrid"></div>
             </section>
 
-            <section class="panel settings-section">
+            <section class="panel settings-section" data-tab-group="model">
               <div class="panel-title-row">
                 <div>
                   <h2>向量模型（Embedding）</h2>
@@ -496,7 +509,7 @@
               <div id="embeddingCatalog" class="embedding-catalog">读取中…</div>
             </section>
 
-            <section class="panel settings-section">
+            <section class="panel settings-section" data-tab-group="external">
               <div class="panel-title-row">
                 <div>
                   <h2>外部 AI 访问（MCP）</h2>
@@ -506,7 +519,7 @@
               <div id="externalAiPanel" class="external-ai-panel">读取中…</div>
             </section>
 
-            <section class="panel settings-section">
+            <section class="panel settings-section" data-tab-group="external">
               <div class="panel-title-row">
                 <div>
                   <h2>飞书机器人(IM 接入)</h2>
@@ -516,7 +529,7 @@
               <div id="feishuBotPanel" class="external-ai-panel">读取中…</div>
             </section>
 
-            <section class="panel settings-section">
+            <section class="panel settings-section" data-tab-group="parse">
               <h2>解析与 Token 策略</h2>
               <div class="settings-cards">
                 <div class="setting-card active">
@@ -544,7 +557,7 @@
               </div>
             </section>
 
-            <section class="panel settings-section">
+            <section class="panel settings-section" data-tab-group="external">
               <h2>外部接入</h2>
               <div class="settings-list">
                 <div><span>MCP-like Server</span><strong id="settingsMcpStatus">读取中</strong></div>
@@ -553,7 +566,7 @@
               </div>
             </section>
 
-            <section class="panel settings-section">
+            <section class="panel settings-section" data-tab-group="data">
               <h2>升级与备份</h2>
               <div class="settings-list">
                 <div><span>迁移状态</span><strong id="settingsMigrationDetail">读取中</strong></div>
@@ -567,7 +580,7 @@
               </div>
             </section>
 
-            <section class="panel settings-section settings-wide">
+            <section class="panel settings-section settings-wide" data-tab-group="system">
               <div class="panel-title-row">
                 <div>
                   <h2>本机能力检查</h2>
@@ -577,7 +590,7 @@
               <div class="doctor-grid" id="systemDoctor"></div>
             </section>
 
-            <section class="panel settings-section settings-wide">
+            <section class="panel settings-section settings-wide" data-tab-group="system">
               <div class="panel-title-row">
                 <div>
                   <h2>记忆整理 Agent</h2>

@@ -2587,6 +2587,32 @@ svg.is-dragging {
 }
 .health-runs strong { color: var(--text); }
 
+/* 视图内 Tab 滑块(污染治理 / 设置中心)。 */
+.view-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.tab-btn {
+  padding: 7px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+[data-tab-group].tab-hidden { display: none !important; }
+.page-grid.tabbed { grid-template-columns: 1fr; }
+
 .detail-drawer-head {
   display: flex;
   align-items: center;

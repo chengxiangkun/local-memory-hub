@@ -234,6 +234,26 @@ async function boot() {
   }
   // 新用户首启向导(仅首次显示)。
   showOnboardingIfFirstRun({ onImportSample: importExampleText });
+  initViewTabs();
+}
+
+// 视图内 Tab 滑块:点击 .view-tabs 的按钮,只显示该视图里 data-tab-group 匹配的面板。
+function initViewTabs() {
+  document.querySelectorAll(".view-tabs").forEach((bar) => {
+    const view = bar.closest(".view");
+    if (!view) return;
+    const apply = (tab) => {
+      bar.querySelectorAll(".tab-btn").forEach((btn) => btn.classList.toggle("active", btn.dataset.tab === tab));
+      view.querySelectorAll("[data-tab-group]").forEach((panel) => {
+        panel.classList.toggle("tab-hidden", panel.dataset.tabGroup !== tab);
+      });
+    };
+    bar.querySelectorAll(".tab-btn").forEach((btn) => {
+      btn.addEventListener("click", () => apply(btn.dataset.tab));
+    });
+    const initial = bar.querySelector(".tab-btn.active")?.dataset.tab || bar.querySelector(".tab-btn")?.dataset.tab;
+    if (initial) apply(initial);
+  });
 }
 
 async function refreshAll() {
