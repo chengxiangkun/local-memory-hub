@@ -1,7 +1,18 @@
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import { appendModelCallLog } from "./model-call-log.js";
 import { normalizeCitation } from "./retrieval-service.js";
 
+const execFileAsync = promisify(execFile);
 const providers = new Map();
+
+// 本地 Agent CLI 桥接:逐 provider 的命令与参数(prompt 作为参数传入,大小远低于 ARG_MAX)。
+// 命令可被配置的 base_url 覆盖(存命令路径/名);openclaw 等未知 CLI 默认把 prompt 作为唯一参数,建议用户在配置里改命令。
+const LOCAL_CLI_INVOCATIONS = {
+  local_codex: { command: "codex", args: (prompt) => ["exec", prompt, "-s", "read-only"] },
+  local_claude: { command: "claude", args: (prompt) => ["-p", prompt] },
+  local_openclaw: { command: "openclaw", args: (prompt) => [prompt] }
+};
 
 // 统一的系统提示词:让回答有温度、像了解你的私人助手,而不是冷冰冰的检索工具。
 const SYSTEM_PROMPT = [
@@ -30,6 +41,9 @@ export function listProviderTemplates() {
       embedding: true,
       embeddingDimension: 32
     }),
+    providerTemplate("local_codex", "本地 Codex CLI", "local_cli", false, { defaultModel: "codex", modelOptions: ["codex"] }),
+    providerTemplate("local_claude", "本地 Claude Code", "local_cli", false, { defaultModel: "claude", modelOptions: ["claude"] }),
+    providerTemplate("local_openclaw", "本地 OpenClaw(小龙虾)", "local_cli", false, { defaultModel: "openclaw", modelOptions: ["openclaw"] }),
     providerTemplate("claude_official", "Claude 官方 / Anthropic", "anthropic_compatible", true, {
       defaultBaseUrl: "https://api.anthropic.com",
       defaultModel: "claude-sonnet-4-20250514",
@@ -315,6 +329,39 @@ function normalizeCitations(items) {
   return items.map((item, index) => normalizeCitation(item, index));
 }
 
+// 本地 Agent CLI 桥接 provider:把上下文拼成 prompt,spawn 本机 CLI(codex/claude/openclaw),
+// stdout 即回答。免云 API key,复用本地订阅。失败(命令不存在/超时/非零)抛错,由 routeChat 捕获。
+class LocalCliProviderAdapter {
+  constructor(options = {}) {
+    this.providerId = options.providerId || "local_cli";
+    this.displayName = options.displayName || "本地 Agent CLI";
+  }
+
+  async chat(request, config) {
+    const spec = LOCAL_CLI_INVOCATIONS[this.providerId];
+    const command = (config.base_url && String(config.base_url).trim()) || spec?.command || this.providerId.replace(/^local_/, "");
+    const prompt = `${SYSTEM_PROMPT}\n\n${buildPrompt(request)}`;
+    const args = spec ? spec.args(prompt) : [prompt];
+    try {
+      const { stdout } = await execFileAsync(command, args, {
+        timeout: 120000,
+        maxBuffer: 10 * 1024 * 1024,
+        windowsHide: true
+      });
+      const answer = String(stdout || "").trim();
+      if (!answer) throw new Error("CLI 无输出");
+      return {
+        provider_id: this.providerId,
+        model: config.model || command,
+        answer,
+        citations: normalizeCitations(request.context || [])
+      };
+    } catch (error) {
+      throw new Error(`${this.displayName} 调用失败:${error.message}`);
+    }
+  }
+}
+
 function createTemplateProvider(providerId) {
   const template = listProviderTemplates().find((item) => item.provider_id === providerId);
   if (!template) return null;
@@ -326,6 +373,7 @@ function createTemplateProvider(providerId) {
   };
   if (template.api_format === "openai_compatible") return new OpenAICompatibleProviderAdapter(common);
   if (template.api_format === "anthropic_compatible") return new AnthropicProviderAdapter(common);
+  if (template.api_format === "local_cli") return new LocalCliProviderAdapter(common);
   return null;
 }
 
