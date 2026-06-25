@@ -210,9 +210,13 @@
               <div class="import-box" data-import-box="file">
                 <div class="drop-zone">
                   <strong>拖入文件</strong>
-                  <span>PDF、Markdown、TXT、图片、视频会进入本地解析队列。</span>
-                  <input id="filePayload" type="file" />
-                  <button class="primary-button" id="submitFileImport">导入并解析文件</button>
+                  <span>PDF、Markdown、TXT、图片、视频会进入本地解析队列。支持多选 / 整个文件夹。</span>
+                  <input id="filePayload" type="file" multiple />
+                  <input id="folderPayload" type="file" webkitdirectory multiple hidden />
+                  <div class="import-file-actions">
+                    <button class="primary-button" id="submitFileImport">导入并解析文件</button>
+                    <button class="ghost-button" id="pickFolderImport" type="button">选择文件夹</button>
+                  </div>
                 </div>
               </div>
               <div class="import-box" data-import-box="link">

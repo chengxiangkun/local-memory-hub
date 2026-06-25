@@ -7,7 +7,7 @@ import {
 } from "./js/governance-view.js";
 import { renderEmptyNodeDetail, renderSelectedNode } from "./js/graph-detail-view.js";
 import { renderGraph as renderGraphSvg, updateGraphSelection, getGraphSnapshotDataUrl } from "./js/graph-renderer-force.js";
-import { importExampleText as runExampleImport, importFile as runFileImport, importText as runTextImport, importUrl as runUrlImport } from "./js/import-flow.js";
+import { importExampleText as runExampleImport, importFile as runFileImport, importFiles as runFilesImport, importText as runTextImport, importUrl as runUrlImport } from "./js/import-flow.js";
 import { renderMetrics as renderMetricCounters } from "./js/metrics-view.js";
 import {
   askQuestion as runAskQuestion,
@@ -131,7 +131,13 @@ function bindEvents() {
     importUrl(document.querySelector("#linkPayload").value);
   });
   document.querySelector("#submitFileImport")?.addEventListener("click", () => {
-    importFile(document.querySelector("#filePayload").files?.[0]);
+    importFiles(document.querySelector("#filePayload").files);
+  });
+  document.querySelector("#pickFolderImport")?.addEventListener("click", () => {
+    document.querySelector("#folderPayload")?.click();
+  });
+  document.querySelector("#folderPayload")?.addEventListener("change", (event) => {
+    importFiles(event.target.files);
   });
   document.querySelector(".drop-zone")?.addEventListener("dragover", (event) => {
     event.preventDefault();
@@ -143,7 +149,7 @@ function bindEvents() {
   document.querySelector(".drop-zone")?.addEventListener("drop", (event) => {
     event.preventDefault();
     event.currentTarget.classList.remove("drag-over");
-    importFile(event.dataTransfer.files?.[0]);
+    importFiles(event.dataTransfer.files);
   });
   document.querySelector("#quickImportSubmit")?.addEventListener("click", async () => {
     await importText(document.querySelector("#quickTitle").value, document.querySelector("#quickText").value);
@@ -412,6 +418,10 @@ async function importText(title, text) {
 
 async function importFile(file) {
   await runFileImport({ file }, importDependencies());
+}
+
+async function importFiles(files) {
+  await runFilesImport({ files }, importDependencies());
 }
 
 async function importUrl(url) {

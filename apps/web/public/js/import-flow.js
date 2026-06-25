@@ -98,6 +98,46 @@ export async function importFile({ file }, { setStatus, refreshAll, setView }) {
   }
 }
 
+// 多文件 / 文件夹批量导入:走 /api/import/batch(后端循环导入 + 自动解析)。
+// 单个文件仍走 importFile(保留 OCR 提示等单文件交互)。
+export async function importFiles({ files }, deps) {
+  const { setStatus, refreshAll, setView } = deps;
+  const list = Array.from(files || []).filter(Boolean);
+  if (!list.length) {
+    setStatus("导入失败：请选择文件");
+    return;
+  }
+  if (list.length === 1) {
+    return importFile({ file: list[0] }, deps);
+  }
+  const tooBig = list.find((file) => file.size > 50 * 1024 * 1024);
+  if (tooBig) {
+    setStatus(`导入失败：${tooBig.name} 超过 50MB`);
+    return;
+  }
+  try {
+    setStatus(`正在导入 ${list.length} 个文件…`);
+    const sources = [];
+    for (const file of list) {
+      sources.push({
+        entrypoint: "web",
+        source_hint: "file_upload",
+        payload: { name: file.name, title: file.name, base64: await readFileAsBase64(file) }
+      });
+    }
+    const res = await post("/api/import/batch", { sources, auto_parse: true });
+    await refreshAll();
+    setView("sources");
+    const summary = res.summary || {};
+    setStatus(
+      `批量导入完成：成功 ${summary.succeeded || 0} / 共 ${summary.total || list.length}` +
+        (summary.failed ? `，失败 ${summary.failed}` : "")
+    );
+  } catch (error) {
+    setStatus(`批量导入失败：${error.message}`);
+  }
+}
+
 export async function importUrl({ url }, { setStatus, refreshAll, setView }) {
   const cleanUrl = url.trim();
   if (!cleanUrl) {
