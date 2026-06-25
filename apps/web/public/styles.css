@@ -3013,6 +3013,11 @@ body.theme-light .info-dot span::after {
 .concept-card .ghost-button { width: auto; }
 .muted { color: var(--muted); }
 .health-summary { margin: 0 0 8px; font-size: 13px; color: var(--muted); }
+.health-issue { padding: 10px 0; border-bottom: 1px solid var(--border); }
+.health-issue:last-child { border-bottom: none; }
+.health-issue-head { display: flex; gap: 8px; align-items: baseline; }
+.health-issue-detail { flex: 1; min-width: 0; font-size: 13px; line-height: 1.55; word-break: break-word; }
+.health-issue-sources { margin-top: 5px; padding-left: 2px; color: var(--muted); font-size: 12px; line-height: 1.5; word-break: break-word; }
 .chat-body strong { font-weight: 700; color: var(--text); }
 .chat-body em { font-style: italic; }
 .chat-body h4 { margin: 12px 0 6px; font-size: 15px; }

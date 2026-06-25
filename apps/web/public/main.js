@@ -866,10 +866,12 @@ function renderHealthReport(container, report) {
     issues
       .map(
         (it) => `
-      <div class="audit-row">
-        <span class="audit-action audit-deleted">${escapeHtmlLocal(it.type)}</span>
-        <span class="audit-title">${escapeHtmlLocal(it.detail)}</span>
-        <span class="audit-reason">${escapeHtmlLocal((it.sources || []).join("、"))}</span>
+      <div class="health-issue">
+        <div class="health-issue-head">
+          <span class="audit-action audit-deleted">${escapeHtmlLocal(it.type)}</span>
+          <span class="health-issue-detail">${escapeHtmlLocal(it.detail)}</span>
+        </div>
+        ${(it.sources || []).length ? `<div class="health-issue-sources">涉及:${escapeHtmlLocal(it.sources.join("、"))}</div>` : ""}
       </div>`
       )
       .join("");
