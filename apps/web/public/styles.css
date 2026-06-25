@@ -1194,10 +1194,10 @@ svg.is-dragging {
 .source-row,
 .source-head {
   display: grid;
-  grid-template-columns: minmax(220px, 1.4fr) 120px 100px 110px 110px 120px 100px 132px;
+  grid-template-columns: minmax(220px, 1.4fr) 120px 100px 110px 110px 120px 100px 156px;
   gap: 12px;
   align-items: center;
-  min-width: 1080px;
+  min-width: 1104px;
   min-height: 52px;
   padding: 0 14px;
   border-bottom: 1px solid var(--line-soft);
@@ -1250,6 +1250,7 @@ svg.is-dragging {
   padding: 4px 9px;
   border-radius: 8px;
   font-size: 12px;
+  white-space: nowrap;
 }
 
 .row-action-button.warning-button {
@@ -1285,6 +1286,7 @@ svg.is-dragging {
   display: flex;
   gap: 6px;
   justify-content: flex-end;
+  flex-wrap: wrap;
 }
 
 .source-pagination {
