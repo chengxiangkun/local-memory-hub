@@ -821,7 +821,8 @@ svg.is-dragging {
 
 .detail-body {
   min-height: 0;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   padding: 15px;
   color: var(--muted);
   font-size: 14px;
@@ -843,7 +844,16 @@ svg.is-dragging {
 .detail-card {
   display: grid;
   gap: 12px;
+  overflow-wrap: anywhere;
 }
+.detail-card p { overflow-wrap: anywhere; margin: 0; }
+.detail-card ul {
+  margin: 0;
+  padding-left: 18px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.detail-card li { overflow-wrap: anywhere; word-break: break-word; margin-bottom: 3px; }
 
 .pill-row {
   display: flex;

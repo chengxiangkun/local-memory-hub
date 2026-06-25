@@ -217,6 +217,12 @@ fn local_cli(arg: &str, wait: bool) {
             cmd.stdout(Stdio::from(f)).stderr(Stdio::from(f2));
         }
     }
+    // Windows:隐藏 node 子进程的控制台黑窗(CREATE_NO_WINDOW=0x08000000)。
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        cmd.creation_flags(0x08000000);
+    }
     if wait {
         match cmd.status() {
             Ok(s) => diag_log(&format!("local_cli({}) exit code = {:?}", arg, s.code())),
