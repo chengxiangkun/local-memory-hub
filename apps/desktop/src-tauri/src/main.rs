@@ -122,7 +122,7 @@ fn dev_repo_root() -> String {
     Path::new(manifest)
         .join("../../..")
         .canonicalize()
-        .map(|p| p.to_string_lossy().to_string())
+        .map(|p| strip_verbatim(&p).to_string_lossy().to_string())
         .unwrap_or_else(|_| manifest.to_string())
 }
 
@@ -136,6 +136,20 @@ fn dev_node_bin() -> String {
         }
     }
     "node".to_string()
+}
+
+// 去掉 Windows 的 \\?\ verbatim 扩展路径前缀。
+// resource_dir()/canonicalize() 在 Windows 返回 \\?\ 路径,它只认反斜杠、不做归一化;
+// 一旦后续拼接出正斜杠就成非法路径(node 解析主模块会一路 lstat 到盘符报 EISDIR)。
+fn strip_verbatim(p: &Path) -> PathBuf {
+    let s = p.to_string_lossy();
+    if let Some(rest) = s.strip_prefix(r"\\?\UNC\") {
+        return PathBuf::from(format!(r"\\{}", rest));
+    }
+    if let Some(rest) = s.strip_prefix(r"\\?\") {
+        return PathBuf::from(rest);
+    }
+    p.to_path_buf()
 }
 
 // 优先用打进包内的自包含运行时;否则回退到开发态。
@@ -165,8 +179,8 @@ fn resolve_runtime(app: &tauri::App) -> (String, String) {
         diag_log(&format!("candidate: {} (node exists={})", node.display(), exists));
         if exists {
             return (
-                node.to_string_lossy().to_string(),
-                rt.to_string_lossy().to_string(),
+                strip_verbatim(&node).to_string_lossy().to_string(),
+                strip_verbatim(rt).to_string_lossy().to_string(),
             );
         }
     }
@@ -179,7 +193,14 @@ fn local_cli(arg: &str, wait: bool) {
         .get()
         .cloned()
         .unwrap_or_else(|| (dev_node_bin(), dev_repo_root()));
-    let script = format!("{}/apps/api/src/local-cli.js", root);
+    // 按组件 join(用平台正确分隔符),不要手拼正斜杠 —— 否则在 Windows \\?\ 路径上会拼出非法路径。
+    let script = Path::new(&root)
+        .join("apps")
+        .join("api")
+        .join("src")
+        .join("local-cli.js")
+        .to_string_lossy()
+        .to_string();
     diag_log(&format!(
         "local_cli({}): node={} script={} script_exists={}",
         arg,
