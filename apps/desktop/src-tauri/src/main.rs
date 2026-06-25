@@ -73,6 +73,36 @@ fn diag_log(msg: &str) {
     }
 }
 
+// 启动动画页:写到 <数据目录>/splash.html,返回其 file:// URL。
+// 窗口先加载它(秒开,显示 spinner + 文案 + 已等待秒数),后端就绪后再切到真实界面,
+// 避免"打开后一片空白干等"。
+fn splash_url() -> Option<tauri::Url> {
+    let dir = diag_data_dir();
+    let _ = fs::create_dir_all(&dir);
+    let path = dir.join("splash.html");
+    let html = r#"<!doctype html><html><head><meta charset="utf-8"><style>
+html,body{margin:0;height:100%;background:#0e1116;color:#e9eef2;font-family:-apple-system,'Segoe UI',system-ui,sans-serif;display:flex;align-items:center;justify-content:center}
+.box{text-align:center}
+.logo{width:76px;height:76px;border-radius:20px;background:#15a06b;margin:0 auto 22px;display:flex;align-items:center;justify-content:center;font-size:38px;box-shadow:0 8px 30px rgba(21,160,107,.35)}
+h1{font-size:20px;margin:0 0 8px;font-weight:600}
+p{margin:0;color:#9aa8b7;font-size:13px}
+.spin{width:32px;height:32px;border:3px solid rgba(52,211,153,.22);border-top-color:#34d399;border-radius:50%;margin:20px auto 0;animation:r .8s linear infinite}
+@keyframes r{to{transform:rotate(360deg)}}
+small{color:#5b6876;font-size:12px}
+</style></head><body><div class="box">
+<div class="logo">📖</div>
+<h1>Local Memory Hub</h1>
+<p id="msg">正在启动本地服务,请稍候…</p>
+<div class="spin"></div>
+<p style="margin-top:16px"><small id="t"></small></p>
+<script>let s=0;setInterval(function(){s++;var t=document.getElementById('t');if(t)t.textContent='已等待 '+s+' 秒';},1000);</script>
+</div></body></html>"#;
+    if fs::write(&path, html).is_ok() {
+        return tauri::Url::from_file_path(&path).ok();
+    }
+    None
+}
+
 // 解析后的 (node 可执行路径, 工程根目录),启动时确定一次,供 start/stop 共用。
 static RUNTIME: OnceLock<(String, String)> = OnceLock::new();
 
@@ -179,16 +209,6 @@ fn local_cli(arg: &str, wait: bool) {
     }
 }
 
-fn wait_web_ready(timeout_secs: u64) -> bool {
-    for _ in 0..(timeout_secs * 2) {
-        if TcpStream::connect(WEB_ADDR).is_ok() {
-            return true;
-        }
-        std::thread::sleep(Duration::from_millis(500));
-    }
-    false
-}
-
 fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_updater::Builder::new().build())
@@ -198,28 +218,41 @@ fn main() {
             if let Some((n, r)) = RUNTIME.get() {
                 diag_log(&format!("RUNTIME node={} root={}", n, r));
             }
-            local_cli("start", false); // 后台拉起 API + Web
-            let ready = wait_web_ready(40);
-            diag_log(&format!("wait_web_ready(40) = {}", ready));
-            let window = WebviewWindowBuilder::new(app, "main", WebviewUrl::External(WEB_URL.parse().unwrap()))
+            // 立即建窗口并显示启动动画(秒开,不再空白干等);找不到 splash 时直接指向真实地址。
+            let start_url = splash_url()
+                .unwrap_or_else(|| WEB_URL.parse().expect("WEB_URL 解析失败"));
+            let window = WebviewWindowBuilder::new(app, "main", WebviewUrl::External(start_url))
                 .title("Local Memory Hub")
                 .inner_size(1280.0, 860.0)
                 .resizable(true)
                 .build()?;
-            // 服务启动较慢时(首次/慢机器),窗口可能先显示"拒绝连接";
-            // 后台继续等待,服务就绪后自动重载窗口,避免用户看到错误页。
-            if !ready {
-                let win = window.clone();
-                tauri::async_runtime::spawn(async move {
-                    for _ in 0..120 {
-                        std::thread::sleep(Duration::from_millis(500));
-                        if TcpStream::connect(WEB_ADDR).is_ok() {
-                            let _ = win.eval("location.reload()");
-                            break;
-                        }
+
+            local_cli("start", false); // 后台拉起 API + Web
+
+            // 后台轮询:服务就绪 → 切到真实界面;超时 → 在动画页上给明确提示。
+            let win = window.clone();
+            tauri::async_runtime::spawn(async move {
+                let mut ready = false;
+                for _ in 0..240 {
+                    // 最多 ~120s
+                    std::thread::sleep(Duration::from_millis(500));
+                    if TcpStream::connect(WEB_ADDR).is_ok() {
+                        ready = true;
+                        break;
                     }
-                });
-            }
+                }
+                diag_log(&format!("web ready = {}", ready));
+                if ready {
+                    let _ = win.eval(&format!("window.location.replace('{}')", WEB_URL));
+                } else {
+                    let _ = win.eval(
+                        "var m=document.getElementById('msg');\
+                         if(m){m.textContent='启动超时:本地服务未就绪。请重启应用;若仍失败,把数据目录下的 startup.log / local-cli-start.log 发给作者。';m.style.color='#f87171';}\
+                         var sp=document.querySelector('.spin'); if(sp) sp.style.display='none';",
+                    );
+                }
+            });
+
             // 后台检查更新(不阻塞启动)
             tauri::async_runtime::spawn(check_for_updates(app.handle().clone()));
             Ok(())
