@@ -3018,6 +3018,8 @@ body.theme-light .info-dot span::after {
 .health-issue-head { display: flex; gap: 8px; align-items: baseline; }
 .health-issue-detail { flex: 1; min-width: 0; font-size: 13px; line-height: 1.55; word-break: break-word; }
 .health-issue-sources { margin-top: 5px; padding-left: 2px; color: var(--muted); font-size: 12px; line-height: 1.5; word-break: break-word; }
+.external-write-tools { margin-top: 14px; }
+.write-warn { font-weight: 400; font-size: 12px; color: #f59e0b; margin-left: 6px; }
 .chat-body strong { font-weight: 700; color: var(--text); }
 .chat-body em { font-style: italic; }
 .chat-body h4 { margin: 12px 0 6px; font-size: 15px; }

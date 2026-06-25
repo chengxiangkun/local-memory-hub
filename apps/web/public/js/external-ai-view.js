@@ -14,6 +14,13 @@ const TOOL_LABELS = {
   "graph.search": "搜索图谱节点"
 };
 
+// 写工具:允许外部 AI 改本地数据,默认关闭,需谨慎开启。
+const WRITE_TOOL_LABELS = {
+  "memory.import": "导入单条资料(写)",
+  "memory.import_batch": "批量导入资料(写)",
+  "memory.parse": "触发解析(写)"
+};
+
 export async function renderExternalAi(container) {
   if (!container) return;
   let permissions = { tools: {} };
@@ -36,6 +43,16 @@ export async function renderExternalAi(container) {
         <label class="external-tool-row">
           <input type="checkbox" data-tool="${escapeHtml(name)}" ${tools[name] !== false ? "checked" : ""} />
           <span><strong>${escapeHtml(name)}</strong> · ${escapeHtml(TOOL_LABELS[name])}</span>
+        </label>
+      `).join("")}
+    </div>
+
+    <div class="external-tools external-write-tools">
+      <h4>写入工具 <span class="write-warn">⚠ 允许外部 AI 改本地数据,默认关闭,请谨慎开启</span></h4>
+      ${Object.keys(WRITE_TOOL_LABELS).map((name) => `
+        <label class="external-tool-row">
+          <input type="checkbox" data-tool="${escapeHtml(name)}" ${tools[name] ? "checked" : ""} />
+          <span><strong>${escapeHtml(name)}</strong> · ${escapeHtml(WRITE_TOOL_LABELS[name])}</span>
         </label>
       `).join("")}
     </div>

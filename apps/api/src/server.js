@@ -602,7 +602,55 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method === "POST" && req.url === "/api/import") {
       const body = await readJson(req);
-      return json(res, 200, await handleImport(body));
+      const result = await handleImport(body, dataInfo.data_dir);
+      // 外部 AI 写入留治理痕迹(可在治理页看到 imported 事件)。
+      if (body.entrypoint === "external_mcp" && result.source?.source_id) {
+        await appendGovernanceEvents({
+          scope: "import",
+          source_id: result.source.source_id,
+          title: result.source.title || "",
+          action: "imported",
+          reason: "external_import"
+        }, dataInfo.data_dir).catch(() => {});
+      }
+      return json(res, 200, result);
+    }
+
+    if (req.method === "POST" && req.url === "/api/import/batch") {
+      const body = await readJson(req);
+      const sources = Array.isArray(body.sources) ? body.sources : [];
+      const autoParse = Boolean(body.auto_parse);
+      const results = [];
+      let succeeded = 0;
+      let failed = 0;
+      for (const item of sources) {
+        try {
+          const imported = await handleImport(item, dataInfo.data_dir);
+          const sourceId = imported.source?.source_id;
+          if (autoParse && sourceId && imported.status !== "duplicate") {
+            try {
+              await parseSource(sourceId, {}, dataInfo.data_dir);
+            } catch {
+              /* 解析失败不影响导入计数,可后续手动重解析 */
+            }
+          }
+          if (sourceId) {
+            await appendGovernanceEvents({
+              scope: "import",
+              source_id: sourceId,
+              title: imported.source?.title || "",
+              action: "imported",
+              reason: "external_batch_import"
+            }, dataInfo.data_dir).catch(() => {});
+          }
+          results.push({ status: imported.status, source_id: sourceId, title: imported.source?.title || "" });
+          succeeded += 1;
+        } catch (error) {
+          results.push({ status: "failed", error: error.message });
+          failed += 1;
+        }
+      }
+      return json(res, 200, { results, summary: { total: sources.length, succeeded, failed } });
     }
 
     if (req.method === "POST" && req.url === "/api/parse") {
