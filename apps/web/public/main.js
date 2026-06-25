@@ -124,20 +124,22 @@ function bindEvents() {
   document.querySelector("#closeImportPanel")?.addEventListener("click", () => els.floatingImport.classList.add("hidden"));
   document.querySelector("#clearSelection")?.addEventListener("click", clearSelection);
   document.querySelector("#emptyImport")?.addEventListener("click", importExampleText);
-  document.querySelector("#submitTextImport")?.addEventListener("click", () => {
-    importText(document.querySelector("#textTitle").value, document.querySelector("#textPayload").value);
+  document.querySelector("#submitTextImport")?.addEventListener("click", (event) => {
+    withBusy(event.currentTarget, "导入中…", () =>
+      importText(document.querySelector("#textTitle").value, document.querySelector("#textPayload").value)
+    );
   });
-  document.querySelector("#submitLinkImport")?.addEventListener("click", () => {
-    importUrl(document.querySelector("#linkPayload").value);
+  document.querySelector("#submitLinkImport")?.addEventListener("click", (event) => {
+    withBusy(event.currentTarget, "解析中…", () => importUrl(document.querySelector("#linkPayload").value));
   });
-  document.querySelector("#submitFileImport")?.addEventListener("click", () => {
-    importFiles(document.querySelector("#filePayload").files);
+  document.querySelector("#submitFileImport")?.addEventListener("click", (event) => {
+    withBusy(event.currentTarget, "导入中…", () => importFiles(document.querySelector("#filePayload").files));
   });
   document.querySelector("#pickFolderImport")?.addEventListener("click", () => {
     document.querySelector("#folderPayload")?.click();
   });
   document.querySelector("#folderPayload")?.addEventListener("change", (event) => {
-    importFiles(event.target.files);
+    withBusy(null, "", () => importFiles(event.target.files));
   });
   document.querySelector(".drop-zone")?.addEventListener("dragover", (event) => {
     event.preventDefault();
@@ -149,11 +151,13 @@ function bindEvents() {
   document.querySelector(".drop-zone")?.addEventListener("drop", (event) => {
     event.preventDefault();
     event.currentTarget.classList.remove("drag-over");
-    importFiles(event.dataTransfer.files);
+    withBusy(null, "", () => importFiles(event.dataTransfer.files));
   });
-  document.querySelector("#quickImportSubmit")?.addEventListener("click", async () => {
-    await importText(document.querySelector("#quickTitle").value, document.querySelector("#quickText").value);
-    els.floatingImport.classList.add("hidden");
+  document.querySelector("#quickImportSubmit")?.addEventListener("click", (event) => {
+    withBusy(event.currentTarget, "导入中…", async () => {
+      await importText(document.querySelector("#quickTitle").value, document.querySelector("#quickText").value);
+      els.floatingImport.classList.add("hidden");
+    });
   });
   document.querySelector("#askButton")?.addEventListener("click", askQuestion);
   document.querySelector("#clearQaButton")?.addEventListener("click", clearQaConversation);
@@ -447,6 +451,27 @@ async function importUrl(url) {
 
 function importDependencies() {
   return { setStatus, refreshAll, setView };
+}
+
+// 幂等防连点 + 进度反馈:导入进行中禁用按钮并显示"导入中…",且全局只允许一次导入在飞。
+let importBusy = false;
+async function withBusy(button, label, fn) {
+  if (importBusy) return;
+  importBusy = true;
+  const prev = button ? button.textContent : "";
+  if (button) {
+    button.disabled = true;
+    button.textContent = label;
+  }
+  try {
+    await fn();
+  } finally {
+    importBusy = false;
+    if (button) {
+      button.disabled = false;
+      button.textContent = prev;
+    }
+  }
 }
 
 function renderGraph() {

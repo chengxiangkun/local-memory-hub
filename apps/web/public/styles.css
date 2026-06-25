@@ -2535,6 +2535,27 @@ svg.is-dragging {
   align-items: center;
   flex-wrap: wrap;
 }
+#filePayload {
+  font-size: 13px;
+  color: var(--muted);
+  max-width: 100%;
+  margin-bottom: 10px;
+}
+#filePayload::file-selector-button {
+  margin-right: 10px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--raise);
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+#filePayload::file-selector-button:hover {
+  background: var(--surface);
+  border-color: var(--accent);
+}
 .health-source-link {
   background: none;
   border: 0;
