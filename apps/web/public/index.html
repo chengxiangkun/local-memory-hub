@@ -369,6 +369,16 @@
               </div>
             </section>
             <section class="panel">
+              <div class="panel-title-row">
+                <div>
+                  <h2>知识库健康检查</h2>
+                  <p>用大模型扫描整库,找出矛盾、过时、缺失或孤立的内容(需配置问答模型)。</p>
+                </div>
+                <button class="secondary-button" type="button" id="runHealthCheck">运行检查</button>
+              </div>
+              <div id="healthReport" class="audit-log-list"><span>尚未检查。</span></div>
+            </section>
+            <section class="panel">
               <h2>影响范围预览</h2>
               <div class="impact-preview">
                 <div><strong id="impactSegments">0</strong><span>文本片段</span></div>

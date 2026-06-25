@@ -789,6 +789,70 @@ function renderGovernance() {
     events: state.governanceEvents
   });
   renderGovernanceEvents(document.querySelector("#auditLog"), state.governanceEvents);
+  renderHealthCheckPanel();
+}
+
+async function renderHealthCheckPanel() {
+  const container = document.querySelector("#healthReport");
+  const button = document.querySelector("#runHealthCheck");
+  if (button && !button.dataset.wired) {
+    button.dataset.wired = "1";
+    button.addEventListener("click", async () => {
+      button.disabled = true;
+      const prev = button.textContent;
+      button.textContent = "检查中…";
+      try {
+        const report = await post("/api/memory/health-check", {});
+        renderHealthReport(container, report);
+        await loadGovernanceEvents();
+        renderGovernanceEvents(document.querySelector("#auditLog"), state.governanceEvents);
+      } catch (error) {
+        if (container) container.innerHTML = `<span>检查失败:${escapeHtmlLocal(error.message)}</span>`;
+      } finally {
+        button.disabled = false;
+        button.textContent = prev;
+      }
+    });
+  }
+  try {
+    renderHealthReport(container, await get("/api/memory/health-check"));
+  } catch {
+    /* ignore */
+  }
+}
+
+function renderHealthReport(container, report) {
+  if (!container) return;
+  if (!report || report.status === "none") {
+    container.innerHTML = `<span>尚未检查。点「运行检查」开始。</span>`;
+    return;
+  }
+  if (report.status === "skipped") {
+    const why = report.reason === "no_real_provider" ? "未配置问答模型" : report.reason === "not_enough_sources" ? "资料太少" : report.reason;
+    container.innerHTML = `<span>已跳过:${escapeHtmlLocal(why || "")}。</span>`;
+    return;
+  }
+  if (report.status === "failed") {
+    container.innerHTML = `<span>检查失败:${escapeHtmlLocal(report.reason || "")}。</span>`;
+    return;
+  }
+  const issues = report.issues || [];
+  if (issues.length === 0) {
+    container.innerHTML = `<span>✅ 检查了 ${report.checked_count} 份资料,未发现问题。</span>`;
+    return;
+  }
+  container.innerHTML =
+    `<div class="health-summary">检查 ${report.checked_count} 份,发现 ${issues.length} 个问题:</div>` +
+    issues
+      .map(
+        (it) => `
+      <div class="audit-row">
+        <span class="audit-action audit-deleted">${escapeHtmlLocal(it.type)}</span>
+        <span class="audit-title">${escapeHtmlLocal(it.detail)}</span>
+        <span class="audit-reason">${escapeHtmlLocal((it.sources || []).join("、"))}</span>
+      </div>`
+      )
+      .join("");
 }
 
 async function loadGovernanceEvents() {

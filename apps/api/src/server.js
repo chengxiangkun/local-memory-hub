@@ -22,6 +22,7 @@ import { getVersionInfo, migrateIfNeeded } from "./migration-service.js";
 import { initModelProviders, listProviderTemplates, routeChat } from "./model-provider.js";
 import { parseSource, rebuildGraphIndex } from "./parser-service.js";
 import { enrichSourceMetadata } from "./metadata-enricher.js";
+import { runMemoryHealthCheck, getLastHealthReport } from "./memory-health-service.js";
 import { runQaMemoryAutoGovernance } from "./qa-memory-governance-service.js";
 import { expandToParentDocs, listFallbackQuestionContext, retrieveQuestionContext } from "./retrieval-service.js";
 import { createSourceFolder, listSourceFolders, moveSourceToFolder } from "./source-folder-store.js";
@@ -489,6 +490,14 @@ const server = http.createServer(async (req, res) => {
       return json(res, 200, {
         events: await listGovernanceEvents(dataInfo.data_dir, { limit })
       });
+    }
+
+    if (req.method === "POST" && req.url === "/api/memory/health-check") {
+      return json(res, 200, await runMemoryHealthCheck(dataInfo.data_dir));
+    }
+
+    if (req.method === "GET" && req.url === "/api/memory/health-check") {
+      return json(res, 200, await getLastHealthReport(dataInfo.data_dir));
     }
 
     if (req.method === "GET" && req.url?.startsWith("/api/sources/impact")) {
