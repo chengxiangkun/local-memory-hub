@@ -24,6 +24,7 @@ import {
 import { renderSettings } from "./js/settings-view.js";
 import { renderEmbeddingSettings } from "./js/embedding-settings-view.js";
 import { renderExternalAi } from "./js/external-ai-view.js";
+import { renderFeishuBot } from "./js/feishu-bot-view.js";
 import { confirmDialog, promptDialog } from "./js/modal.js";
 import { generateMemoryCard } from "./js/share-card.js";
 import { showOnboardingIfFirstRun } from "./js/onboarding.js";
@@ -859,6 +860,7 @@ function renderSettingsView() {
   });
   renderEmbeddingSettings(document.querySelector("#embeddingCatalog"), { onChanged: refreshAll }).catch(() => null);
   renderExternalAi(document.querySelector("#externalAiPanel")).catch(() => null);
+  renderFeishuBot(document.querySelector("#feishuBotPanel")).catch(() => null);
 }
 
 function renderQaControls() {

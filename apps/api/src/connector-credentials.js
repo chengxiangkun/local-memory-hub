@@ -14,7 +14,9 @@ import { encryptSecret, decryptSecret } from "./secret-store.js";
 
 export const CONNECTOR_CREDENTIAL_KEYS = {
   feishu: ["FEISHU_APP_ID", "FEISHU_APP_SECRET"],
-  tencent_docs: ["TENCENT_CLIENT_ID", "TENCENT_ACCESS_TOKEN", "TENCENT_OPEN_ID"]
+  tencent_docs: ["TENCENT_CLIENT_ID", "TENCENT_ACCESS_TOKEN", "TENCENT_OPEN_ID"],
+  // 飞书 IM 机器人用独立应用(与文档同步分开),长连接收发消息。
+  feishu_bot: ["FEISHU_BOT_APP_ID", "FEISHU_BOT_APP_SECRET"]
 };
 
 const ALL_KEYS = Object.values(CONNECTOR_CREDENTIAL_KEYS).flat();

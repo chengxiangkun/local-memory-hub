@@ -2787,6 +2787,12 @@ svg.is-dragging {
 /* 外部 AI(MCP)访问设置 */
 .external-ai-panel { display: grid; gap: 16px; }
 .external-ai-panel h4 { margin: 0 0 8px; color: var(--muted); font-size: 13px; }
+.feishu-bot-statusrow { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.feishu-bot-hint { color: var(--muted); font-size: 12px; line-height: 1.5; flex: 1 1 280px; }
+.feishu-bot-form { display: grid; gap: 10px; max-width: 520px; }
+.feishu-bot-actions { display: flex; gap: 10px; align-items: center; }
+.feishu-bot-actions button { width: auto; }
+.feishu-bot-msg { color: var(--muted); font-size: 12px; min-height: 16px; }
 .external-tool-row { display: flex; align-items: center; gap: 8px; margin: 0 0 6px; font-size: 13px; }
 .external-tool-row span strong { font-weight: 600; }
 .external-config-code {

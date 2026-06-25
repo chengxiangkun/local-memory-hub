@@ -5,6 +5,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { loadLocalEnv } from "./local-env.js";
 import { loadConnectorCredentials, saveConnectorCredentials, connectorCredentialStatus } from "./connector-credentials.js";
+import { feishuBotStatus, startFeishuBot, stopFeishuBot, feishuBotConfigured } from "./feishu-bot-runner.js";
 import { persistConversationTurn } from "./conversation-memory-service.js";
 import { initDataDir, moveToTrash } from "./data-store.js";
 import { testEmbeddingProvider } from "./embedding-service.js";
@@ -70,6 +71,10 @@ const execFileAsync = promisify(execFile);
 await loadLocalEnv();
 const dataInfo = await initDataDir();
 await loadConnectorCredentials(dataInfo.data_dir);
+// 飞书 IM 机器人:已配置则随服务自动起长连接(失败不影响主服务)。
+if (feishuBotConfigured()) {
+  try { startFeishuBot(dataInfo.data_dir); } catch { /* 忽略,UI 可手动启动 */ }
+}
 await initSqlite(dataInfo.data_dir);
 initModelProviders();
 runQaMemoryAutoGovernance(dataInfo.data_dir).catch((error) => {
@@ -317,6 +322,18 @@ const server = http.createServer(async (req, res) => {
       const body = await readJson(req);
       const credentials = await saveConnectorCredentials(body || {}, dataInfo.data_dir);
       return json(res, 200, { status: "saved", credentials });
+    }
+
+    if (req.method === "GET" && req.url === "/api/feishu-bot/status") {
+      return json(res, 200, feishuBotStatus());
+    }
+
+    if (req.method === "POST" && req.url === "/api/feishu-bot/start") {
+      return json(res, 200, startFeishuBot(dataInfo.data_dir));
+    }
+
+    if (req.method === "POST" && req.url === "/api/feishu-bot/stop") {
+      return json(res, 200, stopFeishuBot());
     }
 
     if (req.method === "GET" && req.url === "/api/source-folders") {
