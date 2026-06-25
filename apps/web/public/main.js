@@ -52,6 +52,8 @@ const els = {
   floatingImport: document.querySelector("#floatingImport"),
   sourceDetailDrawer: document.querySelector("#sourceDetailDrawer"),
   sourceDetailBody: document.querySelector("#sourceDetailBody"),
+  sourceContentDrawer: document.querySelector("#sourceContentDrawer"),
+  sourceContentBody: document.querySelector("#sourceContentBody"),
   graphZoomSlider: document.querySelector("#graphZoomSlider"),
   graphZoomValue: document.querySelector("#graphZoomValue")
 };
@@ -153,6 +155,10 @@ function bindEvents() {
   document.querySelector("#closeSourceDetail")?.addEventListener("click", closeSourceDetail);
   els.sourceDetailDrawer?.addEventListener("click", (event) => {
     if (event.target === els.sourceDetailDrawer) closeSourceDetail();
+  });
+  document.querySelector("#closeSourceContent")?.addEventListener("click", closeSourceContent);
+  els.sourceContentDrawer?.addEventListener("click", (event) => {
+    if (event.target === els.sourceContentDrawer) closeSourceContent();
   });
   document.querySelector("#questionInput")?.addEventListener("keydown", (event) => {
     // 回车发送;Shift+Enter(或输入法组合中)换行。
@@ -617,7 +623,7 @@ let currentDetailSourceId = "";
 
 async function openSourceDetail(sourceId) {
   currentDetailSourceId = sourceId;
-  if (els.sourceDetailDrawer) els.sourceDetailDrawer.classList.remove("hidden");
+  if (els.sourceDetailDrawer) els.sourceDetailDrawer.classList.add("drawer-open");
   els.sourceDetailBody.innerHTML = `<div class="detail-empty">加载中…</div>`;
   await refreshSourceDetail();
 }
@@ -663,7 +669,11 @@ async function afterDetailMutation(message) {
 
 function closeSourceDetail() {
   currentDetailSourceId = "";
-  els.sourceDetailDrawer?.classList.add("hidden");
+  els.sourceDetailDrawer?.classList.remove("drawer-open");
+}
+
+function closeSourceContent() {
+  els.sourceContentDrawer?.classList.remove("drawer-open");
 }
 
 // 供问答引用追溯使用:按 source_id 返回该资料的实时状态。
@@ -730,19 +740,27 @@ async function parseSourceFromLibrary(sourceId) {
 }
 
 async function previewSourceContent(sourceId) {
-  if (!els.sourcePreview) return;
+  if (!els.sourceContentBody) return;
   const source = state.sources.find((item) => item.source_id === sourceId);
-  els.sourcePreview.innerHTML = `<strong>内容预览</strong><p>读取中...</p>`;
-  const data = await get(`/api/segments?source_id=${encodeURIComponent(sourceId)}`);
-  const segments = data.segments || [];
-  els.sourcePreview.innerHTML = `
-    <strong>${escapeHtmlLocal(source?.title || "内容预览")}</strong>
-    ${
-      segments.length
-        ? segments.slice(0, 6).map((item) => `<p>${escapeHtmlLocal(item.text)}</p>`).join("")
-        : "<p>还没有解析出的文本片段。</p>"
-    }
-  `;
+  // 从右侧滑入抽屉(iOS 风格);展示该资料解析出的全部文本片段。
+  els.sourceContentDrawer?.classList.add("drawer-open");
+  els.sourceContentBody.innerHTML = `<div class="detail-empty">读取中…</div>`;
+  try {
+    const data = await get(`/api/segments?source_id=${encodeURIComponent(sourceId)}`);
+    const segments = data.segments || [];
+    els.sourceContentBody.innerHTML = `
+      <div class="detail-section">
+        <h3>${escapeHtmlLocal(source?.title || "资料内容")}</h3>
+        ${
+          segments.length
+            ? `<div class="content-text">${segments.map((item) => `<p>${escapeHtmlLocal(item.text)}</p>`).join("")}</div>`
+            : `<div class="detail-empty">还没有解析出的文本片段。</div>`
+        }
+      </div>
+    `;
+  } catch (error) {
+    els.sourceContentBody.innerHTML = `<div class="detail-empty">加载失败：${escapeHtmlLocal(error.message)}</div>`;
+  }
 }
 
 function renderFolderTree() {

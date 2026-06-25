@@ -2465,7 +2465,9 @@ svg.is-dragging {
   display: none !important;
 }
 
-/* 源资料详情抽屉(右侧全高)。 */
+/* 源资料详情/内容抽屉(右侧全高,iOS 风格滑入)。
+   不用 .hidden(display:none 无法过渡),改用 .drawer-open 状态类:
+   关闭态用 opacity/visibility + 面板 translateX(100%) 隐藏并保留可过渡。 */
 .detail-drawer {
   position: fixed;
   inset: 0;
@@ -2474,6 +2476,16 @@ svg.is-dragging {
   justify-content: flex-end;
   background: rgba(0, 0, 0, 0.52);
   backdrop-filter: blur(8px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.24s ease, visibility 0.24s ease;
+}
+
+.detail-drawer.drawer-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .detail-drawer-panel {
@@ -2484,6 +2496,23 @@ svg.is-dragging {
   background: var(--surface);
   border-left: 1px solid var(--line);
   box-shadow: var(--shadow);
+  transform: translateX(100%);
+  transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.detail-drawer.drawer-open .detail-drawer-panel {
+  transform: translateX(0);
+}
+
+.content-text {
+  display: grid;
+  gap: 10px;
+}
+.content-text p {
+  margin: 0;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
 
 .detail-drawer-head {
