@@ -19,7 +19,8 @@ import {
   renameQaSession,
   deleteQaSession,
   getCurrentSessionId,
-  configureQaCitations
+  configureQaCitations,
+  renderMarkdown
 } from "./js/qa-view.js";
 import { renderSettings } from "./js/settings-view.js";
 import { renderEmbeddingSettings } from "./js/embedding-settings-view.js";
@@ -748,14 +749,21 @@ async function previewSourceContent(sourceId) {
   try {
     const data = await get(`/api/segments?source_id=${encodeURIComponent(sourceId)}`);
     const segments = data.segments || [];
+    const title = source?.title || "资料内容";
+    const isMarkdown = /\.(md|markdown)$/i.test(title);
+    let body;
+    if (!segments.length) {
+      body = `<div class="detail-empty">还没有解析出的文本片段。</div>`;
+    } else if (isMarkdown) {
+      // Markdown 资料:渲染成标题/列表/代码/加粗,而非原文平铺。
+      body = `<div class="content-text content-markdown">${renderMarkdown(segments.map((item) => item.text).join("\n\n"))}</div>`;
+    } else {
+      body = `<div class="content-text">${segments.map((item) => `<p>${escapeHtmlLocal(item.text)}</p>`).join("")}</div>`;
+    }
     els.sourceContentBody.innerHTML = `
       <div class="detail-section">
-        <h3>${escapeHtmlLocal(source?.title || "资料内容")}</h3>
-        ${
-          segments.length
-            ? `<div class="content-text">${segments.map((item) => `<p>${escapeHtmlLocal(item.text)}</p>`).join("")}</div>`
-            : `<div class="detail-empty">还没有解析出的文本片段。</div>`
-        }
+        <h3>${escapeHtmlLocal(title)}</h3>
+        ${body}
       </div>
     `;
   } catch (error) {

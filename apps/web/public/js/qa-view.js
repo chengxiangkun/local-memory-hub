@@ -337,7 +337,7 @@ function renderMessageContent(message, messageIndex) {
 }
 
 // 轻量 markdown -> HTML(先转义防注入,再套自有标签)。够覆盖聊天回答常见语法。
-function renderMarkdown(raw) {
+export function renderMarkdown(raw) {
   const lines = escapeHtml(raw || "").split("\n");
   const out = [];
   let listType = null;
