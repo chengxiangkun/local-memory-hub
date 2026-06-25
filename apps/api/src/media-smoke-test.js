@@ -45,11 +45,13 @@ async function main() {
   const audioPath = path.join(dataDir, "extracted", "audio", `${imported.source.source_id}.wav`);
   await stat(audioPath);
 
+  // 音视频无本地转写器时:文本模型收不到音频内容,不应"假兜底"入记忆。
+  // 应显式失败且不入记忆(修复 #29)。
   const fallback = await parseSource(imported.source.source_id, { llm_fallback: true }, dataDir);
-  assertEqual(fallback.status, "llm_fallback_success", "media parse should support llm fallback");
+  assertEqual(fallback.status, "failed", "media without transcriber should fail clearly, not fake-fallback");
 
   const source = await getSourceById(imported.source.source_id, dataDir);
-  assertEqual(source.memory_status, "memory_indexed", "fallback media parse should enter memory");
+  assert(source.memory_status !== "memory_indexed", "media without transcriber must not enter memory");
 }
 
 async function createSampleVideo(videoFile) {

@@ -207,7 +207,28 @@ export async function rebuildGraphIndex(dataDir = getDataDir()) {
   };
 }
 
+// 文本大模型收不到二进制内容,对图片/音视频做"文本兜底"只会让模型寒暄/道歉,
+// 不能当解析结果。判定这类源,走显式失败而非假兜底。
+export function isVisualOrBinarySource(source) {
+  if (source.source_type !== "file" || !source.local_file_path) return false;
+  const ext = path.extname(source.local_file_path).toLowerCase();
+  return IMAGE_EXTENSIONS.has(ext) || MEDIA_EXTENSIONS.has(ext);
+}
+
 async function parseWithLlmFallback(source, jobId, localError, dataDir) {
+  // ① 图片/音视频等二进制:文本模型根本收不到内容,"兜底"只会写一段寒暄进记忆。
+  // 直接标解析失败 + 给可操作提示,不入库(不污染记忆)。
+  if (isVisualOrBinarySource(source)) {
+    const ext = path.extname(source.local_file_path).toLowerCase();
+    const isImage = IMAGE_EXTENSIONS.has(ext);
+    const reason = isImage
+      ? `图片需本地 OCR(tesseract)或视觉模型才能解析,当前不可用,未入记忆。可安装 tesseract(mac:brew install tesseract)后重新解析。原因:${localError.message}`
+      : `音视频需本地转写(faster-whisper)才能解析,当前不可用,未入记忆。原因:${localError.message}`;
+    await updateParseJob(jobId, { status: "failed", error_message: reason }, dataDir);
+    await updateSourceStatuses(source.source_id, { parse_status: "parse_failed", memory_status: "memory_pending" }, dataDir);
+    return { status: "failed", source_id: source.source_id, error: reason, needs_ocr: isImage };
+  }
+
   await updateSourceStatuses(source.source_id, { parse_status: "llm_fallback_pending" }, dataDir);
   const policy = await getModelPolicy("parse_fallback", dataDir);
   const providerId = policy?.provider_id || "mock";
@@ -216,21 +237,46 @@ async function parseWithLlmFallback(source, jobId, localError, dataDir) {
     {
       provider_id: providerId,
       task: "parse_fallback",
-      question: `请兜底解析这个源资料：${source.title}。本地错误：${localError.message}`,
+      // 只要正文,不要寒暄/道歉;拿不到内容就回 NO_CONTENT,避免把解释当内容入库。
+      question: `下面这份资料「${source.title}」本地解析失败。请直接输出它的正文文本内容本身,不要任何解释、道歉、寒暄或"已帮你兜底"之类的话;若你无法获得其真实内容,只回复 NO_CONTENT。`,
       context: [
         {
           source_id: source.source_id,
           title: source.title,
-          extracted_preview: `本地解析失败，已使用大模型兜底。来源类型：${source.source_type}。错误：${localError.message}`
+          extracted_preview: `来源类型：${source.source_type}。本地错误：${localError.message}`
         }
       ],
       config: config ? { base_url: config.base_url, api_key: config.api_key, model: config.model } : {}
     },
     dataDir
   );
-  const text = fallback.answer;
-  const textPath = await writeExtractedText(source.source_id, text, dataDir);
+  const text = String(fallback.answer || "").trim();
   const segments = createSegments(source, text);
+  const quality = assessSourceTextQuality({ title: source.title, text, sourceType: source.source_type });
+  // ② 兜底结果同样过质检:模型说拿不到内容 / 质检不过 / 无有效片段 → 不入库。
+  const noContent = !text || /NO_CONTENT/i.test(text);
+  if (noContent || !quality.should_index || segments.length === 0) {
+    const rejectedPath = await writeExtractedText(source.source_id, text, dataDir);
+    await insertExtractedText(
+      {
+        extracted_id: randomUUID(),
+        source_id: source.source_id,
+        text_path: rejectedPath,
+        text_preview: buildQualityPreview(text, quality),
+        created_at: new Date().toISOString()
+      },
+      dataDir
+    );
+    const reason = noContent
+      ? "大模型无法获取该资料的真实内容,未入记忆"
+      : segments.length === 0
+        ? "兜底未生成有效文本片段"
+        : formatSourceQualityReasons(quality.reasons);
+    await updateParseJob(jobId, { status: "quality_rejected", error_message: reason }, dataDir);
+    await updateSourceStatuses(source.source_id, { parse_status: "quality_rejected", memory_status: "memory_rejected" }, dataDir);
+    return { status: "quality_rejected", source_id: source.source_id, segment_count: 0, error: reason };
+  }
+  const textPath = await writeExtractedText(source.source_id, text, dataDir);
   const graph = await createGraphForSource(source, segments, dataDir);
 
   await insertExtractedText(

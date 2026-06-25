@@ -133,14 +133,18 @@ async function main() {
     `unexpected pdf error: ${pdfResult.error}`
   );
 
+  // 图片无本地 OCR(tesseract)时:文本模型收不到图,不应"假兜底"把寒暄写进记忆。
+  // 应显式失败 + needs_ocr,且不入记忆(修复 #29)。
   const imageFile = path.join(dataDir, "fake.png");
   await writeFile(imageFile, Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
   const image = await importFile("图片 OCR 兜底", imageFile);
   const fallback = await parseSource(image.source.source_id, { llm_fallback: true }, dataDir);
-  assertEqual(fallback.status, "llm_fallback_success", "image parse should use llm fallback");
+  assertEqual(fallback.status, "failed", "image without OCR should fail clearly, not fake-fallback");
+  assert(fallback.needs_ocr === true, "image fallback should flag needs_ocr");
 
   const imageSource = await getSourceById(image.source.source_id, dataDir);
-  assertEqual(imageSource.memory_status, "memory_indexed", "fallback should enter memory");
+  assert(imageSource.memory_status !== "memory_indexed", "image without OCR must not enter memory");
+  assertEqual(imageSource.parse_status, "parse_failed", "image without OCR should be parse_failed");
 }
 
 async function importFile(title, filePath) {
